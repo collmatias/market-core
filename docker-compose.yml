@@ -1,0 +1,39 @@
+version: '3.8'
+
+services:
+  # --- BASE DE DATOS ---
+  db:
+    image: postgres:15-alpine
+    container_name: vetcore_db
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    env_file:
+      - .env
+    ports:
+      - "5432:5432" # Expuesto para que puedas conectarte con DBeaver desde Ubuntu
+    restart: always
+
+  # --- BACKEND (API) ---
+  api:
+    build: ./backend
+    container_name: vetcore_api
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - ./backend:/app # Hot-reload: cambios en tu código se ven al instante
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    depends_on:
+      - db
+
+  # --- FRONTEND (Placeholder) ---
+  # frontend:
+  #   build: ./frontend
+  #   ports:
+  #     - "3000:3000"
+  #   depends_on:
+  #     - api
+
+volumes:
+  postgres_data:
