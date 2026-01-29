@@ -22,6 +22,10 @@ from rest_framework.routers import DefaultRouter
 from core.views import ClienteViewSet, PacienteViewSet, HistoriaClinicaViewSet
 from inventory.views import ProductoViewSet, MovimientoStockViewSet
 
+# Importa la vista normal
+from core.views import lista_clientes
+from core.views import crear_cliente
+
 # Configuramos el Router
 router = DefaultRouter()
 # Rutas de Core
@@ -35,4 +39,8 @@ router.register(r'movimientos', MovimientoStockViewSet)
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include(router.urls)), # Todas las rutas API colgarán de /api/
+
+    # Rutas del Frontend (Templates)
+    path('clientes/', lista_clientes, name='lista_clientes'),
+    path('clientes/nuevo/', crear_cliente, name='crear_cliente'),
 ]
