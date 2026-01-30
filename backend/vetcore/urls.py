@@ -17,14 +17,21 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
+from django.contrib.auth import views as auth_views
 
-# Importamos las vistas
+
+# Importamos las vistas (API)
 from core.views import ClienteViewSet, PacienteViewSet, HistoriaClinicaViewSet
-from inventory.views import ProductoViewSet, MovimientoStockViewSet
 
-# Importa la vista normal
-from core.views import lista_clientes
-from core.views import crear_cliente
+# Core Views
+from core.views import (
+    home,
+    lista_clientes, crear_cliente, 
+    lista_pacientes, crear_paciente
+)
+# Inventory Views
+from inventory.views import ProductoViewSet, MovimientoStockViewSet
+from inventory.views import lista_productos, crear_producto, registrar_movimiento
 
 # Configuramos el Router
 router = DefaultRouter()
@@ -40,7 +47,21 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include(router.urls)), # Todas las rutas API colgarán de /api/
 
+    # --- HOME Y AUTH ---
+    path('', home, name='home'), # La raíz del sitio
+    path('login/', auth_views.LoginView.as_view(), name='login'),
+    path('logout/', auth_views.LogoutView.as_view(), name='logout'),
+
     # Rutas del Frontend (Templates)
     path('clientes/', lista_clientes, name='lista_clientes'),
     path('clientes/nuevo/', crear_cliente, name='crear_cliente'),
+
+    # Rutas Pacientes
+    path('pacientes/', lista_pacientes, name='lista_pacientes'),
+    path('pacientes/nuevo/', crear_paciente, name='crear_paciente'),
+
+    # Rutas de Inventario
+    path('productos/', lista_productos, name='lista_productos'),
+    path('productos/nuevo/', crear_producto, name='crear_producto'),
+    path('stock/movimiento/', registrar_movimiento, name='registrar_movimiento'),
 ]

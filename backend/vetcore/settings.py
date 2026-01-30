@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 
 from pathlib import Path
 import os
+import sys
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -61,7 +62,7 @@ ROOT_URLCONF = 'vetcore.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [os.path.join(BASE_DIR, 'templates')], # <--- AGREGAR ESTO
+        'DIRS': [os.path.join(BASE_DIR, 'templates')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -79,16 +80,29 @@ WSGI_APPLICATION = 'vetcore.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'vetcore_db',       # Definido en docker-compose
-        'USER': 'vetcore_user',     # Definido en docker-compose
-        'PASSWORD': 'vetcore_pass', # Definido en docker-compose
-        'HOST': 'db',               # Nombre del servicio en docker-compose
-        'PORT': '5432',
+# Detectamos si estamos corriendo dentro de Docker
+IS_DOCKER = os.environ.get('AM_I_IN_DOCKER', False)
+
+if IS_DOCKER:
+    # ENTORNO DE DESARROLLO (Ubuntu/Docker)
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': 'vetcore_db',
+            'USER': 'vetcore_user',
+            'PASSWORD': 'vetcore_pass',
+            'HOST': 'db',
+            'PORT': '5432',
+        }
     }
-}
+else:
+    # ENTORNO DE PRODUCCIÓN (Windows Cliente)
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
+    }
 
 
 # Password validation
@@ -131,3 +145,8 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# --- CONFIGURACIÓN DE LOGIN ---
+LOGIN_URL = '/login/'
+LOGIN_REDIRECT_URL = '/'  # Al loguearse, va al Home
+LOGOUT_REDIRECT_URL = '/login/'  # Al salir, vuelve al login

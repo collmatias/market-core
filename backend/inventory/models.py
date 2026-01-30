@@ -5,15 +5,25 @@ from django.db import models
 from django.contrib.auth.models import User
 
 class Producto(models.Model):
+    # Agregamos esta opción para diferenciar
+    TIPO_CHOICES = [
+        ('PRODUCTO', 'Producto Físico (Control de Stock)'),
+        ('SERVICIO', 'Servicio (Mano de obra, Cirugía, etc)')
+    ]
+
     codigo_barras = models.CharField(max_length=50, unique=True, blank=True, null=True)
     descripcion = models.CharField(max_length=200)
-    costo = models.DecimalField(max_digits=10, decimal_places=2)
+    tipo = models.CharField(max_length=10, choices=TIPO_CHOICES, default='PRODUCTO') # <--- NUEVO
+    costo = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     precio_venta = models.DecimalField(max_digits=10, decimal_places=2)
     cantidad_actual = models.IntegerField(default=0)
     cantidad_minima = models.IntegerField(default=5)
     
     @property
     def necesita_reposicion(self):
+        # Los servicios nunca necesitan reposición
+        if self.tipo == 'SERVICIO':
+            return False
         return self.cantidad_actual <= self.cantidad_minima
 
     def __str__(self):

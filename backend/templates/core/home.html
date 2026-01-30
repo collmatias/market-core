@@ -1,0 +1,77 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+{% if user.is_authenticated %}
+    <div class="row mb-4 fade-in">
+        <div class="col-12">
+            <h2 class="display-6 fw-bold text-dark mb-4">
+                👋 Hola, {{ user.username|title }}
+            </h2>
+        </div>
+        <div class="alert alert-info shadow-sm d-flex align-items-center" role="alert">
+            <i class="bi bi-router-fill fs-2 me-3"></i>
+            <div>
+                <h5 class="alert-heading fw-bold m-0">📡 Modo Servidor Activo</h5>
+                <p class="mb-0 small">
+                    Para acceder desde otras computadoras o celulares, ingresa a:
+                    <br>
+                    <strong>http://{{ server_ip }}:8000</strong>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-md-4">
+            <div class="card h-100 border-0 shadow-sm hover-card">
+                <div class="card-body text-center p-4">
+                    <div class="display-4 text-primary mb-3"><i class="bi bi-people"></i></div>
+                    <h4 class="card-title">Clientes</h4>
+                    <p class="card-text text-muted">Gestión de dueños y contactos.</p>
+                    <a href="{% url 'lista_clientes' %}" class="btn btn-outline-primary stretched-link">Ir a Clientes</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card h-100 border-0 shadow-sm hover-card">
+                <div class="card-body text-center p-4">
+                    <div class="display-4 text-success mb-3"><i class="bi bi-heart-pulse"></i></div>
+                    <h4 class="card-title">Pacientes</h4>
+                    <p class="card-text text-muted">Historias clínicas y mascotas.</p>
+                    <a href="{% url 'lista_pacientes' %}" class="btn btn-outline-success stretched-link">Ir a Pacientes</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card h-100 border-0 shadow-sm hover-card">
+                <div class="card-body text-center p-4">
+                    <div class="display-4 text-warning mb-3"><i class="bi bi-box-seam"></i></div>
+                    <h4 class="card-title">Inventario</h4>
+                    <p class="card-text text-muted">Control de stock y productos.</p>
+                    
+                    <a href="{% url 'lista_productos' %}" class="btn btn-outline-warning stretched-link">Ir a Stock</a>
+                </div>
+            </div>
+        </div>
+
+{% else %}
+    <div class="px-4 py-5 my-5 text-center">
+        <h1 class="display-4 fw-bold text-primary"><i class="bi bi-hospital-fill"></i> VetCore</h1>
+        <div class="col-lg-6 mx-auto">
+            <p class="lead mb-4">Sistema Integral de Gestión Veterinaria.</p>
+            <p class="text-muted">Por favor, inicie sesión para acceder al panel de control.</p>
+            <div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
+                <a href="{% url 'login' %}" class="btn btn-primary btn-lg px-4 gap-3">Iniciar Sesión</a>
+            </div>
+        </div>
+    </div>
+{% endif %}
+
+<style>
+    .hover-card:hover { transform: translateY(-5px); transition: 0.3s; }
+</style>
+
+{% endblock %}

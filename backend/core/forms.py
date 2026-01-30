@@ -1,5 +1,5 @@
 from django import forms
-from .models import Cliente
+from .models import Cliente, Paciente
 
 class ClienteForm(forms.ModelForm):
     class Meta:
@@ -12,4 +12,17 @@ class ClienteForm(forms.ModelForm):
             'telefono': forms.TextInput(attrs={'class': 'form-control'}),
             'email': forms.EmailInput(attrs={'class': 'form-control'}),
             'direccion': forms.TextInput(attrs={'class': 'form-control'}),
+        }
+
+class PacienteForm(forms.ModelForm):
+    class Meta:
+        model = Paciente
+        fields = ['cliente', 'nombre', 'especie', 'raza', 'fecha_nacimiento', 'peso_actual']
+        widgets = {
+            'cliente': forms.Select(attrs={'class': 'form-select'}), # Select estilizado
+            'nombre': forms.TextInput(attrs={'class': 'form-control'}),
+            'especie': forms.Select(attrs={'class': 'form-select'}),
+            'raza': forms.TextInput(attrs={'class': 'form-control'}),
+            'fecha_nacimiento': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}), # Calendario
+            'peso_actual': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01'}),
         }
