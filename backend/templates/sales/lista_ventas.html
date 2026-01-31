@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2>Historial de Ventas</h2>
+    <a href="{% url 'nueva_venta' %}" class="btn btn-primary"><i class="bi bi-cart-plus"></i> Nueva Venta</a>
+</div>
+
+<div class="card shadow-sm">
+    <div class="card-body p-0">
+        <table class="table table-hover mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th>#ID</th>
+                    <th>Fecha</th>
+                    <th>Cliente</th>
+                    <th>Método Pago</th>
+                    <th>Total</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for v in ventas %}
+                <tr>
+                    <td class="fw-bold">#{{ v.id }}</td>
+                    <td>{{ v.fecha|date:"d/m/Y H:i" }}</td>
+                    <td>
+                        {% if v.cliente %}
+                            {{ v.cliente.apellido }}, {{ v.cliente.nombre }}
+                        {% else %}
+                            <span class="text-muted fst-italic">Consumidor Final</span>
+                        {% endif %}
+                    </td>
+                    <td><span class="badge bg-secondary">{{ v.metodo_pago }}</span></td>
+                    <td class="fw-bold text-success">${{ v.total }}</td>
+                    <td>
+                        <a href="{% url 'detalle_venta' v.id %}" class="btn btn-sm btn-outline-dark" title="Ver Ticket">
+                            <i class="bi bi-receipt"></i>
+                        </a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="6" class="text-center text-muted py-3">No se han registrado ventas aún.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

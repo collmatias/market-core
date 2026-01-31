@@ -1,8 +1,5 @@
 from django.db import models
 
-# Create your models here.
-from django.db import models
-
 class Cliente(models.Model):
     nombre = models.CharField(max_length=100)
     apellido = models.CharField(max_length=100)
@@ -27,13 +24,13 @@ class Paciente(models.Model):
     def __str__(self):
         return f"{self.nombre} ({self.get_especie_display()})"
 
-class HistoriaClinica(models.Model):
-    paciente = models.ForeignKey(Paciente, on_delete=models.CASCADE, related_name='historia')
-    fecha = models.DateTimeField(auto_now_add=True)
-    motivo_consulta = models.CharField(max_length=200)
-    diagnostico = models.TextField()
-    tratamiento = models.TextField()
-    observaciones = models.TextField(blank=True)
+# class HistoriaClinica(models.Model):
+#     paciente = models.ForeignKey(Paciente, on_delete=models.CASCADE, related_name='historia')
+#     fecha = models.DateTimeField(auto_now_add=True)
+#     motivo_consulta = models.CharField(max_length=200)
+#     diagnostico = models.TextField()
+#     tratamiento = models.TextField()
+#     observaciones = models.TextField(blank=True)
     
-    def __str__(self):
-        return f"{self.fecha.strftime('%d/%m/%Y')} - {self.paciente.nombre}"
+#     def __str__(self):
+#         return f"{self.fecha.strftime('%d/%m/%Y')} - {self.paciente.nombre}"

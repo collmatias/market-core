@@ -36,16 +36,4 @@ class Migration(migrations.Migration):
                 ('cliente', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='mascotas', to='core.cliente')),
             ],
         ),
-        migrations.CreateModel(
-            name='HistoriaClinica',
-            fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('fecha', models.DateTimeField(auto_now_add=True)),
-                ('motivo_consulta', models.CharField(max_length=200)),
-                ('diagnostico', models.TextField()),
-                ('tratamiento', models.TextField()),
-                ('observaciones', models.TextField(blank=True)),
-                ('paciente', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='historia', to='core.paciente')),
-            ],
-        ),
     ]

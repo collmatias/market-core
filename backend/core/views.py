@@ -1,10 +1,10 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 
 # Create your views here.
 from rest_framework import viewsets
-from .models import Cliente, Paciente, HistoriaClinica
-from .serializers import ClienteSerializer, PacienteSerializer, HistoriaClinicaSerializer
+from .models import Cliente, Paciente #, HistoriaClinica
+from .serializers import ClienteSerializer, PacienteSerializer #, HistoriaClinicaSerializer
 
 from django.shortcuts import render
 from .utils import get_server_ip
@@ -18,9 +18,9 @@ class PacienteViewSet(viewsets.ModelViewSet):
     queryset = Paciente.objects.all().order_by('-id')
     serializer_class = PacienteSerializer
 
-class HistoriaClinicaViewSet(viewsets.ModelViewSet):
-    queryset = HistoriaClinica.objects.all().order_by('-fecha')
-    serializer_class = HistoriaClinicaSerializer
+# class HistoriaClinicaViewSet(viewsets.ModelViewSet):
+#     queryset = HistoriaClinica.objects.all().order_by('-fecha')
+#     serializer_class = HistoriaClinicaSerializer
 
 def home(request):
     ip_address = get_server_ip()
@@ -60,3 +60,40 @@ def crear_paciente(request):
         form = PacienteForm()
     
     return render(request, 'core/paciente_form.html', {'form': form})
+
+
+def editar_paciente(request, paciente_id):
+    paciente = get_object_or_404(Paciente, pk=paciente_id)
+    if request.method == 'POST':
+        # Pasamos 'instance=paciente' para que cargue los datos actuales
+        form = PacienteForm(request.POST, request.FILES, instance=paciente)
+        if form.is_valid():
+            form.save()
+            return redirect('lista_pacientes')
+    else:
+        form = PacienteForm(instance=paciente)
+    
+    return render(request, 'core/paciente_form.html', {'form': form, 'es_edicion': True})
+
+# Asegúrate de tener estos imports al principio
+from django.shortcuts import render, redirect, get_object_or_404
+from .models import Cliente
+from .forms import ClienteForm
+
+def editar_cliente(request, cliente_id):
+    cliente = get_object_or_404(Cliente, pk=cliente_id)
+    
+    if request.method == 'POST':
+        # 'instance=cliente' es la clave para editar en lugar de crear
+        form = ClienteForm(request.POST, instance=cliente)
+        if form.is_valid():
+            form.save()
+            return redirect('lista_clientes')
+    else:
+        # Carga el formulario con los datos actuales
+        form = ClienteForm(instance=cliente)
+    
+    return render(request, 'core/cliente_form.html', {
+        'form': form, 
+        'es_edicion': True # Para cambiar el título en el template
+    })

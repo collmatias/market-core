@@ -1,0 +1,95 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="d-flex justify-content-between mb-4 no-print">
+    <a href="{% url 'lista_ventas' %}" class="btn btn-secondary"><i class="bi bi-arrow-left"></i> Volver al Historial</a>
+    <div>
+        <a href="{% url 'nueva_venta' %}" class="btn btn-success me-2"><i class="bi bi-cart-plus"></i> Nueva Venta</a>
+        <button onclick="window.print()" class="btn btn-primary"><i class="bi bi-printer"></i> Imprimir Ticket</button>
+    </div>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-md-6 col-lg-5">
+        <div class="card shadow-lg border-0" id="ticket-imprimible">
+            <div class="card-body p-5">
+                
+                <div class="text-center mb-4">
+                    <h2 class="fw-bold"><i class="bi bi-hospital"></i> VetCore</h2>
+                    <p class="text-muted mb-0">Veterinaria Integral</p>
+                    <p class="small text-muted">Av. Principal 123, Córdoba</p>
+                    <hr class="my-3">
+                    <h5 class="fw-bold mb-0">TICKET DE VENTA #{{ venta.id }}</h5>
+                    <p class="small text-muted">{{ venta.fecha|date:"d/m/Y H:i:s" }}</p>
+                </div>
+
+                <div class="mb-4 small">
+                    <strong>Cliente:</strong> 
+                    {% if venta.cliente %}
+                        {{ venta.cliente.apellido }}, {{ venta.cliente.nombre }}
+                    {% else %}
+                        Consumidor Final
+                    {% endif %}
+                    <br>
+                    <strong>Pago:</strong> {{ venta.metodo_pago }}
+                </div>
+
+                <table class="table table-sm table-borderless small">
+                    <thead class="border-bottom">
+                        <tr>
+                            <th>Cant.</th>
+                            <th>Descripción</th>
+                            <th class="text-end">Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in venta.detalles.all %}
+                        <tr>
+                            <td>{{ item.cantidad }}</td>
+                            <td>{{ item.producto.descripcion }}</td>
+                            <td class="text-end">${{ item.subtotal }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                    <tfoot class="border-top fw-bold">
+                        <tr>
+                            <td colspan="2" class="text-end pt-3">TOTAL A PAGAR:</td>
+                            <td class="text-end pt-3 fs-5">${{ venta.total }}</td>
+                        </tr>
+                    </tfoot>
+                </table>
+
+                <div class="text-center mt-5 pt-3 border-top small text-muted">
+                    <p class="mb-1">¡Gracias por confiar en nosotros!</p>
+                    <p>www.vetcore.com.ar</p>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    @media print {
+        /* Ocultar todo lo que no sea el ticket */
+        body * {
+            visibility: hidden;
+        }
+        .navbar, .no-print {
+            display: none !important;
+        }
+        /* Mostrar solo el ticket */
+        #ticket-imprimible, #ticket-imprimible * {
+            visibility: visible;
+        }
+        #ticket-imprimible {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+            border: none !important;
+            box-shadow: none !important;
+        }
+    }
+</style>
+{% endblock %}

@@ -45,6 +45,8 @@ INSTALLED_APPS = [
     # Mis Apps
     'core',
     'inventory',
+    'sales',
+    'clinical.apps.ClinicalConfig',
 ]
 
 MIDDLEWARE = [
@@ -150,3 +152,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 LOGIN_URL = '/login/'
 LOGIN_REDIRECT_URL = '/'  # Al loguearse, va al Home
 LOGOUT_REDIRECT_URL = '/login/'  # Al salir, vuelve al login
+
+# --- CONFIGURACIÓN DE ARCHIVOS MEDIA (Imágenes, PDF) ---
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')

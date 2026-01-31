@@ -226,3 +226,32 @@ dist/
 
 # Archivos de medios subidos por usuarios
 media/
+
+# --- Python ---
+__pycache__/
+*.py[cod]
+*$py.class
+
+# --- Django ---
+*.sqlite3
+*.sqlite3-journal
+db.sqlite3
+/media/
+/static/
+
+# --- Variables de Entorno y Claves ---
+.env
+.venv
+env/
+venv/
+
+# --- IDEs y Sistema ---
+.idea/
+.vscode/
+.DS_Store
+
+# --- Logs y Builds ---
+*.log
+build/
+dist/
+*.spec
