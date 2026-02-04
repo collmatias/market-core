@@ -1,8 +1,10 @@
 from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib.auth.decorators import login_required # <--- EL CANDADO
 from core.models import Paciente
 from .models import Historial
 from .forms import HistorialForm, ArchivoAdjuntoForm
 
+@login_required
 def ficha_medica(request, paciente_id):
     """Muestra el historial completo de una mascota"""
     paciente = get_object_or_404(Paciente, pk=paciente_id)
@@ -13,6 +15,7 @@ def ficha_medica(request, paciente_id):
         'historial': historial
     })
 
+@login_required
 def nueva_consulta(request, paciente_id):
     paciente = get_object_or_404(Paciente, pk=paciente_id)
     
@@ -33,7 +36,9 @@ def nueva_consulta(request, paciente_id):
                 
             return redirect('ficha_medica', paciente_id=paciente.id)
     else:
-        form = HistorialForm()
+        # --- AQUÍ RECUPERÉ LO QUE SE HABÍA PERDIDO ---
+        # Pre-cargamos el peso actual del paciente
+        form = HistorialForm(initial={'peso': paciente.peso_actual})
         archivo_form = ArchivoAdjuntoForm()
     
     return render(request, 'clinical/nueva_consulta.html', {
@@ -42,20 +47,19 @@ def nueva_consulta(request, paciente_id):
         'paciente': paciente
     })
 
-
+@login_required
 def editar_consulta(request, consulta_id):
     consulta = get_object_or_404(Historial, pk=consulta_id)
-    paciente = consulta.paciente # Recuperamos el paciente desde la consulta
+    paciente = consulta.paciente
     
     if request.method == 'POST':
-        # Pasamos 'instance=consulta' para decirle que actualice, no que cree uno nuevo
         form = HistorialForm(request.POST, instance=consulta)
         archivo_form = ArchivoAdjuntoForm(request.POST, request.FILES)
         
         if form.is_valid():
             form.save()
             
-            # Si quiere agregar MÁS archivos al editar, lo permitimos
+            # Si agrega archivo al editar
             if archivo_form.is_valid() and request.FILES.get('archivo'):
                 adjunto = archivo_form.save(commit=False)
                 adjunto.historial = consulta
@@ -63,7 +67,6 @@ def editar_consulta(request, consulta_id):
                 
             return redirect('ficha_medica', paciente_id=paciente.id)
     else:
-        # Cargamos el form con los datos existentes
         form = HistorialForm(instance=consulta)
         archivo_form = ArchivoAdjuntoForm()
     
@@ -71,5 +74,5 @@ def editar_consulta(request, consulta_id):
         'form': form,
         'archivo_form': archivo_form,
         'paciente': paciente,
-        'es_edicion': True # Bandera para cambiar el título en el template
+        'es_edicion': True
     })

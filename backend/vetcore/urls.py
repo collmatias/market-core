@@ -26,16 +26,17 @@ from core.views import ClienteViewSet, PacienteViewSet #, HistoriaClinicaViewSet
 
 # Core Views
 from core.views import (
-    home,
+    home, descargar_backup, activacion,
     lista_clientes, crear_cliente, editar_cliente,
     lista_pacientes, crear_paciente, editar_paciente
 )
+
 # Inventory Views
 from inventory.views import ProductoViewSet, MovimientoStockViewSet
 from inventory.views import lista_productos, crear_producto, registrar_movimiento
 
 # Sales Views
-from sales.views import nueva_venta, lista_ventas, detalle_venta
+from sales.views import nueva_venta, lista_ventas, detalle_venta, reporte_caja
 
 # Clinical Views
 from clinical.views import ficha_medica, nueva_consulta, editar_consulta
@@ -56,8 +57,13 @@ urlpatterns = [
 
     # --- HOME Y AUTH ---
     path('', home, name='home'), # La raíz del sitio
-    path('login/', auth_views.LoginView.as_view(), name='login'),
-    path('logout/', auth_views.LogoutView.as_view(), name='logout'),
+
+    path('backup/', descargar_backup, name='descargar_backup'),
+
+    path('activar/', activacion, name='activacion'),
+
+    path('login/', auth_views.LoginView.as_view(template_name='registration/login.html'), name='login'),
+    path('logout/', auth_views.LogoutView.as_view(next_page='login'), name='logout'),
 
     # Rutas del Frontend (Templates)
     path('clientes/', lista_clientes, name='lista_clientes'),
@@ -74,6 +80,7 @@ urlpatterns = [
     path('stock/movimiento/', registrar_movimiento, name='registrar_movimiento'),
 
     path('caja/', nueva_venta, name='nueva_venta'),
+    path('caja/reporte/', reporte_caja, name='reporte_caja'),
 
     # Rutas de Historial y Ticket
     path('ventas/', lista_ventas, name='lista_ventas'),

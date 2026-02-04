@@ -14,6 +14,9 @@ from pathlib import Path
 import os
 import sys
 
+# Leemos el modo. Si no existe, asumimos que es DESKTOP (Cliente Local)
+DEPLOYMENT_MODE = os.environ.get('VETCORE_MODE', 'DESKTOP')
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -57,6 +60,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'core.middleware.LicenseCheckMiddleware', 
 ]
 
 ROOT_URLCONF = 'vetcore.urls'
@@ -82,29 +86,33 @@ WSGI_APPLICATION = 'vetcore.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
-# Detectamos si estamos corriendo dentro de Docker
-IS_DOCKER = os.environ.get('AM_I_IN_DOCKER', False)
-
-if IS_DOCKER:
-    # ENTORNO DE DESARROLLO (Ubuntu/Docker)
+if DEPLOYMENT_MODE == 'SAAS':
+    # --- FUTURO: MODELO SAAS (NUBE) ---
+    # Aquí sí usamos PostgreSQL porque habrá miles de veterinarias en una sola DB
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.postgresql',
-            'NAME': 'vetcore_db',
-            'USER': 'vetcore_user',
-            'PASSWORD': 'vetcore_pass',
-            'HOST': 'db',
+            'NAME': os.environ.get('DB_NAME', 'vetcore_db'),
+            'USER': os.environ.get('DB_USER', 'vetcore_user'),
+            'PASSWORD': os.environ.get('DB_PASS', 'vetcore_pass'),
+            'HOST': os.environ.get('DB_HOST', 'db'), # Host de Docker
             'PORT': '5432',
         }
     }
+    SESSION_COOKIE_NAME = 'sessionid_saas'
+    CSRF_COOKIE_NAME = 'csrftoken_saas'
 else:
-    # ENTORNO DE PRODUCCIÓN (Windows Cliente)
+    # --- ACTUAL: MODELO ESCRITORIO (LOCAL/OFFLINE) ---
+    # Usamos SQLite tanto en Windows como en tu Docker de desarrollo.
+    # Esto garantiza que tu entorno de desarrollo sea IDENTICO al del cliente.
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',
             'NAME': BASE_DIR / 'db.sqlite3',
         }
     }
+    SESSION_COOKIE_NAME = 'sessionid_desktop'
+    CSRF_COOKIE_NAME = 'csrftoken_desktop'
 
 
 # Password validation
@@ -125,16 +133,24 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
 # Internationalization
-# https://docs.djangoproject.com/en/5.2/topics/i18n/
+# https://docs.djangoproject.com/en/5.0/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+# 1. Cambiamos el código de idioma a Español de Argentina
+LANGUAGE_CODE = 'es-ar'
 
-TIME_ZONE = 'UTC'
+# 2. Cambiamos la zona horaria a la de Córdoba/Argentina
+# (Esto es importante para que el cierre de caja corte a las 00:00 de acá y no de Londres)
+TIME_ZONE = 'America/Argentina/Cordoba'
 
+# 3. Activamos el sistema de traducción
 USE_I18N = True
 
+# 4. Permitimos que Django formatee fechas y números según la región (es-ar)
+# (Ej: Usar coma para decimales en lugar de punto, día antes que mes, etc.)
+USE_L10N = True
+
+# 5. Soporte para Zona Horaria (Recomendado True para guardar en UTC en la DB y mostrar local al usuario)
 USE_TZ = True
 
 

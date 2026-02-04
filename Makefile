@@ -50,3 +50,7 @@ bash:
 perms:
 	sudo chown -R $$USER:$$USER backend/
 	@echo "✅ Permisos corregidos."
+
+# --- Testing ---
+test:
+	$(COMPOSE) exec $(API_CONTAINER) python manage.py test

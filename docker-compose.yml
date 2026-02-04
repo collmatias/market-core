@@ -1,33 +1,82 @@
 services:
-  # --- BASE DE DATOS ---
+  # --- BASE DE DATOS (Para modo SAAS) ---
   db:
     image: postgres:15-alpine
-    container_name: vetcore_db
+    container_name: vetcore_db_saas
     volumes:
       - postgres_data:/var/lib/postgresql/data
-    env_file:
-      - .env
+    environment:
+      - POSTGRES_DB=vetcore_db
+      - POSTGRES_USER=vetcore_user
+      - POSTGRES_PASSWORD=vetcore_pass
     ports:
-      - "5432:5432" # Expuesto para que puedas conectarte con DBeaver desde Ubuntu
+      - "5432:5432"
     restart: always
 
-  # --- BACKEND (API) ---
-  api:
+  # --- BACKEND 1: MODO DESKTOP (SQLite) ---
+  # Acceso: http://localhost:8000
+  api_desktop:
     build: ./backend
-    container_name: vetcore_api
+    container_name: vetcore_desktop
     command: python manage.py runserver 0.0.0.0:8000
     volumes:
-      - ./backend:/app # Hot-reload: cambios en tu código se ven al instante
+      - ./backend:/app
     environment:
-      - AM_I_IN_DOCKER=True
-      - POSTGRES_DB=vetcore_db
+      - VETCORE_MODE=DESKTOP
+      - DEBUG=1
+      - SECRET_KEY=tu_secret_key_de_django_aqui
+      - LICENSE_API_URL=http://cloud_api:8000/check-license
     ports:
       - "8000:8000"
-    env_file:
-      - .env
+
+  # --- BACKEND 2: MODO SAAS (Postgres) ---
+  # Acceso: http://localhost:8001
+  api_saas:
+    build: ./backend
+    container_name: vetcore_saas
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - ./backend:/app
+    environment:
+      - VETCORE_MODE=SAAS
+      - POSTGRES_DB=vetcore_db
+      - POSTGRES_USER=vetcore_user
+      - POSTGRES_PASSWORD=vetcore_pass
+      - POSTGRES_HOST=db
+      - POSTGRES_PORT=5432
+      - SECRET_KEY=tu_secret_key_de_django_aqui
+      - DEBUG=1
+      - LICENSE_API_URL=http://cloud_api:8000/check-license
+    ports:
+      - "8001:8000"
     depends_on:
       - db
 
+  # --- 1. BASE DE DATOS DE LA NUBE (LICENCIAS) ---
+  cloud_db:
+    image: postgres:15
+    environment:
+      - POSTGRES_DB=licenses_db
+      - POSTGRES_USER=cloud_admin
+      - POSTGRES_PASSWORD=cloud_secret_pass
+    volumes:
+      - cloud_postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5433:5432"
+
+  # --- 2. API DE LA NUBE (GESTIÓN CENTRAL) ---
+  cloud_api:
+    build: ./cloud_api
+    container_name: cloud_api_service
+    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+    ports:
+      - "5000:8000"
+    environment:
+      - DATABASE_URL=postgresql://cloud_admin:cloud_secret_pass@cloud_db/licenses_db
+      - API_SECRET=MI_CLAVE_MAESTRA_PARA_CREAR_LICENCIAS
+    depends_on:
+      - cloud_db
 
 volumes:
+  cloud_postgres_data: 
   postgres_data:

@@ -1,33 +1,72 @@
-{% extends 'base.html' %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Acceso - VetCore</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { 
+            background: linear-gradient(135deg, #0d6efd 0%, #0dcaf0 100%); 
+            height: 100vh; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+        }
+        .card-login { 
+            width: 100%; 
+            max-width: 400px; 
+            border-radius: 15px; 
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2); 
+            border: none;
+        }
+        .login-header {
+            background-color: white;
+            padding: 30px 20px 10px;
+            text-align: center;
+            border-radius: 15px 15px 0 0;
+        }
+        .logo-icon { font-size: 3.5rem; }
+    </style>
+</head>
+<body>
 
-{% block content %}
-<div class="row justify-content-center align-items-center" style="height: 70vh;">
-    <div class="col-md-4">
-        <div class="card shadow-lg border-0">
-            <div class="card-body p-5 text-center">
-                <h1 class="mb-4 text-primary"><i class="bi bi-hospital"></i> VetCore</h1>
-                <h5 class="text-muted mb-4">Acceso al Sistema</h5>
+    <div class="card card-login">
+        <div class="login-header">
+            <div class="logo-icon">🐶</div>
+            <h2 class="fw-bold text-primary mb-0">VetCore</h2>
+            <p class="text-muted small">Sistema de Gestión Veterinaria</p>
+        </div>
+        
+        <div class="card-body p-4 bg-white">
+            <form method="post">
+                {% csrf_token %}
                 
-                <form method="post">
-                    {% csrf_token %}
-                    <div class="mb-3 text-start">
-                        <label class="form-label">Usuario</label>
-                        <input type="text" name="username" class="form-control form-control-lg" required autofocus>
-                    </div>
-                    <div class="mb-3 text-start">
-                        <label class="form-label">Contraseña</label>
-                        <input type="password" name="password" class="form-control form-control-lg" required>
-                    </div>
-                    
-                    <div class="d-grid gap-2 mt-4">
-                        <button type="submit" class="btn btn-primary btn-lg">Ingresar</button>
-                    </div>
-                </form>
-            </div>
-            <div class="card-footer text-muted text-center py-3">
-                Sistema de Gestión Veterinaria
-            </div>
+                {% if form.errors %}
+                <div class="alert alert-danger py-2 small text-center mb-3">
+                    Usuario o contraseña incorrectos.
+                </div>
+                {% endif %}
+
+                <div class="form-floating mb-3">
+                    <input type="text" name="username" class="form-control" id="floatingInput" placeholder="Usuario" required autofocus>
+                    <label for="floatingInput">Usuario</label>
+                </div>
+
+                <div class="form-floating mb-4">
+                    <input type="password" name="password" class="form-control" id="floatingPassword" placeholder="Contraseña" required>
+                    <label for="floatingPassword">Contraseña</label>
+                </div>
+
+                <div class="d-grid">
+                    <button type="submit" class="btn btn-primary btn-lg fw-bold">INGRESAR AL SISTEMA</button>
+                </div>
+            </form>
+        </div>
+        <div class="card-footer text-center bg-light py-3 small text-muted border-0 rounded-bottom">
+            &copy; 2026 VetCore Systems
         </div>
     </div>
-</div>
-{% endblock %}
+
+</body>
+</html>
