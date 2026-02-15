@@ -22,12 +22,14 @@ services:
     volumes:
       - ./backend:/app
     environment:
-      - VETCORE_MODE=DESKTOP
+      - DEPLOYMENT_MODE=DESKTOP
       - DEBUG=1
       - SECRET_KEY=tu_secret_key_de_django_aqui
       - LICENSE_API_URL=http://cloud_api:8000/check-license
     ports:
       - "8000:8000"
+    depends_on:
+      - cloud_api
 
   # --- BACKEND 2: MODO SAAS (Postgres) ---
   # Acceso: http://localhost:8001
@@ -38,7 +40,7 @@ services:
     volumes:
       - ./backend:/app
     environment:
-      - VETCORE_MODE=SAAS
+      - DEPLOYMENT_MODE=SAAS
       - POSTGRES_DB=vetcore_db
       - POSTGRES_USER=vetcore_user
       - POSTGRES_PASSWORD=vetcore_pass

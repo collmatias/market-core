@@ -22,11 +22,11 @@ from django.conf import settings
 from django.conf.urls.static import static
 
 # Importamos las vistas (API)
-from core.views import ClienteViewSet, PacienteViewSet #, HistoriaClinicaViewSet
+from core.views import ClienteViewSet, PacienteViewSet, setup_wizard #, HistoriaClinicaViewSet
 
 # Core Views
 from core.views import (
-    home, descargar_backup, activacion,
+    home, descargar_backup, activacion, configuracion_empresa,
     lista_clientes, crear_cliente, editar_cliente,
     lista_pacientes, crear_paciente, editar_paciente
 )
@@ -59,8 +59,10 @@ urlpatterns = [
     path('', home, name='home'), # La raíz del sitio
 
     path('backup/', descargar_backup, name='descargar_backup'),
-
+    path('setup/', setup_wizard, name='setup_wizard'),
     path('activar/', activacion, name='activacion'),
+
+    path('configuracion/', configuracion_empresa, name='configuracion_empresa'),
 
     path('login/', auth_views.LoginView.as_view(template_name='registration/login.html'), name='login'),
     path('logout/', auth_views.LogoutView.as_view(next_page='login'), name='logout'),
@@ -102,4 +104,3 @@ urlpatterns = [
 
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
-

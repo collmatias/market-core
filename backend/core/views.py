@@ -6,10 +6,17 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect, get_object_or_404
 from rest_framework import viewsets
 
-from .models import Cliente, Paciente
+
+from django.contrib.auth import login
+from django.contrib.auth.models import User
+from .license import get_hardware_id
+
+
+from .models import Cliente, Paciente, Empresa, UserProfile
 from .serializers import ClienteSerializer, PacienteSerializer
-from .forms import ClienteForm, PacienteForm
+from .forms import ClienteForm, PacienteForm, EmpresaForm, SetupForm
 from .utils import get_server_ip
+from datetime import date, timedelta
 
 # --- CORRECCIÓN AQUÍ: Importamos 'generate_offline_key' ---
 from .license import check_license, save_license, generate_offline_key
@@ -80,7 +87,7 @@ def editar_cliente(request, cliente_id):
 # --- PACIENTES ---
 @login_required
 def lista_pacientes(request):
-    pacientes = Paciente.objects.select_related('cliente').all().order_by('-id')
+    pacientes = Paciente.objects.para_empresa(request.user)
     return render(request, 'core/lista_pacientes.html', {'pacientes': pacientes})
 
 @login_required
@@ -143,3 +150,85 @@ def activacion(request):
         'hardware_id': hw_id,
         'error': error
     })
+
+@login_required
+def configuracion_empresa(request):
+    try:
+        empresa = request.user.userprofile.empresa
+        es_nuevo = False
+    except:
+        empresa = Empresa.objects.first()
+        es_nuevo = True if not empresa else False
+
+    if request.method == 'POST':
+        form = EmpresaForm(request.POST, instance=empresa)
+        if form.is_valid():
+            # 1. PAUSA: No guardes todavía en la DB
+            nueva_empresa = form.save(commit=False)
+            
+            # 2. RELLENA LOS HUECOS: Asigna la fecha obligatoria manualmente
+            # Por defecto le damos 1 año de licencia o hasta el 2030
+            if not nueva_empresa.fecha_vencimiento:
+                nueva_empresa.fecha_vencimiento = date.today() + timedelta(days=365) # 1 año gratis
+            
+            # 3. GUARDA: Ahora sí, escribe en la DB
+            nueva_empresa.save()
+            
+            # Asignar usuario si es nuevo (esto sigue igual)
+            if not hasattr(request.user, 'userprofile'):
+                UserProfile.objects.create(user=request.user, empresa=nueva_empresa)
+            
+            return redirect('home')
+    else:
+        form = EmpresaForm(instance=empresa)
+
+    return render(request, 'core/configuracion_empresa.html', {
+        'form': form,
+        'es_nuevo': es_nuevo
+    })
+
+def setup_wizard(request):
+    if User.objects.filter(is_superuser=True).exists():
+        return redirect('home')
+
+    if request.method == 'POST':
+        form = SetupForm(request.POST)
+        if form.is_valid():
+            try:
+                data = form.cleaned_data
+                
+                # Crear Empresa
+                empresa = Empresa.objects.create(
+                    nombre=data['nombre_empresa'],
+                    cuit=data['cuit'],
+                    direccion=data['direccion'],
+                    telefono=data['telefono'],
+                    plan='TRIAL',
+                    fecha_vencimiento=date.today() + timedelta(days=30),
+                    activo=True
+                )
+                
+                # Crear Usuario
+                user = User.objects.create_superuser(
+                    username=data['username'],
+                    email=data['email'],
+                    password=data['password']
+                )
+                
+                UserProfile.objects.create(user=user, empresa=empresa)
+                login(request, user)
+                return redirect('home')
+
+            except Exception as e:
+                # Si algo explota (ej: CUIT duplicado o Usuario existente), lo mostramos
+                form.add_error(None, f"Error interno: {str(e)}")
+                print(f"❌ ERROR AL GUARDAR: {e}") # <--- MIRA LA TERMINAL
+
+        else:
+            # Si el formulario es inválido, imprimimos POR QUÉ
+            print("❌ EL FORMULARIO NO ES VÁLIDO:") # <--- MIRA LA TERMINAL
+            print(form.errors)                      # <--- MIRA LA TERMINAL
+    else:
+        form = SetupForm()
+
+    return render(request, 'core/setup_wizard.html', {'form': form})

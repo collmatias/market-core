@@ -1,0 +1,92 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="card shadow-lg border-0 rounded-3">
+                <div class="card-header bg-success text-white text-center py-4">
+                    <h2 class="mb-0"><i class="bi bi-rocket-takeoff-fill"></i> Bienvenido a VetCore</h2>
+                    <p class="mb-0 opacity-75">Configuración Inicial del Sistema</p>
+                </div>
+                <div class="card-body p-5">
+                    <div class="alert alert-info border-0 d-flex align-items-center" role="alert">
+                        <i class="bi bi-gift-fill fs-4 me-3"></i>
+                        <div>
+                            <strong>¡30 Días de Prueba Gratis!</strong><br>
+                            Al registrarte, obtendrás acceso completo por un mes.
+                        </div>
+                    </div>
+
+                    <form method="post">
+                        {% csrf_token %}
+
+                        {% if form.errors %}
+                            <div class="alert alert-danger">
+                                <strong>⚠️ Por favor corrige los siguientes errores:</strong>
+                                <ul>
+                                    {% for field in form %}
+                                        {% for error in field.errors %}
+                                            <li><strong>{{ field.label }}:</strong> {{ error }}</li>
+                                        {% endfor %}
+                                    {% endfor %}
+                                    {% for error in form.non_field_errors %}
+                                        <li>{{ error }}</li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                        {% endif %}            
+                        <h5 class="text-muted mb-3 border-bottom pb-2">👤 Datos de Administrador</h5>
+                        <div class="mb-3">
+                            {{ form.username.label_tag }}
+                            {{ form.username }}
+                        </div>
+
+                        <div class="mb-3">
+                            {{ form.email.label_tag }}
+                            {{ form.email }}
+                            {% if form.email.errors %}
+                                <div class="text-danger small">{{ form.email.errors }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col">
+                                {{ form.password.label_tag }}
+                                {{ form.password }}
+                            </div>
+                            <div class="col">
+                                {{ form.password_confirm.label_tag }}
+                                {{ form.password_confirm }}
+                            </div>
+                            <div class="form-text text-danger">{{ form.non_field_errors }}</div>
+                        </div>
+
+                        <h5 class="text-muted mb-3 border-bottom pb-2 mt-4">🏥 Datos de la Veterinaria</h5>
+                        <div class="mb-3">
+                            {{ form.nombre_empresa.label_tag }}
+                            {{ form.nombre_empresa }}
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col">
+                                {{ form.cuit.label_tag }}
+                                {{ form.cuit }}
+                            </div>
+                            <div class="col">
+                                {{ form.telefono.label_tag }}
+                                {{ form.telefono }}
+                            </div>
+                        </div>
+
+                        <div class="d-grid gap-2 mt-5">
+                            <button type="submit" class="btn btn-success btn-lg">
+                                Instalar y Comenzar <i class="bi bi-arrow-right"></i>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

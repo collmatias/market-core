@@ -15,7 +15,7 @@ import os
 import sys
 
 # Leemos el modo. Si no existe, asumimos que es DESKTOP (Cliente Local)
-DEPLOYMENT_MODE = os.environ.get('VETCORE_MODE', 'DESKTOP')
+DEPLOYMENT_MODE = os.environ.get('DEPLOYMENT_MODE', 'DESKTOP').upper()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent

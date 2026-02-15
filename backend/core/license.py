@@ -29,6 +29,19 @@ else:
     AWS_LAMBDA_URL = PRODUCTION_URL
 
 def get_hardware_id():
+    """
+    Obtiene un ID único.
+    - En PROD (Windows): Usa la MAC Address real.
+    - En DEV (Docker): Usa un ID fijo para no tener que reactivar a cada rato.
+    """
+    
+    # Si existe la variable VETCORE_MODE (que solo pusimos en el docker-compose),
+    # asumimos que es entorno de desarrollo.
+    if os.environ.get('VETCORE_MODE'):
+        # Retornamos un ID fijo cualquiera (ej: puros nueves)
+        return "999999999999"
+    
+    # Lógica Real para Producción (.exe)
     mac = uuid.getnode()
     return str(mac)
 

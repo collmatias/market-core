@@ -1,5 +1,6 @@
 from django import forms
-from .models import Cliente, Paciente
+from .models import Cliente, Paciente, Empresa
+from django.contrib.auth.models import User
 
 class ClienteForm(forms.ModelForm):
     class Meta:
@@ -26,3 +27,36 @@ class PacienteForm(forms.ModelForm):
             'fecha_nacimiento': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}), # Calendario
             'peso_actual': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01'}),
         }
+
+class EmpresaForm(forms.ModelForm):
+    class Meta:
+        model = Empresa
+        fields = ['nombre', 'cuit', 'direccion', 'telefono'] # Agrega los campos que tengas en el modelo
+        widgets = {
+            'nombre': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ej: Veterinaria Patitas'}),
+            'cuit': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'XX-XXXXXXXX-X'}),
+            'direccion': forms.TextInput(attrs={'class': 'form-control'}),
+            'telefono': forms.TextInput(attrs={'class': 'form-control'}),
+        }
+
+class SetupForm(forms.Form):
+    # --- DATOS DEL ADMIN (Dueño) ---
+    username = forms.CharField(label="Nombre de Usuario", max_length=150, widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ej: admin'}))
+    email = forms.EmailField(label="Correo Electrónico", widget=forms.EmailInput(attrs={'class': 'form-control', 'placeholder': 'tu@email.com'}))
+    password = forms.CharField(label="Contraseña", widget=forms.PasswordInput(attrs={'class': 'form-control'}))
+    password_confirm = forms.CharField(label="Confirmar Contraseña", widget=forms.PasswordInput(attrs={'class': 'form-control'}))
+
+    # --- DATOS DE LA VETERINARIA ---
+    nombre_empresa = forms.CharField(label="Nombre de la Veterinaria", max_length=100, widget=forms.TextInput(attrs={'class': 'form-control'}))
+    cuit = forms.CharField(label="CUIT", max_length=20, widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': '20-xxxxxxxx-x'}))
+    direccion = forms.CharField(label="Dirección", required=False, widget=forms.TextInput(attrs={'class': 'form-control'}))
+    telefono = forms.CharField(label="Teléfono", required=False, widget=forms.TextInput(attrs={'class': 'form-control'}))
+
+    def clean(self):
+        cleaned_data = super().clean()
+        password = cleaned_data.get("password")
+        password_confirm = cleaned_data.get("password_confirm")
+
+        if password != password_confirm:
+            raise forms.ValidationError("Las contraseñas no coinciden.")
+        return cleaned_data
