@@ -54,3 +54,21 @@ perms:
 # --- Testing ---
 test:
 	$(COMPOSE) exec $(API_CONTAINER) python manage.py test
+
+# Borra base de datos, volúmenes, migraciones y reinicia todo limpio
+reset-db:
+	@echo "💥 Destruyendo base de datos..."
+	docker compose down -v
+	rm -f backend/db.sqlite3
+	@echo "🧹 Borrando migraciones viejas..."
+	find backend -path "*/migrations/*.py" -not -name "__init__.py" -delete
+	@echo "🚀 Levantando servicios..."
+	docker compose up -d --build
+	@echo "⏳ Esperando a que la DB inicie..."
+	sleep 5
+	@echo "📝 Creando nuevos planos (makemigrations)..."
+	docker compose exec api_desktop python manage.py makemigrations
+	@echo "🏗️ Aplicando migraciones frescas..."
+	docker compose exec api_desktop python manage.py migrate
+	docker compose exec api_saas python manage.py migrate
+	@echo "✅ ¡Listo! Entra a http://localhost:8000"

@@ -41,15 +41,14 @@ class LicenseCheckMiddleware:
         # (Copia tu lógica anterior aquí)
 
         # ----------------------------------------------------
-        # 3. VALIDACIÓN DE EMPRESA (NUEVO)
+        # 3. VALIDACIÓN DE EMPRESA / PERFIL
         # ----------------------------------------------------
         if request.user.is_authenticated:
-            # Si el usuario no tiene perfil o no hay empresas en la DB
+            # Si no hay empresas en la DB
             if not Empresa.objects.exists():
-                return redirect('configuracion_empresa')
+                return redirect('configuracion_empresa') # (o 'setup_wizard' si usas esa ruta)
             
-            # Opcional: Si es SaaS y el usuario no tiene empresa asignada
-            if hasattr(request, 'user') and not hasattr(request.user, 'userprofile'):
+            if not hasattr(request.user, 'profile'):
                  return redirect('configuracion_empresa')
 
         return self.get_response(request)

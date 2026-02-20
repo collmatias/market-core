@@ -1,5 +1,5 @@
 from django import forms
-from .models import Cliente, Paciente, Empresa
+from .models import Cliente, Paciente, Empresa, UserProfile
 from django.contrib.auth.models import User
 
 class ClienteForm(forms.ModelForm):
@@ -60,3 +60,33 @@ class SetupForm(forms.Form):
         if password != password_confirm:
             raise forms.ValidationError("Las contraseñas no coinciden.")
         return cleaned_data
+
+class EmpleadoForm(forms.ModelForm):
+    # Campos extra que no están en User directo
+    rol = forms.ChoiceField(choices=UserProfile.ROLES, label="Rol / Permisos", widget=forms.Select(attrs={'class': 'form-select'}))
+    matricula = forms.CharField(required=False, label="Matrícula Profesional", widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Opcional'}))
+    password = forms.CharField(label="Contraseña", widget=forms.PasswordInput(attrs={'class': 'form-control'}))
+
+    class Meta:
+        model = User
+        fields = ['username', 'first_name', 'last_name', 'email']
+        widgets = {
+            'username': forms.TextInput(attrs={'class': 'form-control'}),
+            'first_name': forms.TextInput(attrs={'class': 'form-control'}),
+            'last_name': forms.TextInput(attrs={'class': 'form-control'}),
+            'email': forms.EmailInput(attrs={'class': 'form-control'}),
+        }
+
+class EditarEmpleadoForm(forms.ModelForm):
+    rol = forms.ChoiceField(choices=UserProfile.ROLES, label="Rol / Permisos", widget=forms.Select(attrs={'class': 'form-select'}))
+    matricula = forms.CharField(required=False, label="Matrícula Profesional", widget=forms.TextInput(attrs={'class': 'form-control'}))
+
+    class Meta:
+        model = User
+        fields = ['username', 'first_name', 'last_name', 'email']
+        widgets = {
+            'username': forms.TextInput(attrs={'class': 'form-control'}),
+            'first_name': forms.TextInput(attrs={'class': 'form-control'}),
+            'last_name': forms.TextInput(attrs={'class': 'form-control'}),
+            'email': forms.EmailInput(attrs={'class': 'form-control'}),
+        }

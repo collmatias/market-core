@@ -28,7 +28,8 @@ from core.views import ClienteViewSet, PacienteViewSet, setup_wizard #, Historia
 from core.views import (
     home, descargar_backup, activacion, configuracion_empresa,
     lista_clientes, crear_cliente, editar_cliente,
-    lista_pacientes, crear_paciente, editar_paciente
+    lista_pacientes, crear_paciente, editar_paciente,
+    gestion_equipo, editar_empleado, estado_empleado
 )
 
 # Inventory Views
@@ -95,6 +96,10 @@ urlpatterns = [
 
     # Ruta para editar consulta (usamos el ID de la consulta)
     path('historia/<int:consulta_id>/editar/', editar_consulta, name='editar_consulta'),
+
+    path('equipo/', gestion_equipo, name='gestion_equipo'),
+    path('equipo/editar/<int:id>/', editar_empleado, name='editar_empleado'),
+    path('equipo/estado/<int:id>/', estado_empleado, name='estado_empleado'),
 
 ]
 

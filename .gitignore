@@ -77,3 +77,7 @@ dist/
 .idea/
 .DS_Store
 Thumbs.db
+
+
+# Ignorar migraciones en etapa de desarrollo
+backend/*/migrations/0*.py

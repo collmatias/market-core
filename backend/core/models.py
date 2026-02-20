@@ -4,7 +4,7 @@ from django.contrib.auth.models import User
 class TenantManager(models.Manager):
     def para_empresa(self, user):
         # Filtra automáticamente por la empresa del usuario
-        return self.get_queryset().filter(empresa=user.userprofile.empresa)
+        return self.get_queryset().filter(empresa=user.profile.empresa)
 
 class Empresa(models.Model):
     nombre = models.CharField(max_length=100)
@@ -24,9 +24,29 @@ class Empresa(models.Model):
         return self.nombre
 
 class UserProfile(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    # ROLES DISPONIBLES
+    ROLES = [
+        ('ADMIN', 'Administrador / Dueño'),
+        ('VETERINARIO', 'Veterinario'),
+        ('VENDEDOR', 'Vendedor / Recepción'),
+    ]
+
+    # Usamos related_name='profile' para poder hacer request.user.profile
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
     empresa = models.ForeignKey(Empresa, on_delete=models.CASCADE)
-    # is_admin_empresa = models.BooleanField(default=False)
+    
+    # NUEVOS CAMPOS PARA EL EQUIPO
+    rol = models.CharField(max_length=20, choices=ROLES, default='VETERINARIO')
+    matricula = models.CharField(max_length=50, blank=True, null=True, help_text="Obligatorio para veterinarios")
+    telefono = models.CharField(max_length=20, blank=True, null=True)
+
+    def __str__(self):
+        return f"{self.user.username} - {self.get_rol_display()}"
+
+    # Helper para saber si puede editar medicina (lo usaremos más adelante para permisos)
+    @property
+    def es_clinico(self):
+        return self.rol in ['ADMIN', 'VETERINARIO']
 
 class Cliente(models.Model):
     nombre = models.CharField(max_length=100)

@@ -14,9 +14,11 @@ from .license import get_hardware_id
 
 from .models import Cliente, Paciente, Empresa, UserProfile
 from .serializers import ClienteSerializer, PacienteSerializer
-from .forms import ClienteForm, PacienteForm, EmpresaForm, SetupForm
+from .forms import ClienteForm, PacienteForm, EmpresaForm, SetupForm, EmpleadoForm, EditarEmpleadoForm
 from .utils import get_server_ip
 from datetime import date, timedelta
+
+from django.contrib import messages
 
 # --- CORRECCIÓN AQUÍ: Importamos 'generate_offline_key' ---
 from .license import check_license, save_license, generate_offline_key
@@ -154,29 +156,34 @@ def activacion(request):
 @login_required
 def configuracion_empresa(request):
     try:
-        empresa = request.user.userprofile.empresa
+        # CAMBIO 1: Ahora usamos .profile por el related_name que definimos
+        empresa = request.user.profile.empresa
         es_nuevo = False
     except:
+        # Si falla, buscamos la primera empresa o asumimos que es nuevo
         empresa = Empresa.objects.first()
         es_nuevo = True if not empresa else False
 
     if request.method == 'POST':
         form = EmpresaForm(request.POST, instance=empresa)
         if form.is_valid():
-            # 1. PAUSA: No guardes todavía en la DB
             nueva_empresa = form.save(commit=False)
             
-            # 2. RELLENA LOS HUECOS: Asigna la fecha obligatoria manualmente
-            # Por defecto le damos 1 año de licencia o hasta el 2030
+            # Asignar fecha de vencimiento si no tiene
             if not nueva_empresa.fecha_vencimiento:
-                nueva_empresa.fecha_vencimiento = date.today() + timedelta(days=365) # 1 año gratis
-            
-            # 3. GUARDA: Ahora sí, escribe en la DB
+                nueva_empresa.fecha_vencimiento = date.today() + timedelta(days=365)
+                
             nueva_empresa.save()
             
-            # Asignar usuario si es nuevo (esto sigue igual)
-            if not hasattr(request.user, 'userprofile'):
-                UserProfile.objects.create(user=request.user, empresa=nueva_empresa)
+            # CAMBIO 2: Magia pura. get_or_create evita el error UNIQUE.
+            # Si el perfil no existe, lo crea con rol ADMIN. Si existe, no hace nada.
+            UserProfile.objects.get_or_create(
+                user=request.user,
+                defaults={
+                    'empresa': nueva_empresa,
+                    'rol': 'ADMIN'
+                }
+            )
             
             return redirect('home')
     else:
@@ -232,3 +239,109 @@ def setup_wizard(request):
         form = SetupForm()
 
     return render(request, 'core/setup_wizard.html', {'form': form})
+
+@login_required
+def gestion_equipo(request):
+    # 1. SEGURIDAD MEJORADA: Pasa si es ADMIN en su perfil, o si es un superusuario de la terminal
+    es_admin_perfil = hasattr(request.user, 'profile') and request.user.profile.rol == 'ADMIN'
+    
+    if not (request.user.is_superuser or es_admin_perfil):
+        messages.error(request, "Acceso denegado. Se requieren permisos de Administrador.")
+        return redirect('home')
+
+    empresa_actual = request.user.profile.empresa
+
+    if request.method == 'POST':
+        form = EmpleadoForm(request.POST)
+        if form.is_valid():
+            try:
+                data = form.cleaned_data
+                
+                # 2. Crear el Usuario de Django
+                nuevo_user = User.objects.create_user(
+                    username=data['username'],
+                    email=data['email'],
+                    password=data['password'],
+                    first_name=data['first_name'],
+                    last_name=data['last_name']
+                )
+
+                # 3. Crear su Perfil (Vinculado a la MISMA empresa)
+                UserProfile.objects.create(
+                    user=nuevo_user,
+                    empresa=empresa_actual,
+                    rol=data['rol'],
+                    matricula=data['matricula']
+                )
+                
+                messages.success(request, f"Empleado {nuevo_user.username} creado con éxito.")
+                return redirect('gestion_equipo')
+                
+            except Exception as e:
+                messages.error(request, f"Error al crear usuario: {e}")
+    else:
+        form = EmpleadoForm()
+
+    # Listar solo empleados de MI empresa
+    empleados = UserProfile.objects.filter(empresa=empresa_actual).select_related('user')
+
+    return render(request, 'core/gestion_equipo.html', {
+        'empleados': empleados,
+        'form': form
+    })
+
+@login_required
+def editar_empleado(request, id):
+    # Seguridad: Solo admin
+    es_admin = request.user.is_superuser or (hasattr(request.user, 'profile') and request.user.profile.rol == 'ADMIN')
+    if not es_admin:
+        messages.error(request, "Acceso denegado.")
+        return redirect('home')
+
+    # Buscamos al usuario asegurándonos de que pertenezca a la misma veterinaria
+    empleado = get_object_or_404(User, id=id, profile__empresa=request.user.profile.empresa)
+    perfil = empleado.profile
+
+    if request.method == 'POST':
+        form = EditarEmpleadoForm(request.POST, instance=empleado)
+        if form.is_valid():
+            form.save() # Guarda datos básicos (nombre, email)
+            # Guarda datos del perfil
+            perfil.rol = form.cleaned_data['rol']
+            perfil.matricula = form.cleaned_data['matricula']
+            perfil.save()
+            
+            messages.success(request, f"Datos de {empleado.first_name} actualizados.")
+            return redirect('gestion_equipo')
+    else:
+        # Pre-cargar los datos del perfil en el formulario
+        form = EditarEmpleadoForm(instance=empleado, initial={
+            'rol': perfil.rol,
+            'matricula': perfil.matricula
+        })
+
+    return render(request, 'core/editar_empleado.html', {'form': form, 'empleado': empleado})
+
+@login_required
+def estado_empleado(request, id):
+    # Vista interruptor: Activa/Desactiva al usuario
+    es_admin = request.user.is_superuser or (hasattr(request.user, 'profile') and request.user.profile.rol == 'ADMIN')
+    if not es_admin:
+        return redirect('home')
+
+    empleado = get_object_or_404(User, id=id, profile__empresa=request.user.profile.empresa)
+    
+    # Evitar que el admin se desactive a sí mismo por accidente
+    if empleado == request.user:
+        messages.error(request, "No puedes desactivar tu propia cuenta de administrador.")
+        return redirect('gestion_equipo')
+
+    # Invertir el estado
+    empleado.is_active = not empleado.is_active
+    empleado.save()
+    
+    estado = "activado" if empleado.is_active else "desactivado (sin acceso)"
+    tipo_mensaje = messages.success if empleado.is_active else messages.warning
+    tipo_mensaje(request, f"El usuario {empleado.username} ha sido {estado}.")
+    
+    return redirect('gestion_equipo')
