@@ -74,7 +74,7 @@
 
                         <div class="dropdown">
                             <button class="btn btn-primary border-light dropdown-toggle btn-sm" type="button" data-bs-toggle="dropdown">
-                                <i class="bi bi-person-circle"></i> {{ user.username }}
+                                <i class="{{ user.profile.avatar|default:'bi-person-circle' }}"></i> {{ user.username }}
                             </button>
 
                             <ul class="dropdown-menu dropdown-menu-end shadow">

@@ -52,7 +52,9 @@
                         <tbody>
                             {% for perfil in empleados %}
                             <tr>
-                                <td class="fw-bold">{{ perfil.user.username }}</td>
+                                <td class="fw-bold">
+                                    <i class="{{ perfil.avatar|default:'bi-person-fill' }} text-primary me-1"></i> {{ perfil.user.username }}
+                                </td>
                                 <td>{{ perfil.user.first_name }} {{ perfil.user.last_name }}</td>
 <td>
                                     <span class="badge {% if perfil.rol == 'VETERINARIO' %}bg-success{% else %}bg-primary{% endif %}">

@@ -37,7 +37,7 @@
             <div class="card user-card border-0 shadow-sm h-100 bg-white" onclick="abrirPinPad('{{ perfil.user.id }}', '{{ perfil.user.first_name|default:perfil.user.username }}')">
                 <div class="card-body text-center p-4">
                     <div class="bg-primary bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 80px; height: 80px;">
-                        <i class="bi bi-person-fill fs-1 text-primary"></i>
+                        <i class="{{ perfil.avatar|default:'bi-person-fill' }} fs-1 text-primary"></i>
                     </div>
                     <h5 class="fw-bold mb-1">{{ perfil.user.first_name|default:perfil.user.username|title }}</h5>
                     <span class="badge bg-secondary small">{{ perfil.get_rol_display }}</span>
