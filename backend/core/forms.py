@@ -119,7 +119,8 @@ class SetupForm(forms.Form):
 
 class EmpleadoForm(forms.ModelForm):
     # Campos extra que no están en User directo
-    rol = forms.ChoiceField(choices=UserProfile.ROLES, label="Rol / Permisos", widget=forms.Select(attrs={'class': 'form-select'}))
+    rol = forms.ChoiceField(choices=UserProfile.ROLES, widget=forms.Select(attrs={'class': 'form-select'}))
+    es_admin = forms.BooleanField(required=False, label="¿Es Administrador?", widget=forms.CheckboxInput(attrs={'class': 'form-check-input'}))
     matricula = forms.CharField(required=False, label="Matrícula Profesional", widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Opcional'}))
     password = forms.CharField(label="Contraseña", widget=forms.PasswordInput(attrs={'class': 'form-control'}))
     pin = forms.CharField(required=False, label="PIN Rápido (4 dígitos)", widget=forms.PasswordInput(attrs={'class': 'form-control', 'maxlength': '4', 'placeholder': 'Ej: 1234'}))
@@ -135,8 +136,23 @@ class EmpleadoForm(forms.ModelForm):
             'email': forms.EmailInput(attrs={'class': 'form-control'}),
         }
 
+    def clean(self):
+        # Primero dejamos que Django haga sus validaciones normales
+        cleaned_data = super().clean()
+        
+        # Obtenemos lo que el usuario seleccionó/escribió
+        rol = cleaned_data.get('rol')
+        matricula = cleaned_data.get('matricula')
+
+        # La regla de oro: Si es Vete y no hay matrícula, lanzamos error
+        if rol == 'VETERINARIO' and not matricula:
+            self.add_error('matricula', 'La matrícula profesional es obligatoria para los Veterinarios.')
+            
+        return cleaned_data
+
 class EditarEmpleadoForm(forms.ModelForm):
-    rol = forms.ChoiceField(choices=UserProfile.ROLES, label="Rol / Permisos", widget=forms.Select(attrs={'class': 'form-select'}))
+    rol = forms.ChoiceField(choices=UserProfile.ROLES, widget=forms.Select(attrs={'class': 'form-select'}))
+    es_admin = forms.BooleanField(required=False, label="Dar permisos de Administrador", widget=forms.CheckboxInput(attrs={'class': 'form-check-input'}))
     matricula = forms.CharField(required=False, label="Matrícula Profesional", widget=forms.TextInput(attrs={'class': 'form-control'}))
     pin = forms.CharField(required=False, label="PIN de Acceso Rápido (4 dígitos)", widget=forms.TextInput(attrs={'class': 'form-control', 'maxlength': '4', 'type': 'password'}))
     avatar = forms.ChoiceField(choices=UserProfile.AVATARES, label="Icono de Perfil", widget=forms.Select(attrs={'class': 'form-select'}))
@@ -150,3 +166,20 @@ class EditarEmpleadoForm(forms.ModelForm):
             'last_name': forms.TextInput(attrs={'class': 'form-control'}),
             'email': forms.EmailInput(attrs={'class': 'form-control'}),
         }
+
+    def clean(self):
+        cleaned_data = super().clean()
+        
+        rol = cleaned_data.get('rol')
+        matricula = cleaned_data.get('matricula')
+
+        # Limpiamos espacios en blanco por si tipearion "   "
+        if matricula:
+            matricula = matricula.strip()
+
+        # Si es Veterinario y la matrícula está vacía (o eran solo espacios)
+        if rol == 'VETERINARIO' and not matricula:
+            # Esto bloquea el guardado y enciende la alarma en el campo 'matricula'
+            self.add_error('matricula', 'La matrícula es obligatoria.')
+            
+        return cleaned_data

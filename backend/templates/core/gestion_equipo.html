@@ -54,13 +54,13 @@
                             <tr>
                                 <td class="fw-bold">{{ perfil.user.username }}</td>
                                 <td>{{ perfil.user.first_name }} {{ perfil.user.last_name }}</td>
-                                <td>
-                                    {% if perfil.rol == 'ADMIN' %}
-                                        <span class="badge bg-danger">ADMIN</span>
-                                    {% elif perfil.rol == 'VETERINARIO' %}
-                                        <span class="badge bg-success">VETERINARIO</span>
-                                    {% else %}
-                                        <span class="badge bg-warning text-dark">VENDEDOR</span>
+<td>
+                                    <span class="badge {% if perfil.rol == 'VETERINARIO' %}bg-success{% else %}bg-primary{% endif %}">
+                                        {{ perfil.get_rol_display|upper }}
+                                    </span>
+                                    
+                                    {% if perfil.es_admin or perfil.user.is_superuser %}
+                                        <span class="badge bg-danger ms-1" title="Tiene permisos de Administración"><i class="bi bi-star-fill"></i> ADMIN</span>
                                     {% endif %}
                                 </td>
                                 <td>{{ perfil.matricula|default:"-" }}</td>

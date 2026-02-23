@@ -343,7 +343,12 @@ def setup_wizard(request):
                     password=data['password']
                 )
                 
-                UserProfile.objects.create(user=user, empresa=empresa)
+                UserProfile.objects.create(
+                                            user=user, 
+                                            empresa=empresa, 
+                                            rol='ADMINISTRATIVO', 
+                                            es_admin=True
+                                        )
                 login(request, user)
                 return redirect('home')
 
@@ -392,6 +397,7 @@ def gestion_equipo(request):
                     user=nuevo_user,
                     empresa=empresa_actual,
                     rol=data['rol'],
+                    es_admin=data.get('es_admin', False), # <--- Guardar el tag
                     matricula=data['matricula'],
                     pin=data.get('pin'),
                     avatar=data.get('avatar', 'bi-person-fill')
@@ -430,6 +436,7 @@ def editar_empleado(request, id):
         if form.is_valid():
             form.save() 
             perfil.rol = form.cleaned_data['rol']
+            perfil.es_admin = form.cleaned_data.get('es_admin', False)
             perfil.matricula = form.cleaned_data['matricula']
             perfil.avatar = form.cleaned_data['avatar']
             
@@ -446,6 +453,7 @@ def editar_empleado(request, id):
         # Pre-cargar los datos del perfil en el formulario
         form = EditarEmpleadoForm(instance=empleado, initial={
             'rol': perfil.rol,
+            'es_admin': perfil.es_admin,
             'matricula': perfil.matricula,
             # No enviamos el PIN inicial por seguridad, que se vea en blanco siempre
             'avatar': perfil.avatar

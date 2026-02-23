@@ -26,9 +26,8 @@ class Empresa(models.Model):
 class UserProfile(models.Model):
     # ROLES DISPONIBLES
     ROLES = [
-        ('ADMIN', 'Administrador / Dueño'),
         ('VETERINARIO', 'Veterinario'),
-        ('VENDEDOR', 'Vendedor / Recepción'),
+        ('ADMINISTRATIVO', 'Administrativo'),
     ]
 
     AVATARES = [
@@ -53,6 +52,7 @@ class UserProfile(models.Model):
     
     # NUEVOS CAMPOS PARA EL EQUIPO
     rol = models.CharField(max_length=20, choices=ROLES, default='VETERINARIO')
+    es_admin = models.BooleanField(default=False, help_text="Acceso total a configuraciones, precios y corrección de stock")
     matricula = models.CharField(max_length=50, blank=True, null=True, help_text="Obligatorio para veterinarios")
     telefono = models.CharField(max_length=20, blank=True, null=True)
     pin = models.CharField(max_length=4, blank=True, null=True, help_text="PIN de 4 dígitos")
@@ -61,10 +61,10 @@ class UserProfile(models.Model):
     def __str__(self):
         return f"{self.user.username} - {self.get_rol_display()}"
 
-    # Helper para saber si puede editar medicina (lo usaremos más adelante para permisos)
     @property
     def es_clinico(self):
-        return self.rol in ['ADMIN', 'VETERINARIO']
+        # Ahora ser clínico depende 100% de la profesión, no del poder de admin
+        return self.rol == 'VETERINARIO'
 
 class Cliente(models.Model):
     nombre = models.CharField(max_length=100)
