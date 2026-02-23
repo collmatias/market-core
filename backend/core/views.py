@@ -11,10 +11,15 @@ from django.contrib.auth import login
 from django.contrib.auth.models import User
 from .license import get_hardware_id
 
+from django.contrib.auth.views import PasswordChangeView
+from django.contrib.auth.forms import SetPasswordForm
+
+from django.contrib.messages.views import SuccessMessageMixin
+from django.urls import reverse_lazy
 
 from .models import Cliente, Paciente, Empresa, UserProfile
 from .serializers import ClienteSerializer, PacienteSerializer
-from .forms import ClienteForm, PacienteForm, EmpresaForm, SetupForm, EmpleadoForm, EditarEmpleadoForm
+from .forms import AdminSetPasswordForm, ClienteForm, PacienteForm, EmpresaForm, SetupForm, EmpleadoForm, EditarEmpleadoForm
 from .utils import get_server_ip
 from datetime import date, timedelta
 
@@ -31,6 +36,43 @@ class ClienteViewSet(viewsets.ModelViewSet):
 class PacienteViewSet(viewsets.ModelViewSet):
     queryset = Paciente.objects.all().order_by('-id')
     serializer_class = PacienteSerializer
+
+# --- SEGURIDAD Y PERFIL ---
+class CambiarPasswordView(SuccessMessageMixin, PasswordChangeView):
+    template_name = 'core/cambiar_password.html'
+    success_url = reverse_lazy('home')
+    success_message = "¡Tu contraseña ha sido actualizada con éxito!"
+
+@login_required
+def resetear_password_empleado(request, id):
+    # Seguridad: Solo el ADMIN puede hacer esto
+    es_admin = request.user.is_superuser or (hasattr(request.user, 'profile') and request.user.profile.rol == 'ADMIN')
+    if not es_admin:
+        messages.error(request, "Acceso denegado. Se requieren permisos de Administrador.")
+        return redirect('home')
+
+    # Buscamos al empleado asegurando que sea de la misma empresa
+    empleado = get_object_or_404(User, id=id, profile__empresa=request.user.profile.empresa)
+
+    if request.method == 'POST':
+        # Usamos nuestro formulario sin reglas
+        form = AdminSetPasswordForm(request.POST)
+        if form.is_valid():
+            nueva_clave = form.cleaned_data['new_password1']
+            
+            # GUARDADO MANUAL FORZADO (se salta las validaciones de settings.py)
+            empleado.set_password(nueva_clave)
+            empleado.save()
+            
+            messages.success(request, f"¡Contraseña actualizada con éxito para {empleado.first_name}!")
+            return redirect('gestion_equipo')
+    else:
+        form = AdminSetPasswordForm()
+
+    return render(request, 'core/resetear_password.html', {
+        'form': form, 
+        'empleado': empleado
+    })
 
 # --- VISTAS TEMPLATES (FRONTEND) ---
 
@@ -68,7 +110,14 @@ def crear_cliente(request):
     if request.method == 'POST':
         form = ClienteForm(request.POST)
         if form.is_valid():
-            form.save()
+            # 1. Pausamos el guardado
+            cliente = form.save(commit=False)
+            # 2. Inyectamos la empresa
+            cliente.empresa = request.user.profile.empresa
+            # 3. Guardamos definitivamente
+            cliente.save()
+            
+            messages.success(request, f"Cliente {cliente.nombre} {cliente.apellido} registrado con éxito.")
             return redirect('lista_clientes')
     else:
         form = ClienteForm()
@@ -97,7 +146,14 @@ def crear_paciente(request):
     if request.method == 'POST':
         form = PacienteForm(request.POST)
         if form.is_valid():
-            form.save()
+            # 1. Pausamos el guardado
+            paciente = form.save(commit=False)
+            # 2. Inyectamos la empresa
+            paciente.empresa = request.user.profile.empresa
+            # 3. Guardamos definitivamente
+            paciente.save()
+            
+            messages.success(request, f"Paciente {paciente.nombre} registrado con éxito.")
             return redirect('lista_pacientes')
     else:
         form = PacienteForm()

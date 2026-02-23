@@ -68,8 +68,15 @@
 
 
 
-
                                 <td>
+                                    <a href="{% url 'editar_empleado' perfil.user.id %}" class="btn btn-sm btn-outline-primary" title="Editar datos">
+                                        <i class="bi bi-pencil-square"></i>
+                                    </a>
+                                    
+                                    <a href="{% url 'resetear_password_empleado' perfil.user.id %}" class="btn btn-sm btn-outline-warning ms-1" title="Forzar nueva contraseña">
+                                        <i class="bi bi-key-fill"></i>
+                                    </a>
+                                    
                                     {% if perfil.user.is_active %}
                                         <span class="text-success"><i class="bi bi-check-circle-fill"></i></span>
                                     {% else %}

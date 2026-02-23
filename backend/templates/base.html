@@ -80,6 +80,10 @@
                             <button class="btn btn-primary border-light dropdown-toggle btn-sm" type="button" data-bs-toggle="dropdown">
                                 <i class="bi bi-person-circle"></i> {{ user.username }}
                             </button>
+
+
+
+
                             <ul class="dropdown-menu dropdown-menu-end shadow">
                                 <li>
                                     <span class="dropdown-header text-center">
@@ -87,6 +91,12 @@
                                     </span>
                                 </li>
                                 <li><hr class="dropdown-divider"></li>
+                                
+                                <li>
+                                    <a class="dropdown-item" href="{% url 'cambiar_password' %}">
+                                        <i class="bi bi-key-fill text-warning me-2"></i> Cambiar Contraseña
+                                    </a>
+                                </li>
                                 <li>
                                     <a class="dropdown-item" href="{% url 'descargar_backup' %}">
                                         <i class="bi bi-cloud-download text-primary me-2"></i> Backup Base de Datos

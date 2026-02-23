@@ -2,6 +2,26 @@ from django import forms
 from .models import Cliente, Paciente, Empresa, UserProfile
 from django.contrib.auth.models import User
 
+class AdminSetPasswordForm(forms.Form):
+    new_password1 = forms.CharField(
+        label="Nueva Contraseña",
+        widget=forms.PasswordInput(attrs={'class': 'form-control'}),
+        help_text="Ingresa la nueva clave (sin restricciones de longitud ni seguridad)."
+    )
+    new_password2 = forms.CharField(
+        label="Confirmar Contraseña",
+        widget=forms.PasswordInput(attrs={'class': 'form-control'}),
+        help_text="Repite la contraseña para confirmar."
+    )
+
+    def clean(self):
+        cleaned_data = super().clean()
+        p1 = cleaned_data.get('new_password1')
+        p2 = cleaned_data.get('new_password2')
+        if p1 and p2 and p1 != p2:
+            raise forms.ValidationError("Las contraseñas no coinciden. Intenta de nuevo.")
+        return cleaned_data
+
 class ClienteForm(forms.ModelForm):
     class Meta:
         model = Cliente

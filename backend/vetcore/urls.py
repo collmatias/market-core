@@ -26,7 +26,7 @@ from core.views import ClienteViewSet, PacienteViewSet, setup_wizard #, Historia
 
 # Core Views
 from core.views import (
-    home, descargar_backup, activacion, configuracion_empresa,
+    home, descargar_backup, CambiarPasswordView, resetear_password_empleado, activacion, configuracion_empresa,
     lista_clientes, crear_cliente, editar_cliente,
     lista_pacientes, crear_paciente, editar_paciente,
     gestion_equipo, editar_empleado, estado_empleado
@@ -54,6 +54,8 @@ router.register(r'movimientos', MovimientoStockViewSet)
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('perfil/cambiar-contrasena/', CambiarPasswordView.as_view(), name='cambiar_password'),
+    path('equipo/password/<int:id>/', resetear_password_empleado, name='resetear_password_empleado'),
     path('api/', include(router.urls)), # Todas las rutas API colgarán de /api/
 
     # --- HOME Y AUTH ---

@@ -3,6 +3,7 @@ from django.contrib.auth.decorators import login_required # <--- EL CANDADO
 from core.models import Paciente
 from .models import Historial
 from .forms import HistorialForm, ArchivoAdjuntoForm
+from core.decorators import clinico_requerido
 
 @login_required
 def ficha_medica(request, paciente_id):
@@ -16,6 +17,7 @@ def ficha_medica(request, paciente_id):
     })
 
 @login_required
+@clinico_requerido
 def nueva_consulta(request, paciente_id):
     paciente = get_object_or_404(Paciente, pk=paciente_id)
     
@@ -48,6 +50,7 @@ def nueva_consulta(request, paciente_id):
     })
 
 @login_required
+@clinico_requerido
 def editar_consulta(request, consulta_id):
     consulta = get_object_or_404(Historial, pk=consulta_id)
     paciente = consulta.paciente
