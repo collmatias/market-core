@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>VetCore - Ingreso Rápido</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <style>
+        body { background-color: #e9ecef; height: 100vh; display: flex; align-items: center; justify-content: center; }
+        .user-card { cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; border-radius: 15px; }
+        .user-card:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
+        .pin-input { font-size: 2rem; letter-spacing: 15px; text-align: center; font-weight: bold; }
+        .numpad-btn { font-size: 1.5rem; border-radius: 50%; width: 70px; height: 70px; display: flex; align-items: center; justify-content: center; margin: auto; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="text-center mb-5">
+        <h1 class="display-5 fw-bold text-primary"><i class="bi bi-shield-lock"></i> Estación de Trabajo</h1>
+        <p class="text-muted lead">Selecciona tu usuario para ingresar</p>
+    </div>
+
+    {% if messages %}
+        <div class="row justify-content-center mb-3">
+            <div class="col-md-6">
+                {% for message in messages %}
+                    <div class="alert alert-danger text-center shadow-sm">{{ message }}</div>
+                {% endfor %}
+            </div>
+        </div>
+    {% endif %}
+
+    <div class="row justify-content-center g-4">
+        {% for perfil in empleados %}
+        <div class="col-6 col-md-4 col-lg-3">
+            <div class="card user-card border-0 shadow-sm h-100 bg-white" onclick="abrirPinPad('{{ perfil.user.id }}', '{{ perfil.user.first_name|default:perfil.user.username }}')">
+                <div class="card-body text-center p-4">
+                    <div class="bg-primary bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 80px; height: 80px;">
+                        <i class="bi bi-person-fill fs-1 text-primary"></i>
+                    </div>
+                    <h5 class="fw-bold mb-1">{{ perfil.user.first_name|default:perfil.user.username|title }}</h5>
+                    <span class="badge bg-secondary small">{{ perfil.get_rol_display }}</span>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <div class="text-center mt-5">
+        <a href="{% url 'login' %}" class="btn btn-outline-secondary"><i class="bi bi-box-arrow-in-right"></i> Ingreso Completo (Contraseña)</a>
+    </div>
+</div>
+
+<div class="modal fade" id="pinModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-sm modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 20px;">
+            <div class="modal-body p-4 text-center">
+                <h5 id="modalUserName" class="fw-bold mb-3">Usuario</h5>
+                
+                <form id="pinForm" method="post" action="{% url 'lockscreen' %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="user_id" id="hiddenUserId">
+                    
+                    <input type="password" name="pin" id="pinInput" class="form-control pin-input mb-4 bg-light border-0" maxlength="4" readonly placeholder="••••">
+                    
+                    <div class="row g-2 mb-3">
+                        <div class="col-4"><button type="button" class="btn btn-light numpad-btn shadow-sm" onclick="addPin('1')">1</button></div>
+                        <div class="col-4"><button type="button" class="btn btn-light numpad-btn shadow-sm" onclick="addPin('2')">2</button></div>
+                        <div class="col-4"><button type="button" class="btn btn-light numpad-btn shadow-sm" onclick="addPin('3')">3</button></div>
+                        <div class="col-4"><button type="button" class="btn btn-light numpad-btn shadow-sm" onclick="addPin('4')">4</button></div>
+                        <div class="col-4"><button type="button" class="btn btn-light numpad-btn shadow-sm" onclick="addPin('5')">5</button></div>
+                        <div class="col-4"><button type="button" class="btn btn-light numpad-btn shadow-sm" onclick="addPin('6')">6</button></div>
+                        <div class="col-4"><button type="button" class="btn btn-light numpad-btn shadow-sm" onclick="addPin('7')">7</button></div>
+                        <div class="col-4"><button type="button" class="btn btn-light numpad-btn shadow-sm" onclick="addPin('8')">8</button></div>
+                        <div class="col-4"><button type="button" class="btn btn-light numpad-btn shadow-sm" onclick="addPin('9')">9</button></div>
+                        <div class="col-4"><button type="button" class="btn btn-danger numpad-btn shadow-sm" onclick="clearPin()"><i class="bi bi-backspace"></i></button></div>
+                        <div class="col-4"><button type="button" class="btn btn-light numpad-btn shadow-sm" onclick="addPin('0')">0</button></div>
+                        <div class="col-4"><button type="submit" class="btn btn-success numpad-btn shadow-sm"><i class="bi bi-check-lg"></i></button></div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    const pinModalElement = document.getElementById('pinModal');
+    const pinModal = new bootstrap.Modal(pinModalElement);
+    const pinInput = document.getElementById('pinInput');
+    
+    function abrirPinPad(userId, userName) {
+        document.getElementById('hiddenUserId').value = userId;
+        document.getElementById('modalUserName').innerText = 'Hola, ' + userName;
+        pinInput.value = '';
+        pinModal.show();
+    }
+
+    function addPin(num) {
+        if (pinInput.value.length < 4) {
+            pinInput.value += num;
+        }
+        // Auto-enviar si llega a 4 dígitos
+        if (pinInput.value.length === 4) {
+            setTimeout(() => { document.getElementById('pinForm').submit(); }, 200);
+        }
+    }
+
+    function clearPin() {
+        pinInput.value = pinInput.value.slice(0, -1);
+    }
+
+    // 🌟 NUEVO: MAGIA PARA EL TECLADO FÍSICO
+    document.addEventListener('keydown', function(event) {
+        // Solo escuchamos el teclado si la ventanita del PIN está abierta
+        if (pinModalElement.classList.contains('show')) {
+            const key = event.key;
+            
+            // Si presiona un número del 0 al 9
+            if (key >= '0' && key <= '9') {
+                addPin(key);
+            } 
+            // Si presiona la tecla de borrar
+            else if (key === 'Backspace') {
+                clearPin();
+            }
+            // Si presiona Enter y ya escribió los 4 dígitos
+            else if (key === 'Enter' && pinInput.value.length === 4) {
+                event.preventDefault(); // Evitamos que el Enter haga cosas raras
+                document.getElementById('pinForm').submit();
+            }
+        }
+    });
+</script>
+
+</body>
+</html>

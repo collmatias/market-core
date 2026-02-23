@@ -118,21 +118,20 @@
                 </div>
             </div>
         </div>
-
-        <div class="col">
-            <div class="card h-100 border-0 shadow-sm hover-card border-top border-4 border-secondary bg-light">
-                <div class="card-body">
-                    <div class="d-flex align-items-center mb-2">
-                        <i class="bi bi-cloud-download fs-3 text-dark me-2"></i>
-                        <h5 class="card-title fw-bold mb-0">Backup</h5>
+        {% if user.profile.rol == 'ADMIN' or user.is_superuser %}
+            <div class="col">
+                <div class="card h-100 border-0 shadow-sm hover-card border-top border-4 border-secondary bg-light">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center mb-2">
+                            <i class="bi bi-cloud-download fs-3 text-dark me-2"></i>
+                            <h5 class="card-title fw-bold mb-0">Backup</h5>
+                        </div>
+                        <p class="card-text small text-muted">Guardar base de datos.</p>
+                        <a href="{% url 'descargar_backup' %}" class="btn btn-sm btn-dark w-100 stretched-link">Descargar</a>
                     </div>
-                    <p class="card-text small text-muted">Guardar base de datos.</p>
-                    <a href="{% url 'descargar_backup' %}" class="btn btn-sm btn-dark w-100 stretched-link">Descargar</a>
                 </div>
             </div>
-        </div>
 
-        {% if user.profile.rol == 'ADMIN' or user.is_superuser %}
         <div class="col">
             <div class="card h-100 border-0 shadow-sm hover-card border-top border-4 border-success bg-success bg-opacity-10">
                 <div class="card-body">

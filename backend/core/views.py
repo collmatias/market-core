@@ -3,12 +3,13 @@ from django.conf import settings
 from django.http import FileResponse, HttpResponse, HttpResponseNotFound
 from django.utils import timezone
 from django.contrib.auth.decorators import login_required
+from .decorators import admin_requerido
 from django.shortcuts import render, redirect, get_object_or_404
 from rest_framework import viewsets
 
-
-from django.contrib.auth import login
+from django.contrib.auth import login, logout
 from django.contrib.auth.models import User
+from django.http import JsonResponse
 from .license import get_hardware_id
 
 from django.contrib.auth.views import PasswordChangeView
@@ -19,7 +20,7 @@ from django.urls import reverse_lazy
 
 from .models import Cliente, Paciente, Empresa, UserProfile
 from .serializers import ClienteSerializer, PacienteSerializer
-from .forms import AdminSetPasswordForm, ClienteForm, PacienteForm, EmpresaForm, SetupForm, EmpleadoForm, EditarEmpleadoForm
+from .forms import AdminSetPasswordForm, ClienteForm, PacienteForm, EmpresaForm, SetupForm, EmpleadoForm, EditarEmpleadoForm, CambiarPinForm
 from .utils import get_server_ip
 from datetime import date, timedelta
 
@@ -74,6 +75,69 @@ def resetear_password_empleado(request, id):
         'empleado': empleado
     })
 
+@login_required
+def preparar_cambio_rapido(request):
+    """Cierra la sesión actual pero deja la PC lista para cambiar rápidamente a otro usuario de la misma veterinaria usando solo un PIN."""
+    empresa_id = request.user.profile.empresa.id
+    logout(request) # Cerramos sesión por seguridad
+    
+    # Redirigimos a la pantalla de PIN
+    response = redirect('lockscreen')
+    # Guardamos en una cookie de 12 horas de qué veterinaria es esta PC
+    response.set_cookie('vetcore_workstation', empresa_id, max_age=43200) 
+    return response
+
+def lockscreen(request):
+    """La pantalla gráfica estilo iPad para elegir usuario"""
+    # Si ya hay alguien logueado, lo mandamos al home
+    if request.user.is_authenticated:
+        return redirect('home')
+
+    # Leemos la cookie para saber qué empleados mostrar
+    empresa_id = request.COOKIES.get('vetcore_workstation')
+    
+    if not empresa_id:
+        # Si no hay cookie (borraron el historial), a login normal
+        return redirect('login')
+        
+    # Traemos a todos los empleados activos de esa veterinaria
+    empleados = UserProfile.objects.filter(empresa_id=empresa_id, user__is_active=True).select_related('user')
+
+    if request.method == 'POST':
+        user_id = request.POST.get('user_id')
+        pin_ingresado = request.POST.get('pin')
+        
+        try:
+            perfil = UserProfile.objects.get(user__id=user_id, empresa_id=empresa_id)
+            if perfil.pin and perfil.pin == pin_ingresado:
+                # ¡PIN CORRECTO! Logueamos al usuario instantáneamente
+                login(request, perfil.user)
+                return redirect('home')
+            else:
+                messages.error(request, "PIN incorrecto o no configurado.")
+        except UserProfile.DoesNotExist:
+            messages.error(request, "Usuario inválido.")
+
+    return render(request, 'core/lockscreen.html', {'empleados': empleados})
+
+@login_required
+def cambiar_pin(request):
+    perfil = request.user.profile
+
+    if request.method == 'POST':
+        form = CambiarPinForm(request.POST)
+        if form.is_valid():
+            # Guardamos el nuevo PIN en el perfil del usuario logueado
+            perfil.pin = form.cleaned_data['nuevo_pin']
+            perfil.save()
+            
+            messages.success(request, "¡Tu PIN de acceso rápido ha sido actualizado con éxito!")
+            return redirect('home')
+    else:
+        form = CambiarPinForm()
+
+    return render(request, 'core/cambiar_pin.html', {'form': form})
+
 # --- VISTAS TEMPLATES (FRONTEND) ---
 
 @login_required
@@ -81,6 +145,7 @@ def home(request):
     ip_address = get_server_ip()
     return render(request, 'core/home.html', {'server_ip': ip_address})
 
+@admin_requerido
 @login_required
 def descargar_backup(request):
     engine = settings.DATABASES['default']['ENGINE']
@@ -327,9 +392,11 @@ def gestion_equipo(request):
                     user=nuevo_user,
                     empresa=empresa_actual,
                     rol=data['rol'],
-                    matricula=data['matricula']
+                    matricula=data['matricula'],
+                    pin=data.get('pin'),
+                    avatar=data.get('avatar', 'bi-person-fill')
                 )
-                
+
                 messages.success(request, f"Empleado {nuevo_user.username} creado con éxito.")
                 return redirect('gestion_equipo')
                 
@@ -361,10 +428,16 @@ def editar_empleado(request, id):
     if request.method == 'POST':
         form = EditarEmpleadoForm(request.POST, instance=empleado)
         if form.is_valid():
-            form.save() # Guarda datos básicos (nombre, email)
-            # Guarda datos del perfil
+            form.save() 
             perfil.rol = form.cleaned_data['rol']
             perfil.matricula = form.cleaned_data['matricula']
+            perfil.avatar = form.cleaned_data['avatar']
+            
+            # Solo actualizar el PIN si escribieron algo nuevo
+            nuevo_pin = form.cleaned_data.get('pin')
+            if nuevo_pin:
+                perfil.pin = nuevo_pin
+                
             perfil.save()
             
             messages.success(request, f"Datos de {empleado.first_name} actualizados.")
@@ -373,7 +446,9 @@ def editar_empleado(request, id):
         # Pre-cargar los datos del perfil en el formulario
         form = EditarEmpleadoForm(instance=empleado, initial={
             'rol': perfil.rol,
-            'matricula': perfil.matricula
+            'matricula': perfil.matricula,
+            # No enviamos el PIN inicial por seguridad, que se vea en blanco siempre
+            'avatar': perfil.avatar
         })
 
     return render(request, 'core/editar_empleado.html', {'form': form, 'empleado': empleado})

@@ -31,6 +31,22 @@ class UserProfile(models.Model):
         ('VENDEDOR', 'Vendedor / Recepción'),
     ]
 
+    AVATARES = [
+        ('bi-person-fill', '👤 Persona (Estándar)'),
+        ('bi-person-circle', '🧑‍💼 Perfil Clásico'),
+        ('bi-emoji-sunglasses-fill', '😎 Gafas de Sol'),
+        ('bi-emoji-smile-fill', '😊 Carita Feliz'),
+        ('bi-robot', '🤖 Robot'),
+        ('bi-stars', '✨ Estrellas'),
+        ('bi-heart-pulse-fill', '💖 Corazón Médico'),
+        ('bi-capsule', '💊 Cápsula'),
+        ('bi-bandaid-fill', '🩹 Curita'),
+        ('bi-bug-fill', '🐞 Bichito'),
+        ('bi-controller', '🎮 Gamer'),
+        ('bi-moon-stars-fill', '🌙 Luna'),
+        ('bi-cup-hot-fill', '☕ Café'),
+    ]
+
     # Usamos related_name='profile' para poder hacer request.user.profile
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
     empresa = models.ForeignKey(Empresa, on_delete=models.CASCADE)
@@ -39,6 +55,8 @@ class UserProfile(models.Model):
     rol = models.CharField(max_length=20, choices=ROLES, default='VETERINARIO')
     matricula = models.CharField(max_length=50, blank=True, null=True, help_text="Obligatorio para veterinarios")
     telefono = models.CharField(max_length=20, blank=True, null=True)
+    pin = models.CharField(max_length=4, blank=True, null=True, help_text="PIN de 4 dígitos")
+    avatar = models.CharField(max_length=50, choices=AVATARES, default='bi-person-fill')
 
     def __str__(self):
         return f"{self.user.username} - {self.get_rol_display()}"

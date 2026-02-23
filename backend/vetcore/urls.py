@@ -42,6 +42,8 @@ from sales.views import nueva_venta, lista_ventas, detalle_venta, reporte_caja
 # Clinical Views
 from clinical.views import ficha_medica, nueva_consulta, editar_consulta
 
+from core.views import preparar_cambio_rapido, lockscreen, cambiar_pin
+
 # Configuramos el Router
 router = DefaultRouter()
 # Rutas de Core
@@ -56,8 +58,12 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('perfil/cambiar-contrasena/', CambiarPasswordView.as_view(), name='cambiar_password'),
     path('equipo/password/<int:id>/', resetear_password_empleado, name='resetear_password_empleado'),
-    path('api/', include(router.urls)), # Todas las rutas API colgarán de /api/
+    path('perfil/cambiar-pin/', cambiar_pin, name='cambiar_pin'),
 
+    path('cambiarusuario/preparar/', preparar_cambio_rapido, name='preparar_cambio_rapido'),
+    path('cambiarusuario/ingreso/', lockscreen, name='lockscreen'),
+
+    path('api/', include(router.urls)), # Todas las rutas API colgarán de /api/
     # --- HOME Y AUTH ---
     path('', home, name='home'), # La raíz del sitio
 

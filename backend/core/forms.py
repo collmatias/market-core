@@ -22,6 +22,42 @@ class AdminSetPasswordForm(forms.Form):
             raise forms.ValidationError("Las contraseñas no coinciden. Intenta de nuevo.")
         return cleaned_data
 
+class CambiarPinForm(forms.Form):
+    nuevo_pin = forms.CharField(
+        label="Nuevo PIN",
+        widget=forms.PasswordInput(attrs={
+            'class': 'form-control text-center fs-4', 
+            'maxlength': '4', 
+            'placeholder': '••••',
+            'pattern': '[0-9]*',
+            'inputmode': 'numeric'
+        }),
+        help_text="Debe contener exactamente 4 números."
+    )
+    confirmar_pin = forms.CharField(
+        label="Confirmar Nuevo PIN",
+        widget=forms.PasswordInput(attrs={
+            'class': 'form-control text-center fs-4', 
+            'maxlength': '4', 
+            'placeholder': '••••',
+            'pattern': '[0-9]*',
+            'inputmode': 'numeric'
+        }),
+        help_text="Repite el PIN para confirmarlo."
+    )
+
+    def clean(self):
+        cleaned_data = super().clean()
+        pin1 = cleaned_data.get('nuevo_pin')
+        pin2 = cleaned_data.get('confirmar_pin')
+
+        if pin1 and pin2:
+            if pin1 != pin2:
+                raise forms.ValidationError("Los PINs no coinciden. Inténtalo de nuevo.")
+            if not pin1.isdigit() or len(pin1) != 4:
+                raise forms.ValidationError("El PIN debe ser estrictamente numérico y de 4 dígitos.")
+        return cleaned_data
+
 class ClienteForm(forms.ModelForm):
     class Meta:
         model = Cliente
@@ -86,6 +122,8 @@ class EmpleadoForm(forms.ModelForm):
     rol = forms.ChoiceField(choices=UserProfile.ROLES, label="Rol / Permisos", widget=forms.Select(attrs={'class': 'form-select'}))
     matricula = forms.CharField(required=False, label="Matrícula Profesional", widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Opcional'}))
     password = forms.CharField(label="Contraseña", widget=forms.PasswordInput(attrs={'class': 'form-control'}))
+    pin = forms.CharField(required=False, label="PIN Rápido (4 dígitos)", widget=forms.PasswordInput(attrs={'class': 'form-control', 'maxlength': '4', 'placeholder': 'Ej: 1234'}))
+    avatar = forms.ChoiceField(choices=UserProfile.AVATARES, label="Icono de Perfil", widget=forms.Select(attrs={'class': 'form-select'}))
 
     class Meta:
         model = User
@@ -100,6 +138,8 @@ class EmpleadoForm(forms.ModelForm):
 class EditarEmpleadoForm(forms.ModelForm):
     rol = forms.ChoiceField(choices=UserProfile.ROLES, label="Rol / Permisos", widget=forms.Select(attrs={'class': 'form-select'}))
     matricula = forms.CharField(required=False, label="Matrícula Profesional", widget=forms.TextInput(attrs={'class': 'form-control'}))
+    pin = forms.CharField(required=False, label="PIN de Acceso Rápido (4 dígitos)", widget=forms.TextInput(attrs={'class': 'form-control', 'maxlength': '4', 'type': 'password'}))
+    avatar = forms.ChoiceField(choices=UserProfile.AVATARES, label="Icono de Perfil", widget=forms.Select(attrs={'class': 'form-select'}))
 
     class Meta:
         model = User

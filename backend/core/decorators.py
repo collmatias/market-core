@@ -23,3 +23,22 @@ def clinico_requerido(view_func):
             return redirect('lista_pacientes') 
             
     return _wrapped_view
+
+def admin_requerido(view_func):
+    """
+    Decorador que bloquea el acceso a usuarios que NO son ADMIN.
+    """
+    @wraps(view_func)
+    def _wrapped_view(request, *args, **kwargs):
+        # Es admin si es superuser de Django o si su rol en el perfil es ADMIN
+        es_admin = request.user.is_superuser or (
+            hasattr(request.user, 'profile') and request.user.profile.rol == 'ADMIN'
+        )
+        
+        if es_admin:
+            return view_func(request, *args, **kwargs)
+        else:
+            messages.error(request, "Acceso restringido: Solo el Administrador o Dueño puede realizar esta acción.")
+            return redirect('home')
+            
+    return _wrapped_view

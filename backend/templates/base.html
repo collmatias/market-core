@@ -68,21 +68,14 @@
 
                 <div class="d-flex align-items-center">
                     {% if user.is_authenticated %}
-                        <form action="{% url 'logout' %}" method="post" class="d-inline me-3">
-                            {% csrf_token %}
-                            <input type="hidden" name="next" value="{% url 'login' %}">
-                            <button type="submit" class="btn btn-outline-light btn-sm" title="Cambiar de Usuario rápidamente">
-                                <i class="bi bi-arrow-repeat"></i> Cambiar
-                            </button>
-                        </form>
+                        <a href="{% url 'preparar_cambio_rapido' %}" class="btn btn-outline-light btn-sm me-3" title="Cambiar Usuario">
+                            <i class="bi bi-arrow-repeat"></i> Cambiar
+                        </a>
 
                         <div class="dropdown">
                             <button class="btn btn-primary border-light dropdown-toggle btn-sm" type="button" data-bs-toggle="dropdown">
                                 <i class="bi bi-person-circle"></i> {{ user.username }}
                             </button>
-
-
-
 
                             <ul class="dropdown-menu dropdown-menu-end shadow">
                                 <li>
@@ -91,17 +84,24 @@
                                     </span>
                                 </li>
                                 <li><hr class="dropdown-divider"></li>
-                                
                                 <li>
                                     <a class="dropdown-item" href="{% url 'cambiar_password' %}">
                                         <i class="bi bi-key-fill text-warning me-2"></i> Cambiar Contraseña
                                     </a>
                                 </li>
                                 <li>
-                                    <a class="dropdown-item" href="{% url 'descargar_backup' %}">
-                                        <i class="bi bi-cloud-download text-primary me-2"></i> Backup Base de Datos
+                                    <a class="dropdown-item" href="{% url 'cambiar_pin' %}">
+                                        <i class="bi bi-123 text-success me-2"></i> Cambiar Mi PIN
                                     </a>
                                 </li>
+                                <li><hr class="dropdown-divider"></li>
+                                {% if user.profile.rol == 'ADMIN' or user.is_superuser %}
+                                    <li>
+                                        <a class="dropdown-item" href="{% url 'descargar_backup' %}">
+                                            <i class="bi bi-cloud-download text-primary me-2"></i> Backup Base de Datos
+                                        </a>
+                                    </li>
+                                {% endif %}
                                 <li><hr class="dropdown-divider"></li>
                                 <li>
                                     <form action="{% url 'logout' %}" method="post" class="d-inline w-100">

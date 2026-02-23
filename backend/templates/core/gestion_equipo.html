@@ -3,6 +3,7 @@
 {% block content %}
 <div class="container mt-4">
     <div class="row">
+        
         <div class="col-md-4">
             <div class="card shadow-sm">
                 <div class="card-header bg-primary text-white">
@@ -44,8 +45,6 @@
                                 <th>Nombre Completo</th>
                                 <th>Rol</th>
                                 <th>Matrícula</th>
-
-
                                 <th>Estado</th>
                                 <th>Acciones</th>
                             </tr>
@@ -65,9 +64,15 @@
                                     {% endif %}
                                 </td>
                                 <td>{{ perfil.matricula|default:"-" }}</td>
-
-
-
+                                
+                                <td>
+                                    {% if perfil.user.is_active %}
+                                        <span class="badge bg-success bg-opacity-10 text-success border border-success">Activo</span>
+                                    {% else %}
+                                        <span class="badge bg-danger bg-opacity-10 text-danger border border-danger">Inactivo</span>
+                                    {% endif %}
+                                </td>
+                                
                                 <td>
                                     <a href="{% url 'editar_empleado' perfil.user.id %}" class="btn btn-sm btn-outline-primary" title="Editar datos">
                                         <i class="bi bi-pencil-square"></i>
@@ -75,17 +80,6 @@
                                     
                                     <a href="{% url 'resetear_password_empleado' perfil.user.id %}" class="btn btn-sm btn-outline-warning ms-1" title="Forzar nueva contraseña">
                                         <i class="bi bi-key-fill"></i>
-                                    </a>
-                                    
-                                    {% if perfil.user.is_active %}
-                                        <span class="text-success"><i class="bi bi-check-circle-fill"></i></span>
-                                    {% else %}
-                                        <span class="text-danger"><i class="bi bi-x-circle-fill"></i></span>
-                                    {% endif %}
-                                </td>
-                                <td>
-                                    <a href="{% url 'editar_empleado' perfil.user.id %}" class="btn btn-sm btn-outline-primary" title="Editar datos">
-                                        <i class="bi bi-pencil-square"></i>
                                     </a>
                                     
                                     {% if perfil.user.is_active %}
@@ -101,7 +95,7 @@
                             </tr>
                             {% empty %}
                             <tr>
-                                <td colspan="5" class="text-center py-4 text-muted">No hay empleados cargados.</td>
+                                <td colspan="6" class="text-center py-4 text-muted">No hay empleados cargados.</td>
                             </tr>
                             {% endfor %}
                         </tbody>
@@ -109,6 +103,7 @@
                 </div>
             </div>
         </div>
+        
     </div>
 </div>
 {% endblock %}

@@ -58,6 +58,17 @@
                                 {{ form.matricula }}
                             </div>
                         </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label small fw-bold text-primary"><i class="bi bi-123"></i> {{ form.pin.label }}</label>
+                                {{ form.pin }}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label small fw-bold text-info"><i class="bi bi-image"></i> {{ form.avatar.label }}</label>
+                                {{ form.avatar }}
+                            </div>
+                        </div>
                         
                         <div class="d-grid mt-4">
                             <button type="submit" class="btn btn-primary btn-lg"><i class="bi bi-save me-2"></i> Guardar Cambios</button>
