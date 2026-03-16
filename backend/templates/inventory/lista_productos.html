@@ -56,7 +56,17 @@
                         {% endif %}
                     </td>
                     <td>
-                        <button class="btn btn-sm btn-outline-primary"><i class="bi bi-pencil"></i></button>
+                    {% if user.profile.es_admin or user.is_superuser %}
+                        <a href="{% url 'editar_producto' p.id %}" class="btn btn-sm btn-outline-primary" title="Editar">
+                            <i class="bi bi-pencil-square"></i>
+                        </a>
+                        
+                        <a href="{% url 'eliminar_producto' p.id %}" class="btn btn-sm btn-outline-danger ms-1" title="Eliminar" onclick="return confirm('¿Seguro que deseas eliminar este producto?');">
+                            <i class="bi bi-trash"></i>
+                        </a>
+                    {% else %}
+                        <span class="text-muted small"><i class="bi bi-lock-fill"></i> Restringido</span>
+                    {% endif %}
                     </td>
                 </tr>
                 {% empty %}

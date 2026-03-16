@@ -27,20 +27,27 @@ from core.views import ClienteViewSet, PacienteViewSet, setup_wizard #, Historia
 # Core Views
 from core.views import (
     home, descargar_backup, CambiarPasswordView, resetear_password_empleado, activacion, configuracion_empresa,
-    lista_clientes, crear_cliente, editar_cliente,
-    lista_pacientes, crear_paciente, editar_paciente,
+    lista_clientes, crear_cliente, editar_cliente, detalle_cliente,
+    lista_pacientes, crear_paciente, editar_paciente, detalle_paciente,
     gestion_equipo, editar_empleado, estado_empleado
 )
 
 # Inventory Views
-from inventory.views import ProductoViewSet, MovimientoStockViewSet
-from inventory.views import lista_productos, crear_producto, registrar_movimiento
+from inventory.views import (
+    ProductoViewSet, MovimientoStockViewSet,
+    lista_productos, 
+    crear_producto, 
+    editar_producto, 
+    eliminar_producto, 
+    registrar_movimiento
+)
+
 
 # Sales Views
 from sales.views import nueva_venta, lista_ventas, detalle_venta, reporte_caja
 
 # Clinical Views
-from clinical.views import ficha_medica, nueva_consulta, editar_consulta
+from clinical.views import ficha_medica, nueva_consulta, editar_consulta, agenda, api_turnos, crear_turno, editar_turno, cancelar_turno, atender_turno
 
 from core.views import preparar_cambio_rapido, lockscreen, cambiar_pin
 
@@ -79,15 +86,20 @@ urlpatterns = [
     # Rutas del Frontend (Templates)
     path('clientes/', lista_clientes, name='lista_clientes'),
     path('clientes/nuevo/', crear_cliente, name='crear_cliente'),
+    path('clientes/<int:cliente_id>/', detalle_cliente, name='detalle_cliente'),
     path('clientes/<int:cliente_id>/editar/', editar_cliente, name='editar_cliente'),
 
     # Rutas Pacientes
     path('pacientes/', lista_pacientes, name='lista_pacientes'),
     path('pacientes/nuevo/', crear_paciente, name='crear_paciente'),
+    path('pacientes/<int:paciente_id>/', detalle_paciente, name='detalle_paciente'),
 
-    # Rutas de Inventario
+# --- RUTAS DE INVENTARIO Y STOCK ---
     path('productos/', lista_productos, name='lista_productos'),
     path('productos/nuevo/', crear_producto, name='crear_producto'),
+    path('productos/editar/<int:id>/', editar_producto, name='editar_producto'),
+    path('productos/eliminar/<int:id>/', eliminar_producto, name='eliminar_producto'),
+    
     path('stock/movimiento/', registrar_movimiento, name='registrar_movimiento'),
 
     path('caja/', nueva_venta, name='nueva_venta'),
@@ -104,6 +116,14 @@ urlpatterns = [
 
     # Ruta para editar consulta (usamos el ID de la consulta)
     path('historia/<int:consulta_id>/editar/', editar_consulta, name='editar_consulta'),
+
+    # --- AGENDA / TURNERO ---
+    path('agenda/', agenda, name='agenda'),
+    path('api/turnos/', api_turnos, name='api_turnos'),
+    path('api/turnos/crear/', crear_turno, name='crear_turno'),
+    path('api/turnos/<int:turno_id>/editar/', editar_turno, name='editar_turno'),
+    path('api/turnos/<int:turno_id>/cancelar/', cancelar_turno, name='cancelar_turno'),
+    path('api/turnos/<int:turno_id>/atender/', atender_turno, name='atender_turno'),
 
     path('equipo/', gestion_equipo, name='gestion_equipo'),
     path('equipo/editar/<int:id>/', editar_empleado, name='editar_empleado'),

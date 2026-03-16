@@ -23,10 +23,10 @@ from .serializers import ClienteSerializer, PacienteSerializer
 from .forms import AdminSetPasswordForm, ClienteForm, PacienteForm, EmpresaForm, SetupForm, EmpleadoForm, EditarEmpleadoForm, CambiarPinForm
 from .utils import get_server_ip
 from datetime import date, timedelta
+from clinical.models import Turno
 
 from django.contrib import messages
 
-# --- CORRECCIÓN AQUÍ: Importamos 'generate_offline_key' ---
 from .license import check_license, save_license, generate_offline_key
 
 # --- API VIEWSETS (DRF) ---
@@ -200,6 +200,25 @@ def editar_cliente(request, cliente_id):
         form = ClienteForm(instance=cliente)
     return render(request, 'core/cliente_form.html', {'form': form, 'es_edicion': True})
 
+@login_required
+def detalle_cliente(request, cliente_id):
+    cliente = get_object_or_404(Cliente, pk=cliente_id)
+    mascotas = cliente.mascotas.all()
+    # Turnos de TODAS las mascotas de este cliente
+    turnos_proximos = Turno.objects.filter(
+        paciente__cliente=cliente
+    ).exclude(estado__in=['CANCELADO', 'ATENDIDO']).order_by('fecha_hora_inicio').select_related('paciente', 'profesional__user')
+    turnos_pasados = Turno.objects.filter(
+        paciente__cliente=cliente, estado__in=['ATENDIDO', 'CANCELADO']
+    ).order_by('-fecha_hora_inicio').select_related('paciente', 'profesional__user')[:20]
+
+    return render(request, 'core/detalle_cliente.html', {
+        'cliente': cliente,
+        'mascotas': mascotas,
+        'turnos_proximos': turnos_proximos,
+        'turnos_pasados': turnos_pasados,
+    })
+
 # --- PACIENTES ---
 @login_required
 def lista_pacientes(request):
@@ -235,6 +254,24 @@ def editar_paciente(request, paciente_id):
     else:
         form = PacienteForm(instance=paciente)
     return render(request, 'core/paciente_form.html', {'form': form, 'es_edicion': True})
+
+@login_required
+def detalle_paciente(request, paciente_id):
+    paciente = get_object_or_404(Paciente, pk=paciente_id)
+    historial = paciente.historial_clinico.all().order_by('-fecha')[:10]
+    turnos_proximos = paciente.turnos.exclude(
+        estado__in=['CANCELADO', 'ATENDIDO']
+    ).order_by('fecha_hora_inicio').select_related('profesional__user')
+    turnos_pasados = paciente.turnos.filter(
+        estado__in=['ATENDIDO', 'CANCELADO']
+    ).order_by('-fecha_hora_inicio').select_related('profesional__user')[:20]
+
+    return render(request, 'core/detalle_paciente.html', {
+        'paciente': paciente,
+        'historial': historial,
+        'turnos_proximos': turnos_proximos,
+        'turnos_pasados': turnos_pasados,
+    })
 
 # --- SISTEMA DE ACTIVACIÓN Y LICENCIAS ---
 

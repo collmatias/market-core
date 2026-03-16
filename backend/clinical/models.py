@@ -1,6 +1,6 @@
 from django.db import models
 from django.utils import timezone
-from core.models import Paciente
+from core.models import Paciente, Empresa, UserProfile, TenantManager
 
 class Historial(models.Model):
     paciente = models.ForeignKey(Paciente, on_delete=models.CASCADE, related_name='historial_clinico')
@@ -25,3 +25,41 @@ class ArchivoAdjunto(models.Model):
 
     def __str__(self):
         return f"Archivo de {self.historial.paciente.nombre}"
+
+
+class Turno(models.Model):
+    ESTADOS = [
+        ('PENDIENTE', 'Pendiente'),
+        ('CONFIRMADO', 'Confirmado'),
+        ('CANCELADO', 'Cancelado'),
+        ('ATENDIDO', 'Atendido'),
+    ]
+
+    COLORES_ESTADO = {
+        'PENDIENTE': '#6c757d',
+        'CONFIRMADO': '#198754',
+        'CANCELADO': '#dc3545',
+        'ATENDIDO': '#0d6efd',
+    }
+
+    empresa = models.ForeignKey(Empresa, on_delete=models.CASCADE)
+    paciente = models.ForeignKey(Paciente, on_delete=models.CASCADE, related_name='turnos')
+    profesional = models.ForeignKey(UserProfile, on_delete=models.CASCADE, related_name='turnos')
+    fecha_hora_inicio = models.DateTimeField()
+    fecha_hora_fin = models.DateTimeField()
+    motivo = models.CharField(max_length=200)
+    estado = models.CharField(max_length=15, choices=ESTADOS, default='PENDIENTE')
+    notas = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    objects = TenantManager()
+
+    class Meta:
+        ordering = ['fecha_hora_inicio']
+
+    def __str__(self):
+        return f"{self.fecha_hora_inicio.strftime('%d/%m/%Y %H:%M')} - {self.paciente.nombre}"
+
+    @property
+    def color(self):
+        return self.COLORES_ESTADO.get(self.estado, '#6c757d')

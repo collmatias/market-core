@@ -6,6 +6,13 @@
     <a href="{% url 'crear_paciente' %}" class="btn btn-success"><i class="bi bi-plus-circle"></i> Nueva Mascota</a>
 </div>
 
+<div class="mb-3">
+    <div class="input-group">
+        <span class="input-group-text bg-white"><i class="bi bi-search"></i></span>
+        <input type="text" id="buscarPaciente" class="form-control" placeholder="Buscar por nombre, especie, raza o dueño..." autofocus>
+    </div>
+</div>
+
 <div class="card shadow-sm">
     <div class="card-body p-0">
         <table class="table table-hover mb-0">
@@ -17,13 +24,15 @@
                     <th>Peso</th>
                     <th class="text-end">Acciones</th> </tr>
             </thead>
-            <tbody>
+            <tbody id="tablaPacientes">
                 {% for p in pacientes %}
                 <tr>
-                    <td class="fw-bold align-middle">{{ p.nombre }}</td>
+                    <td class="fw-bold align-middle">
+                        <a href="{% url 'detalle_paciente' p.id %}" class="text-decoration-none text-dark">{{ p.nombre }}</a>
+                    </td>
                     <td class="align-middle">{{ p.get_especie_display }}</td>
                     <td class="align-middle">
-                        <a href="#" class="text-decoration-none">{{ p.cliente.apellido }}, {{ p.cliente.nombre }}</a>
+                        <a href="{% url 'detalle_cliente' p.cliente.id %}" class="text-decoration-none">{{ p.cliente.apellido }}, {{ p.cliente.nombre }}</a>
                     </td>
                     <td class="align-middle">{{ p.peso_actual|default:"-" }} kg</td>
                     
@@ -32,7 +41,9 @@
                             <a href="{% url 'ficha_medica' p.id %}" class="btn btn-sm btn-info text-white" title="Historia Clínica">
                                 <i class="bi bi-file-medical"></i>
                             </a>
-                            
+                            <a href="{% url 'agenda' %}?paciente={{ p.id }}" class="btn btn-sm btn-outline-success" title="Agendar Turno">
+                                <i class="bi bi-calendar-plus"></i>
+                            </a>
                             <a href="{% url 'editar_paciente' p.id %}" class="btn btn-sm btn-outline-primary" title="Editar Datos">
                                 <i class="bi bi-pencil"></i>
                             </a>
@@ -46,4 +57,13 @@
         </table>
     </div>
 </div>
+
+<script>
+document.getElementById('buscarPaciente').addEventListener('input', function() {
+    const filtro = this.value.toLowerCase();
+    document.querySelectorAll('#tablaPacientes tr').forEach(function(fila) {
+        fila.style.display = fila.textContent.toLowerCase().includes(filtro) ? '' : 'none';
+    });
+});
+</script>
 {% endblock %}

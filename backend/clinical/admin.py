@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Historial, ArchivoAdjunto
+from .models import Historial, ArchivoAdjunto, Turno
 
 # Esto permite ver/subir archivos directamente dentro de la pantalla del Historial
 class ArchivoAdjuntoInline(admin.TabularInline):
@@ -22,3 +22,9 @@ class HistorialAdmin(admin.ModelAdmin):
 
 # Si quieres ver los archivos sueltos también, descomenta esto:
 # admin.site.register(ArchivoAdjunto)
+
+@admin.register(Turno)
+class TurnoAdmin(admin.ModelAdmin):
+    list_display = ('fecha_hora_inicio', 'paciente', 'profesional', 'motivo', 'estado')
+    list_filter = ('estado', 'fecha_hora_inicio', 'profesional')
+    search_fields = ('paciente__nombre', 'motivo')

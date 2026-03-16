@@ -21,8 +21,28 @@
             <a href="{% url 'nueva_consulta' paciente.id %}" class="btn btn-primary mb-2">
                 <i class="bi bi-plus-circle"></i> Nueva Consulta
             </a>
+            <a href="{% url 'agenda' %}?paciente={{ paciente.id }}" class="btn btn-outline-success mb-2">
+                <i class="bi bi-calendar-plus"></i> Agendar Turno
+            </a>
             <a href="{% url 'lista_pacientes' %}" class="btn btn-outline-secondary">Volver</a>
         </div>
+
+        {% if turnos %}
+        <div class="card shadow-sm mt-3">
+            <div class="card-header bg-success bg-opacity-10">
+                <h6 class="mb-0 fw-bold text-success"><i class="bi bi-calendar-check"></i> Turnos</h6>
+            </div>
+            <ul class="list-group list-group-flush">
+                {% for t in turnos %}
+                <li class="list-group-item small">
+                    <span class="badge rounded-pill {% if t.estado == 'PENDIENTE' %}bg-secondary{% elif t.estado == 'CONFIRMADO' %}bg-success{% elif t.estado == 'ATENDIDO' %}bg-primary{% else %}bg-danger{% endif %} me-1">{{ t.get_estado_display }}</span>
+                    <strong>{{ t.fecha_hora_inicio|date:"d/m/Y H:i" }}</strong><br>
+                    <span class="text-muted">{{ t.motivo }} — {{ t.profesional.user.get_full_name|default:t.profesional.user.username }}</span>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
     </div>
 
     <div class="col-md-9">
