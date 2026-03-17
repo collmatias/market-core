@@ -12,6 +12,7 @@ class MedicalRecord(models.Model):
     treatment = models.TextField(blank=True)
     weight = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
     next_visit = models.DateField(null=True, blank=True)
+    vet_name = models.CharField(max_length=100, blank=True)
 
     def __str__(self):
         return f"{self.date.strftime('%d/%m/%Y')} - {self.patient.name}"

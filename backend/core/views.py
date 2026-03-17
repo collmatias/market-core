@@ -1,13 +1,15 @@
 import os
+import shutil
 from django.conf import settings
 from django.http import FileResponse, HttpResponse, HttpResponseNotFound
 from django.utils import timezone
 from django.utils.translation import gettext as _
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.csrf import ensure_csrf_cookie
-from .decorators import admin_required
+from .decorators import admin_required, localhost_required
 from django.shortcuts import render, redirect, get_object_or_404
 from django.core.paginator import Paginator
+from django.db.models import Q
 from rest_framework import viewsets
 
 from django.contrib.auth import login, logout
@@ -164,10 +166,19 @@ def download_backup(request):
 @login_required
 def client_list(request):
     clients_qs = Client.objects.for_company(request.user)
+    q = request.GET.get("q", "").strip()
+    if q:
+        clients_qs = clients_qs.filter(
+            Q(first_name__icontains=q) |
+            Q(last_name__icontains=q) |
+            Q(phone__icontains=q) |
+            Q(email__icontains=q)
+        )
+    clients_qs = clients_qs.order_by("last_name", "first_name")
     paginator = Paginator(clients_qs, 25)
     page = request.GET.get("page")
     clients = paginator.get_page(page)
-    return render(request, "core/client_list.html", {"clients": clients})
+    return render(request, "core/client_list.html", {"clients": clients, "q": q})
 
 
 @login_required
@@ -220,11 +231,20 @@ def client_detail(request, client_id):
 # --- PATIENTS ---
 @login_required
 def patient_list(request):
-    patients_qs = Patient.objects.for_company(request.user)
+    patients_qs = Patient.objects.for_company(request.user).select_related("owner")
+    q = request.GET.get("q", "").strip()
+    if q:
+        patients_qs = patients_qs.filter(
+            Q(name__icontains=q) |
+            Q(breed__icontains=q) |
+            Q(owner__first_name__icontains=q) |
+            Q(owner__last_name__icontains=q)
+        )
+    patients_qs = patients_qs.order_by("name")
     paginator = Paginator(patients_qs, 25)
     page = request.GET.get("page")
     patients = paginator.get_page(page)
-    return render(request, "core/patient_list.html", {"patients": patients})
+    return render(request, "core/patient_list.html", {"patients": patients, "q": q})
 
 
 @login_required
@@ -477,3 +497,158 @@ def toggle_employee_status(request, id):
     msg_func = messages.success if employee.is_active else messages.warning
     msg_func(request, _("User %(name)s has been %(status)s.") % {"name": employee.username, "status": status})
     return redirect("team_management")
+
+
+# --- IMPORT HUB ---
+@login_required
+@admin_required
+@localhost_required
+def import_hub(request):
+    return render(request, "core/import_hub.html")
+
+
+# --- VETTER IMPORT ---
+@login_required
+@admin_required
+@localhost_required
+def vetter_import(request):
+    result = None
+    log = None
+    error = None
+    data_dir = ''
+
+    if request.method == "POST":
+        data_dir = request.POST.get("data_dir", "").strip()
+
+        if not os.path.isabs(data_dir):
+            error = _("Please provide an absolute path (starting with /).")
+        else:
+            from core.services.vetter_import import VetterImporter
+
+            importer = VetterImporter(data_dir, request.user.profile.company)
+            valid, msg = importer.validate()
+            if not valid:
+                error = msg
+            else:
+                try:
+                    # Auto-backup before import
+                    db_path = settings.DATABASES["default"]["NAME"]
+                    if "sqlite3" in settings.DATABASES["default"]["ENGINE"] and os.path.exists(db_path):
+                        date_str = timezone.now().strftime("%Y%m%d_%H%M%S")
+                        safety_path = f"{db_path}.pre_import_{date_str}"
+                        shutil.copy2(db_path, safety_path)
+
+                    selected_tables = request.POST.getlist("tables")
+                    result, log = importer.run(tables=selected_tables if selected_tables else None)
+                except Exception as e:
+                    error = str(e)
+
+    return render(request, "core/vetter_import.html", {
+        "result": result,
+        "log": log,
+        "error": error,
+        "data_dir": data_dir,
+    })
+
+
+@login_required
+@admin_required
+@localhost_required
+def vetter_analyze(request):
+    """Return record counts per Vetter table as JSON."""
+    from django.http import JsonResponse
+    from core.services.vetter_import import VetterImporter
+
+    data_dir = request.GET.get("path", "").strip()
+    if not data_dir or not os.path.isabs(data_dir):
+        return JsonResponse({"error": "Invalid path"}, status=400)
+
+    importer = VetterImporter(data_dir, request.user.profile.company)
+    valid, msg = importer.validate()
+    if not valid:
+        return JsonResponse({"error": msg}, status=400)
+
+    counts = importer.analyze()
+    return JsonResponse({"counts": counts})
+
+
+@login_required
+@admin_required
+@localhost_required
+def browse_server_dirs(request):
+    """AJAX endpoint: returns subdirectories of a given path on the server."""
+    parent = request.GET.get("path", "/").strip()
+    parent = os.path.realpath(parent)
+
+    if not os.path.isabs(parent) or not os.path.isdir(parent):
+        return JsonResponse({"error": "Invalid directory"}, status=400)
+
+    dirs = []
+    has_dbf = False
+    try:
+        for entry in sorted(os.scandir(parent), key=lambda e: e.name.lower()):
+            if entry.is_dir(follow_symlinks=False) and not entry.name.startswith('.'):
+                dirs.append(entry.name)
+            elif entry.name.upper().endswith('.DBF'):
+                has_dbf = True
+    except PermissionError:
+        return JsonResponse({"error": "Permission denied"}, status=403)
+
+    return JsonResponse({
+        "path": parent,
+        "parent": os.path.dirname(parent) if parent != "/" else None,
+        "dirs": dirs,
+        "has_dbf": has_dbf,
+    })
+
+
+# --- RESTORE BACKUP ---
+@login_required
+@admin_required
+@localhost_required
+def restore_backup(request):
+    engine = settings.DATABASES["default"]["ENGINE"]
+    if "sqlite3" not in engine:
+        messages.error(request, _("Restore only available in Local Client Mode (SQLite)."))
+        return redirect("home")
+
+    done = False
+    if request.method == "POST" and request.FILES.get("backup_file"):
+        backup_file = request.FILES["backup_file"]
+
+        if not backup_file.name.endswith(".sqlite3"):
+            messages.error(request, _("Invalid file. Please upload a .sqlite3 backup file."))
+            return redirect("restore_backup")
+
+        if backup_file.size > 500 * 1024 * 1024:
+            messages.error(request, _("File too large (max 500 MB)."))
+            return redirect("restore_backup")
+
+        # Validate it's a real SQLite file (magic bytes)
+        header = backup_file.read(16)
+        backup_file.seek(0)
+        if not header.startswith(b"SQLite format 3"):
+            messages.error(request, _("The file is not a valid SQLite database."))
+            return redirect("restore_backup")
+
+        db_path = settings.DATABASES["default"]["NAME"]
+
+        # Create a safety backup before overwriting
+        date_str = timezone.now().strftime("%Y%m%d_%H%M%S")
+        safety_path = f"{db_path}.pre_restore_{date_str}"
+        if os.path.exists(db_path):
+            shutil.copy2(db_path, safety_path)
+
+        # Close all DB connections before replacing
+        from django.db import connections
+        for conn in connections.all():
+            conn.close()
+
+        # Write uploaded file to the database path
+        with open(db_path, "wb") as f:
+            for chunk in backup_file.chunks():
+                f.write(chunk)
+
+        done = True
+
+    return render(request, "core/restore_backup.html", {"done": done})

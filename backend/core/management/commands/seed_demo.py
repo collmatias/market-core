@@ -126,58 +126,60 @@ class Command(BaseCommand):
 
     def _create_clients_patients(self, company):
         clients_data = [
-            ('Juan', 'Pérez', '351-6001001', 'juan.perez@email.com', 'Bv. San Juan 450'),
-            ('María', 'González', '351-6002002', 'maria.gon@email.com', 'Av. Vélez Sarsfield 890'),
-            ('Roberto', 'Fernández', '351-6003003', 'rfernandez@email.com', 'Caseros 1200'),
-            ('Ana', 'Martínez', '351-6004004', 'ana.mtz@email.com', 'Dean Funes 320'),
-            ('Carlos', 'Ruiz', '351-6005005', 'cruiz@email.com', 'Chacabuco 780'),
-            ('Sofía', 'Torres', '351-6006006', 'sofia.t@email.com', 'Obispo Trejo 550'),
-            ('Diego', 'Morales', '351-6007007', 'dmorales@email.com', 'Av. General Paz 2100'),
-            ('Laura', 'Sánchez', '351-6008008', 'lsanchez@email.com', 'Humberto Primo 945'),
-            ('Pablo', 'Romero', '351-6009009', 'promero@email.com', 'Santa Rosa 1350'),
-            ('Valentina', 'Castro', '351-6010010', 'vcastro@email.com', 'Av. Sabattini 3200'),
-            ('Martín', 'Díaz', '351-6011011', '', 'Jujuy 670'),
-            ('Camila', 'López', '351-6012012', 'clopez@email.com', ''),
+            ('Juan', 'Pérez', '351-6001001', 'juan.perez@email.com', 'Bv. San Juan 450', 'Córdoba', 'Córdoba'),
+            ('María', 'González', '351-6002002', 'maria.gon@email.com', 'Av. Vélez Sarsfield 890', 'Córdoba', 'Córdoba'),
+            ('Roberto', 'Fernández', '351-6003003', 'rfernandez@email.com', 'Caseros 1200', 'Córdoba', 'Córdoba'),
+            ('Ana', 'Martínez', '351-6004004', 'ana.mtz@email.com', 'Dean Funes 320', 'Villa María', 'Córdoba'),
+            ('Carlos', 'Ruiz', '351-6005005', 'cruiz@email.com', 'Chacabuco 780', 'Córdoba', 'Córdoba'),
+            ('Sofía', 'Torres', '351-6006006', 'sofia.t@email.com', 'Obispo Trejo 550', 'Córdoba', 'Córdoba'),
+            ('Diego', 'Morales', '351-6007007', 'dmorales@email.com', 'Av. General Paz 2100', 'Río Cuarto', 'Córdoba'),
+            ('Laura', 'Sánchez', '351-6008008', 'lsanchez@email.com', 'Humberto Primo 945', 'Córdoba', 'Córdoba'),
+            ('Pablo', 'Romero', '351-6009009', 'promero@email.com', 'Santa Rosa 1350', 'Córdoba', 'Córdoba'),
+            ('Valentina', 'Castro', '351-6010010', 'vcastro@email.com', 'Av. Sabattini 3200', 'Córdoba', 'Córdoba'),
+            ('Martín', 'Díaz', '351-6011011', '', 'Jujuy 670', 'Córdoba', 'Córdoba'),
+            ('Camila', 'López', '351-6012012', 'clopez@email.com', '', '', ''),
         ]
 
         pets_data = [
-            # (client_idx, name, species, breed, birth_offset_days, weight)
-            (0, 'Rocky', 'DOG', 'Labrador', 1200, Decimal('32.5')),
-            (0, 'Luna', 'CAT', 'Siamés', 800, Decimal('4.2')),
-            (1, 'Max', 'DOG', 'Pastor Alemán', 1800, Decimal('38.0')),
-            (1, 'Michi', 'CAT', 'Mestizo', 600, Decimal('5.1')),
-            (2, 'Toby', 'DOG', 'Beagle', 900, Decimal('12.8')),
-            (3, 'Firulais', 'DOG', 'Caniche Toy', 2500, Decimal('3.9')),
-            (3, 'Negra', 'CAT', 'Persa', 1500, Decimal('4.8')),
-            (4, 'Thor', 'DOG', 'Rottweiler', 700, Decimal('42.0')),
-            (5, 'Coco', 'DOG', 'French Poodle', 1100, Decimal('8.5')),
-            (5, 'Simba', 'CAT', 'Bengalí', 400, Decimal('5.5')),
-            (6, 'Rex', 'DOG', 'Dogo Argentino', 1000, Decimal('40.0')),
-            (7, 'Pelusa', 'CAT', 'Angora', 1300, Decimal('3.7')),
-            (8, 'Bruno', 'DOG', 'Golden Retriever', 500, Decimal('28.0')),
-            (9, 'Kiara', 'DOG', 'Border Collie', 850, Decimal('18.5')),
-            (10, 'Tito', 'DOG', 'Mestizo', 2000, Decimal('15.0')),
-            (10, 'Manchas', 'CAT', 'Mestizo', 700, Decimal('4.0')),
-            (11, 'Lola', 'DOG', 'Bulldog Francés', 650, Decimal('11.2')),
-            (11, 'Copito', 'OTHER', 'Conejo Enano', 300, Decimal('1.8')),
+            # (client_idx, name, species, breed, birth_offset_days, weight, sex, coat)
+            (0, 'Rocky', 'DOG', 'Labrador', 1200, Decimal('32.5'), 'M', 'Dorado'),
+            (0, 'Luna', 'CAT', 'Siamés', 800, Decimal('4.2'), 'F', 'Seal Point'),
+            (1, 'Max', 'DOG', 'Pastor Alemán', 1800, Decimal('38.0'), 'M', 'Negro y fuego'),
+            (1, 'Michi', 'CAT', 'Mestizo', 600, Decimal('5.1'), 'F', 'Atigrado'),
+            (2, 'Toby', 'DOG', 'Beagle', 900, Decimal('12.8'), 'M', 'Tricolor'),
+            (3, 'Firulais', 'DOG', 'Caniche Toy', 2500, Decimal('3.9'), 'M', 'Blanco'),
+            (3, 'Negra', 'CAT', 'Persa', 1500, Decimal('4.8'), 'F', 'Negro'),
+            (4, 'Thor', 'DOG', 'Rottweiler', 700, Decimal('42.0'), 'M', 'Negro y fuego'),
+            (5, 'Coco', 'DOG', 'French Poodle', 1100, Decimal('8.5'), 'M', 'Blanco'),
+            (5, 'Simba', 'CAT', 'Bengalí', 400, Decimal('5.5'), 'M', 'Manchado'),
+            (6, 'Rex', 'DOG', 'Dogo Argentino', 1000, Decimal('40.0'), 'M', 'Blanco'),
+            (7, 'Pelusa', 'CAT', 'Angora', 1300, Decimal('3.7'), 'F', 'Blanco'),
+            (8, 'Bruno', 'DOG', 'Golden Retriever', 500, Decimal('28.0'), 'M', 'Dorado'),
+            (9, 'Kiara', 'DOG', 'Border Collie', 850, Decimal('18.5'), 'F', 'Negro y blanco'),
+            (10, 'Tito', 'DOG', 'Mestizo', 2000, Decimal('15.0'), 'M', 'Marrón'),
+            (10, 'Manchas', 'CAT', 'Mestizo', 700, Decimal('4.0'), 'F', 'Calicó'),
+            (11, 'Lola', 'DOG', 'Bulldog Francés', 650, Decimal('11.2'), 'F', 'Atigrado'),
+            (11, 'Copito', 'OTHER', 'Conejo Enano', 300, Decimal('1.8'), 'M', 'Blanco'),
         ]
 
         clients = []
-        for first_name, last_name, tel, email, address in clients_data:
+        for first_name, last_name, tel, email, address, city, province in clients_data:
             c = Client.objects.create(
                 company=company, first_name=first_name, last_name=last_name,
                 phone=tel, email=email or None, address=address,
+                city=city, province=province,
             )
             clients.append(c)
 
         patients = []
         today = date.today()
-        for cli_idx, name, species, breed, days, weight in pets_data:
+        for cli_idx, name, species, breed, days, weight, sex, coat in pets_data:
             p = Patient.objects.create(
                 company=company, owner=clients[cli_idx],
                 name=name, species=species, breed=breed,
                 birth_date=today - timedelta(days=days),
                 current_weight=weight,
+                sex=sex, coat=coat,
             )
             patients.append(p)
 

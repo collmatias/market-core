@@ -8,11 +8,23 @@
 </div>
 
 <div class="mb-3">
-    <div class="input-group">
+    <form method="get" action="{% url 'client_list' %}" class="input-group">
         <span class="input-group-text bg-white"><i class="bi bi-search"></i></span>
-        <input type="text" id="searchClient" class="form-control" placeholder="{% trans 'Search by name, phone or email...' %}" autofocus>
-    </div>
+        <input type="text" name="q" class="form-control" placeholder="{% trans 'Search by name, phone or email...' %}" value="{{ q }}" autofocus>
+        {% if q %}
+        <a href="{% url 'client_list' %}" class="btn btn-outline-secondary" title="{% trans 'Clear' %}"><i class="bi bi-x-lg"></i></a>
+        {% endif %}
+        <button type="submit" class="btn btn-primary">{% trans "Search" %}</button>
+    </form>
 </div>
+
+{% if q %}
+<div class="mb-2">
+    <small class="text-muted">
+        {% blocktrans with total=clients.paginator.count query=q %}{{ total }} results for "{{ query }}"{% endblocktrans %}
+    </small>
+</div>
+{% endif %}
 
 <div class="card shadow-sm">
     <div class="card-body p-0">
@@ -46,22 +58,15 @@
                 </tr>
                 {% empty %}
                 <tr>
-                    <td colspan="4" class="text-center text-muted py-3">{% trans "No clients registered." %}</td>
+                    <td colspan="4" class="text-center text-muted py-3">
+                        {% if q %}{% trans "No clients match your search." %}{% else %}{% trans "No clients registered." %}{% endif %}
+                    </td>
                 </tr>
                 {% endfor %}
             </tbody>
         </table>
     </div>
 </div>
-
-<script>
-document.getElementById('searchClient').addEventListener('input', function() {
-    const filter = this.value.toLowerCase();
-    document.querySelectorAll('#clientTable tr').forEach(function(row) {
-        row.style.display = row.textContent.toLowerCase().includes(filter) ? '' : 'none';
-    });
-});
-</script>
 
 {% include 'includes/pagination.html' with page_obj=clients %}
 {% endblock %}

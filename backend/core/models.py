@@ -92,9 +92,12 @@ class Client(models.Model):
     company = models.ForeignKey(Company, on_delete=models.CASCADE, null=True)
     first_name = models.CharField(max_length=100)
     last_name = models.CharField(max_length=100)
-    phone = models.CharField(max_length=20)
+    phone = models.CharField(max_length=50, blank=True)
     email = models.EmailField(blank=True, null=True)
     address = models.CharField(max_length=255, blank=True)
+    city = models.CharField(max_length=100, blank=True)
+    province = models.CharField(max_length=100, blank=True)
+    notes = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     objects = TenantManager()
 
@@ -106,16 +109,27 @@ class Patient(models.Model):
     SPECIES = [
         ('DOG', _('Dog')),
         ('CAT', _('Cat')),
+        ('HORSE', _('Horse')),
         ('OTHER', _('Other')),
+    ]
+
+    SEX_CHOICES = [
+        ('M', _('Male')),
+        ('F', _('Female')),
+        ('U', _('Unknown')),
     ]
 
     company = models.ForeignKey(Company, on_delete=models.CASCADE)
     owner = models.ForeignKey(Client, on_delete=models.CASCADE, related_name='pets')
-    name = models.CharField(max_length=50)
+    name = models.CharField(max_length=100)
     species = models.CharField(max_length=10, choices=SPECIES)
-    breed = models.CharField(max_length=50, blank=True)
+    breed = models.CharField(max_length=100, blank=True)
+    sex = models.CharField(max_length=1, choices=SEX_CHOICES, default='U')
     birth_date = models.DateField(blank=True, null=True)
-    current_weight = models.DecimalField(max_digits=5, decimal_places=2, null=True)
+    current_weight = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    microchip = models.CharField(max_length=50, blank=True)
+    coat = models.CharField(max_length=50, blank=True)
+    is_alive = models.BooleanField(default=True)
     objects = TenantManager()
 
     def __str__(self):

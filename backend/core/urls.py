@@ -18,10 +18,15 @@ urlpatterns = [
     path('switch-user/login/', views.lockscreen, name='lockscreen'),
 
     # --- SYSTEM ---
-    path('backup/', views.download_backup, name='download_backup'),
     path('setup/', views.setup_wizard, name='setup_wizard'),
     path('activate/', views.activation, name='activation'),
     path('settings/', views.company_settings, name='company_settings'),
+    path('settings/backup/', views.download_backup, name='download_backup'),
+    path('settings/backup/restore/', views.restore_backup, name='restore_backup'),
+    path('settings/import/', views.import_hub, name='import_hub'),
+    path('settings/import/vetter/', views.vetter_import, name='vetter_import'),
+    path('settings/import/vetter/browse/', views.browse_server_dirs, name='browse_server_dirs'),
+    path('settings/import/vetter/analyze/', views.vetter_analyze, name='vetter_analyze'),
 
     # --- CLIENTS ---
     path('clients/', views.client_list, name='client_list'),

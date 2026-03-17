@@ -16,6 +16,7 @@ pip-log.txt
 db.sqlite3
 db.sqlite3-journal
 *.sqlite3
+*.sqlite3.pre_*
 
 # Migrations (recreated from scratch during development)
 **/migrations/0*.py

@@ -30,3 +30,19 @@ def admin_required(view_func):
             messages.error(request, _("Access restricted: Only administrators can perform this action."))
             return redirect('home')
     return _wrapped_view
+
+
+def _is_localhost(request):
+    """Check if the request originates from the server machine itself."""
+    host = request.get_host().split(':')[0].lower()
+    return host in ('localhost', '127.0.0.1', '::1')
+
+
+def localhost_required(view_func):
+    @wraps(view_func)
+    def _wrapped_view(request, *args, **kwargs):
+        if not _is_localhost(request):
+            messages.error(request, _("This operation can only be performed from the server machine."))
+            return redirect('home')
+        return view_func(request, *args, **kwargs)
+    return _wrapped_view

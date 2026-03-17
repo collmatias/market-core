@@ -8,11 +8,23 @@
 </div>
 
 <div class="mb-3">
-    <div class="input-group">
+    <form method="get" action="{% url 'patient_list' %}" class="input-group">
         <span class="input-group-text bg-white"><i class="bi bi-search"></i></span>
-        <input type="text" id="searchPatient" class="form-control" placeholder="{% trans 'Search by name, species, breed or owner...' %}" autofocus>
-    </div>
+        <input type="text" name="q" class="form-control" placeholder="{% trans 'Search by name, breed or owner...' %}" value="{{ q }}" autofocus>
+        {% if q %}
+        <a href="{% url 'patient_list' %}" class="btn btn-outline-secondary" title="{% trans 'Clear' %}"><i class="bi bi-x-lg"></i></a>
+        {% endif %}
+        <button type="submit" class="btn btn-primary">{% trans "Search" %}</button>
+    </form>
 </div>
+
+{% if q %}
+<div class="mb-2">
+    <small class="text-muted">
+        {% blocktrans with total=patients.paginator.count query=q %}{{ total }} results for "{{ query }}"{% endblocktrans %}
+    </small>
+</div>
+{% endif %}
 
 <div class="card shadow-sm">
     <div class="card-body p-0">
@@ -53,21 +65,14 @@
                     </td>
                 </tr>
                 {% empty %}
-                <tr><td colspan="5" class="text-center text-muted py-3">{% trans "No patients registered." %}</td></tr>
+                <tr><td colspan="5" class="text-center text-muted py-3">
+                    {% if q %}{% trans "No patients match your search." %}{% else %}{% trans "No patients registered." %}{% endif %}
+                </td></tr>
                 {% endfor %}
             </tbody>
         </table>
     </div>
 </div>
-
-<script>
-document.getElementById('searchPatient').addEventListener('input', function() {
-    const filter = this.value.toLowerCase();
-    document.querySelectorAll('#patientTable tr').forEach(function(row) {
-        row.style.display = row.textContent.toLowerCase().includes(filter) ? '' : 'none';
-    });
-});
-</script>
 
 {% include 'includes/pagination.html' with page_obj=patients %}
 {% endblock %}

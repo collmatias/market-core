@@ -21,6 +21,7 @@ services:
     command: python manage.py runserver 0.0.0.0:8000
     volumes:
       - ./backend:/app
+      - ./Vetter:/vetter:ro
     environment:
       - DEPLOYMENT_MODE=DESKTOP
       - DEBUG=1
