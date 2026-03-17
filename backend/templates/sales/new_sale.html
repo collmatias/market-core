@@ -1,0 +1,351 @@
+{% extends 'base.html' %}
+{% load i18n l10n currency %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-7">
+        <div class="card shadow-sm mb-3">
+            <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                <h5 class="mb-0"><i class="bi bi-search"></i> {% trans "Search Products" %}</h5>
+                <button type="button" class="btn btn-sm btn-light" id="btn-toggle-scanner">
+                    <i class="bi bi-upc-scan"></i> {% trans "Scan" %}
+                </button>
+            </div>
+            <div class="card-body">
+                <div id="scanner-container" class="d-none mb-3">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span class="badge bg-danger">
+                            <i class="bi bi-camera-video-fill"></i> {% trans "Camera active — Scan the code" %}
+                        </span>
+                        <button type="button" class="btn btn-sm btn-outline-danger" id="btn-stop-scanner">
+                            <i class="bi bi-x-lg"></i> {% trans "Close" %}
+                        </button>
+                    </div>
+                    <div id="scanner-reader" style="width: 100%; border-radius: 8px; overflow: hidden;"></div>
+                    <div id="scanner-feedback" class="mt-2"></div>
+                </div>
+
+                <div class="input-group mb-3">
+                    <input type="text" id="search-input" class="form-control form-control-lg" placeholder="{% trans 'Type name or code...' %}" list="product-datalist" autocomplete="off">
+                    <button class="btn btn-outline-primary" type="button" onclick="addProduct()">{% trans "Add" %}</button>
+                </div>
+                
+                <datalist id="product-datalist">
+                    {% for p in products %}
+                    <option value="{{ p.description }} | {% currency p.sale_price %}" data-id="{{ p.id }}" data-price="{{ p.sale_price|unlocalize }}" data-code="{{ p.barcode|default:'' }}"></option>
+                    {% endfor %}
+                </datalist>
+
+                <div class="alert alert-info small mt-3 mb-0">
+                    <i class="bi bi-info-circle"></i> {% trans "Type the name, use the Scan button to read codes with the camera, or connect a USB barcode reader." %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-5">
+        <div class="card shadow border-success h-100">
+            <div class="card-header bg-success text-white d-flex justify-content-between">
+                <h5 class="mb-0"><i class="bi bi-cart"></i> {% trans "Current Sale" %}</h5>
+                <h5 class="mb-0 fw-bold" id="total-display">{% currency_symbol %}0</h5>
+            </div>
+            <div class="card-body d-flex flex-column">
+                
+                <form method="post" id="sale-form">
+                    {% csrf_token %}
+                    
+                    <div class="mb-3">
+                        <label class="form-label">{% trans "Client" %}</label>
+                        <select name="client" class="form-select">
+                            <option value="">-- {% trans "Walk-in / Anonymous" %} --</option>
+                            {% for c in clients %}
+                            <option value="{{ c.id }}">{{ c.last_name }}, {{ c.first_name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">{% trans "Payment Method" %}</label>
+                        <select name="payment_method" class="form-select">
+                            <option value="CASH">{% trans "Cash" %}</option>
+                            <option value="CARD">{% trans "Card" %}</option>
+                            <option value="TRANSFER">{% trans "Transfer" %}</option>
+                            <option value="QR">{% trans "QR / Wallet" %}</option>
+                        </select>
+                    </div>
+
+                    <input type="hidden" name="cart_data" id="cart-data">
+
+                    <div class="table-responsive flex-grow-1 border rounded mb-3" style="max-height: 300px; overflow-y: auto;">
+                        <table class="table table-sm table-striped mb-0">
+                            <thead class="table-light sticky-top">
+                                <tr>
+                                    <th>{% trans "Product" %}</th>
+                                    <th style="width: 70px;">{% trans "Qty" %}</th>
+                                    <th>{% trans "Subtotal" %}</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody id="cart-table">
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-success btn-lg" onclick="prepareSubmit(event)">
+                            <i class="bi bi-currency-dollar"></i> {% trans "Checkout & Finalize" %}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const CURRENCY_CFG = JSON.parse('{% currency_config_js %}');
+
+    function formatMoney(value) {
+        const abs = Math.abs(value);
+        const intPart = CURRENCY_CFG.decimals > 0 ? Math.floor(abs) : Math.round(abs);
+        let intStr = intPart.toString().replace(/\B(?=(\d{3})+(?!\d))/g, CURRENCY_CFG.thou_sep);
+        let result = CURRENCY_CFG.symbol + intStr;
+        if (CURRENCY_CFG.decimals > 0) {
+            result += CURRENCY_CFG.dec_sep + (abs - Math.floor(abs)).toFixed(CURRENCY_CFG.decimals).substring(2);
+        }
+        return (value < 0 ? '-' : '') + result;
+    }
+
+    const PRODUCTS_BY_CODE = {
+        {% for p in products %}{% if p.barcode %}
+        "{{ p.barcode|escapejs }}": { id: "{{ p.id }}", name: "{{ p.description|escapejs }}", price: {{ p.sale_price|unlocalize }} },
+        {% endif %}{% endfor %}
+    };
+</script>
+
+<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+
+<script>
+    let cart = [];
+
+    document.getElementById('search-input').addEventListener('keypress', function (e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            addProduct();
+        }
+    });
+
+    function addProductByCode(code) {
+        const prod = PRODUCTS_BY_CODE[code];
+        if (!prod) return false;
+
+        const existing = cart.find(item => item.id === prod.id);
+        if (existing) {
+            existing.quantity++;
+        } else {
+            cart.push({ id: prod.id, name: prod.name, price: prod.price, quantity: 1 });
+        }
+        renderCart();
+        return true;
+    }
+
+    function addProduct() {
+        const input = document.getElementById('search-input');
+        const value = input.value.trim();
+
+        if (addProductByCode(value)) {
+            input.value = '';
+            input.focus();
+            return;
+        }
+
+        const datalist = document.getElementById('product-datalist');
+        let selectedOption = null;
+        for (let i = 0; i < datalist.options.length; i++) {
+            if (datalist.options[i].value === value) {
+                selectedOption = datalist.options[i];
+                break;
+            }
+        }
+
+        if (selectedOption) {
+            const id = selectedOption.getAttribute('data-id');
+            const price = parseFloat(selectedOption.getAttribute('data-price').replace(',', '.'));
+            const name = value.split(' | ')[0];
+
+            const existing = cart.find(item => item.id === id);
+            if (existing) {
+                existing.quantity++;
+            } else {
+                cart.push({ id, name, price, quantity: 1 });
+            }
+            renderCart();
+            input.value = '';
+            input.focus();
+        } else {
+            alert("{% trans 'Product not found. Select one from the list or scan a valid code.' %}");
+        }
+    }
+
+    function renderCart() {
+        const tbody = document.getElementById('cart-table');
+        const totalDisplay = document.getElementById('total-display');
+        tbody.innerHTML = '';
+        let total = 0;
+
+        cart.forEach((item, index) => {
+            const subtotal = item.quantity * item.price;
+            total += subtotal;
+            const row = `
+                <tr>
+                    <td><small>${item.name}</small></td>
+                    <td>
+                        <input type="number" class="form-control form-control-sm p-1" 
+                               value="${item.quantity}" min="1" 
+                               onchange="updateQuantity(${index}, this.value)">
+                    </td>
+                    <td>${formatMoney(subtotal)}</td>
+                    <td>
+                        <button type="button" class="btn btn-sm btn-link text-danger p-0" 
+                                onclick="removeItem(${index})"><i class="bi bi-x-circle"></i></button>
+                    </td>
+                </tr>`;
+            tbody.innerHTML += row;
+        });
+        totalDisplay.innerText = formatMoney(total);
+    }
+
+    function updateQuantity(index, newQty) {
+        if (newQty < 1) return;
+        cart[index].quantity = parseInt(newQty);
+        renderCart();
+    }
+
+    function removeItem(index) {
+        cart.splice(index, 1);
+        renderCart();
+    }
+
+    function prepareSubmit(event) {
+        if (cart.length === 0) {
+            event.preventDefault();
+            alert("{% trans 'The cart is empty.' %}");
+            return;
+        }
+        document.getElementById('cart-data').value = JSON.stringify(cart);
+    }
+
+    // SCANNER
+    let html5QrCode = null;
+    let scannerActive = false;
+    let lastCodeRead = '';
+    let lastReadTime = 0;
+    const COOLDOWN_MS = 1500;
+
+    function beepSuccess() {
+        try {
+            const ctx = new (window.AudioContext || window.webkitAudioContext)();
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.frequency.value = 1200;
+            gain.gain.value = 0.3;
+            osc.start();
+            osc.stop(ctx.currentTime + 0.12);
+        } catch (e) {}
+    }
+
+    function beepError() {
+        try {
+            const ctx = new (window.AudioContext || window.webkitAudioContext)();
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.frequency.value = 300;
+            gain.gain.value = 0.3;
+            osc.start();
+            osc.stop(ctx.currentTime + 0.3);
+        } catch (e) {}
+    }
+
+    function showFeedback(message, type) {
+        const fb = document.getElementById('scanner-feedback');
+        fb.innerHTML = `<div class="alert alert-${type} py-1 px-2 small mb-0">${message}</div>`;
+        setTimeout(() => { fb.innerHTML = ''; }, 2000);
+    }
+
+    function onScanSuccess(decodedText) {
+        const now = Date.now();
+        if (decodedText === lastCodeRead && (now - lastReadTime) < COOLDOWN_MS) return;
+        lastCodeRead = decodedText;
+        lastReadTime = now;
+
+        if (addProductByCode(decodedText)) {
+            beepSuccess();
+            const prod = PRODUCTS_BY_CODE[decodedText];
+            showFeedback(`<i class="bi bi-check-circle-fill"></i> <strong>${prod.name}</strong> {% trans "added to cart" %}`, 'success');
+        } else {
+            beepError();
+            showFeedback(`<i class="bi bi-exclamation-triangle-fill"></i> {% trans "Code" %} <strong>${decodedText}</strong> {% trans "not found" %}`, 'warning');
+        }
+    }
+
+    function startScanner() {
+        const container = document.getElementById('scanner-container');
+        container.classList.remove('d-none');
+
+        if (!html5QrCode) {
+            html5QrCode = new Html5Qrcode("scanner-reader", {
+                formatsToSupport: [
+                    Html5QrcodeSupportedFormats.EAN_13,
+                    Html5QrcodeSupportedFormats.EAN_8,
+                    Html5QrcodeSupportedFormats.CODE_128,
+                    Html5QrcodeSupportedFormats.CODE_39,
+                    Html5QrcodeSupportedFormats.QR_CODE,
+                ],
+                verbose: false,
+            });
+        }
+
+        const config = {
+            fps: 10,
+            qrbox: { width: 280, height: 160 },
+            aspectRatio: 1.777,
+        };
+
+        html5QrCode.start(
+            { facingMode: "environment" },
+            config,
+            onScanSuccess,
+            () => {}
+        ).then(() => {
+            scannerActive = true;
+        }).catch(err => {
+            console.error("Camera error:", err);
+            showFeedback(
+                `<i class="bi bi-camera-video-off-fill"></i> {% trans "Could not access camera. HTTPS is required on mobile devices." %}`,
+                'danger'
+            );
+        });
+    }
+
+    function stopScanner() {
+        if (html5QrCode && scannerActive) {
+            html5QrCode.stop().then(() => {
+                scannerActive = false;
+                document.getElementById('scanner-container').classList.add('d-none');
+                document.getElementById('scanner-feedback').innerHTML = '';
+            }).catch(err => console.error("Stop error:", err));
+        } else {
+            document.getElementById('scanner-container').classList.add('d-none');
+        }
+    }
+
+    document.getElementById('btn-toggle-scanner').addEventListener('click', function() {
+        if (scannerActive) { stopScanner(); } else { startScanner(); }
+    });
+    document.getElementById('btn-stop-scanner').addEventListener('click', stopScanner);
+</script>
+{% endblock %}

@@ -24,8 +24,11 @@ services:
     environment:
       - DEPLOYMENT_MODE=DESKTOP
       - DEBUG=1
-      - SECRET_KEY=tu_secret_key_de_django_aqui
+      - SECRET_KEY=${SECRET_KEY:-django-insecure-dev-only-key-change-in-production}
+      - ALLOWED_HOSTS=*
       - LICENSE_API_URL=http://cloud_api:8000/check-license
+      - AM_I_IN_DOCKER=1
+      - VETCORE_MODE=DEV
     ports:
       - "8000:8000"
     depends_on:
@@ -46,9 +49,12 @@ services:
       - POSTGRES_PASSWORD=vetcore_pass
       - POSTGRES_HOST=db
       - POSTGRES_PORT=5432
-      - SECRET_KEY=tu_secret_key_de_django_aqui
+      - SECRET_KEY=${SECRET_KEY:-django-insecure-dev-only-key-change-in-production}
+      - ALLOWED_HOSTS=*
       - DEBUG=1
       - LICENSE_API_URL=http://cloud_api:8000/check-license
+      - AM_I_IN_DOCKER=1
+      - VETCORE_MODE=DEV
     ports:
       - "8001:8000"
     depends_on:

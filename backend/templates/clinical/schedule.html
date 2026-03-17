@@ -1,0 +1,381 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block extra_css %}
+<link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.css" rel="stylesheet">
+<style>
+    #calendar {
+        background: #fff;
+        border-radius: 8px;
+        padding: 15px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+    }
+    .fc .fc-toolbar-title { font-size: 1.3rem; }
+    .fc .fc-button { font-size: 0.85rem; }
+    .fc-event { cursor: pointer; border: none; padding: 2px 4px; }
+    .fc .fc-daygrid-event { border-radius: 4px; }
+    .status-legend { display: inline-block; width: 14px; height: 14px; border-radius: 3px; margin-right: 5px; vertical-align: middle; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h3 class="fw-bold"><i class="bi bi-calendar-event text-primary"></i> {% trans "Appointment Schedule" %}</h3>
+    <div>
+        <span class="badge bg-light text-dark border me-1"><span class="status-legend" style="background:#6c757d"></span>{% trans "Pending" %}</span>
+        <span class="badge bg-light text-dark border me-1"><span class="status-legend" style="background:#198754"></span>{% trans "Confirmed" %}</span>
+        <span class="badge bg-light text-dark border me-1"><span class="status-legend" style="background:#dc3545"></span>{% trans "Cancelled" %}</span>
+        <span class="badge bg-light text-dark border"><span class="status-legend" style="background:#0d6efd"></span>{% trans "Completed" %}</span>
+    </div>
+</div>
+
+<div id="calendar"></div>
+
+<div class="modal fade" id="appointmentModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="modalTitle"><i class="bi bi-calendar-plus"></i> {% trans "New Appointment" %}</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="appointmentForm">
+                    <input type="hidden" id="appointment_id" value="">
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">{% trans "Patient" %}</label>
+                        <select id="apt_patient" class="form-select" required>
+                            <option value="">-- {% trans "Select" %} --</option>
+                            {% for p in patients %}
+                                <option value="{{ p.id }}" data-client="{{ p.owner.id }}">{{ p.name }} ({{ p.get_species_display }}) — {{ p.owner.last_name }}, {{ p.owner.first_name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">{% trans "Professional" %}</label>
+                        <select id="apt_professional" class="form-select" required>
+                            <option value="">-- {% trans "Select" %} --</option>
+                            {% for v in veterinarians %}
+                                <option value="{{ v.id }}">{{ v.user.get_full_name|default:v.user.username }} — {% trans "Lic." %} {{ v.license_number|default:"N/A" }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">{% trans "Start" %}</label>
+                            <input type="datetime-local" id="apt_start" class="form-control" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">{% trans "End" %}</label>
+                            <input type="datetime-local" id="apt_end" class="form-control" required>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">{% trans "Reason" %}</label>
+                        <input type="text" id="apt_reason" class="form-control" placeholder="{% trans 'E.g.: Vaccination, Checkup, Surgery' %}" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">{% trans "Status" %}</label>
+                        <select id="apt_status" class="form-select">
+                            <option value="PENDING">{% trans "Pending" %}</option>
+                            <option value="CONFIRMED">{% trans "Confirmed" %}</option>
+                            <option value="CANCELLED">{% trans "Cancelled" %}</option>
+                            <option value="COMPLETED">{% trans "Completed" %}</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">{% trans "Notes" %}</label>
+                        <textarea id="apt_notes" class="form-control" rows="2" placeholder="{% trans 'Additional notes (optional)' %}"></textarea>
+                    </div>
+                </form>
+                <div id="apt_errors" class="alert alert-danger d-none"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{% trans "Close" %}</button>
+                <button type="button" class="btn btn-danger d-none" id="btnCancelAppointment">
+                    <i class="bi bi-x-circle"></i> {% trans "Cancel Appointment" %}
+                </button>
+                <button type="button" class="btn btn-primary" id="btnSaveAppointment">
+                    <i class="bi bi-check-lg"></i> {% trans "Save" %}
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+
+    function getCookie(name) {
+        let val = null;
+        document.cookie.split(';').forEach(c => {
+            c = c.trim();
+            if (c.startsWith(name + '=')) val = decodeURIComponent(c.substring(name.length + 1));
+        });
+        return val;
+    }
+
+    const CSRF = getCookie('csrftoken_desktop') || getCookie('csrftoken_saas') || getCookie('csrftoken');
+
+    function fetchJSON(url, method, body) {
+        const opts = {
+            method: method,
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': CSRF
+            },
+            credentials: 'same-origin'
+        };
+        if (body) opts.body = JSON.stringify(body);
+        return fetch(url, opts).then(r => r.json());
+    }
+
+    const modalEl = document.getElementById('appointmentModal');
+    const modal = new bootstrap.Modal(modalEl);
+    const titulo = document.getElementById('modalTitle');
+    const errorsDiv = document.getElementById('apt_errors');
+
+    const fId       = document.getElementById('appointment_id');
+    const fPatient  = document.getElementById('apt_patient');
+    const fProf     = document.getElementById('apt_professional');
+    const fStart    = document.getElementById('apt_start');
+    const fEnd      = document.getElementById('apt_end');
+    const fReason   = document.getElementById('apt_reason');
+    const fStatus   = document.getElementById('apt_status');
+    const fNotes    = document.getElementById('apt_notes');
+
+    const btnSave   = document.getElementById('btnSaveAppointment');
+    const btnCancel = document.getElementById('btnCancelAppointment');
+
+    fStart.addEventListener('change', function() {
+        if (fStart.value) {
+            const d = new Date(fStart.value);
+            d.setMinutes(d.getMinutes() + 30);
+            fEnd.value = toLocalInput(d.toISOString());
+        }
+    });
+
+    function clearModal() {
+        fId.value = '';
+        fPatient.value = '';
+        fProf.value = '';
+        fStart.value = '';
+        fEnd.value = '';
+        fReason.value = '';
+        fStatus.value = 'PENDING';
+        fNotes.value = '';
+        errorsDiv.classList.add('d-none');
+        errorsDiv.innerHTML = '';
+        btnCancel.classList.add('d-none');
+    }
+
+    function showErrors(data) {
+        errorsDiv.classList.remove('d-none');
+        if (data.error) {
+            errorsDiv.innerHTML = data.error;
+        } else if (data.errors) {
+            let html = '<ul class="mb-0">';
+            for (const [field, msgs] of Object.entries(data.errors)) {
+                msgs.forEach(m => html += `<li><strong>${field}:</strong> ${m.message || m}</li>`);
+            }
+            html += '</ul>';
+            errorsDiv.innerHTML = html;
+        }
+    }
+
+    function toLocalInput(iso) {
+        if (!iso) return '';
+        const d = new Date(iso);
+        const pad = n => String(n).padStart(2, '0');
+        return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+    }
+
+    const calendarEl = document.getElementById('calendar');
+    const calendar = new FullCalendar.Calendar(calendarEl, {
+        locale: '{{ LANGUAGE_CODE }}',
+        initialView: 'dayGridMonth',
+        headerToolbar: {
+            left: 'prev,next today',
+            center: 'title',
+            right: 'dayGridMonth,timeGridWeek,timeGridDay,listWeek'
+        },
+        navLinks: true,
+        editable: true,
+        selectable: true,
+        nowIndicator: true,
+        slotMinTime: '07:00:00',
+        slotMaxTime: '22:00:00',
+        allDaySlot: false,
+        eventTimeFormat: { hour: '2-digit', minute: '2-digit', hour12: false },
+        slotLabelFormat: { hour: '2-digit', minute: '2-digit', hour12: false },
+
+        events: {
+            url: '{% url "api_appointments" %}',
+            method: 'GET',
+            failure: function() {
+                alert('Error loading appointments.');
+            }
+        },
+
+        dateClick: function(info) {
+            clearModal();
+            titulo.innerHTML = '<i class="bi bi-calendar-plus"></i> {% trans "New Appointment" %}';
+            
+            const start = info.dateStr;
+            fStart.value = toLocalInput(start);
+            const end = new Date(info.date);
+            end.setMinutes(end.getMinutes() + 30);
+            fEnd.value = toLocalInput(end.toISOString());
+            
+            modal.show();
+        },
+
+        eventClick: function(info) {
+            clearModal();
+            const ev = info.event;
+            const props = ev.extendedProps;
+
+            titulo.innerHTML = '<i class="bi bi-pencil-square"></i> {% trans "Edit Appointment" %}';
+            fId.value = ev.id;
+            fPatient.value = props.patient_id;
+            fProf.value = props.professional_id;
+            fStart.value = toLocalInput(ev.startStr);
+            fEnd.value = toLocalInput(ev.endStr);
+            fReason.value = props.reason;
+            fStatus.value = props.status;
+            fNotes.value = props.notes || '';
+
+            if (props.status !== 'CANCELLED') {
+                btnCancel.classList.remove('d-none');
+            }
+
+            modal.show();
+        },
+
+        eventDrop: function(info) {
+            const ev = info.event;
+            const body = {
+                patient: ev.extendedProps.patient_id,
+                professional: ev.extendedProps.professional_id,
+                start_time: ev.start.toISOString(),
+                end_time: ev.end ? ev.end.toISOString() : new Date(ev.start.getTime() + 30*60000).toISOString(),
+                reason: ev.extendedProps.reason,
+                status: ev.extendedProps.status,
+                notes: ev.extendedProps.notes || ''
+            };
+            fetchJSON(`/api/appointments/${ev.id}/edit/`, 'POST', body).then(data => {
+                if (!data.ok) { info.revert(); alert('Error moving appointment.'); }
+                else calendar.refetchEvents();
+            }).catch(() => { info.revert(); });
+        },
+
+        eventResize: function(info) {
+            const ev = info.event;
+            const body = {
+                patient: ev.extendedProps.patient_id,
+                professional: ev.extendedProps.professional_id,
+                start_time: ev.start.toISOString(),
+                end_time: ev.end.toISOString(),
+                reason: ev.extendedProps.reason,
+                status: ev.extendedProps.status,
+                notes: ev.extendedProps.notes || ''
+            };
+            fetchJSON(`/api/appointments/${ev.id}/edit/`, 'POST', body).then(data => {
+                if (!data.ok) { info.revert(); alert('Error resizing appointment.'); }
+                else calendar.refetchEvents();
+            }).catch(() => { info.revert(); });
+        },
+
+        eventDidMount: function(info) {
+            const status = info.event.extendedProps.status;
+            const labels = { PENDING: '{% trans "Pending" %}', CONFIRMED: '{% trans "Confirmed" %}', CANCELLED: '{% trans "Cancelled" %}', COMPLETED: '{% trans "Completed" %}' };
+            if (status && labels[status]) {
+                const badge = document.createElement('span');
+                badge.className = 'badge ms-2';
+                badge.style.backgroundColor = info.event.backgroundColor;
+                badge.textContent = labels[status];
+                const titleEl = info.el.querySelector('.fc-list-event-title') || info.el.querySelector('.fc-event-title');
+                if (titleEl) titleEl.appendChild(badge);
+            }
+        }
+    });
+
+    calendar.render();
+
+    btnSave.addEventListener('click', function() {
+        errorsDiv.classList.add('d-none');
+        const aptId = fId.value;
+        const newStatus = fStatus.value;
+
+        if (aptId && newStatus === 'COMPLETED') {
+            const createRecord = confirm(
+                '{% trans "Do you want to create a Medical Record entry for this consultation?" %}\n\n' +
+                '{% trans "Accept: A record will be created in the patient file with the appointment reason and notes." %}\n' +
+                '{% trans "Cancel: Only marks as Completed without creating a record." %}'
+            );
+
+            fetchJSON(`/api/appointments/${aptId}/complete/`, 'POST', { create_record: createRecord }).then(data => {
+                if (data.ok) {
+                    modal.hide();
+                    calendar.refetchEvents();
+                    if (data.record_id) {
+                        if (confirm('{% trans "Medical record created. Do you want to complete the consultation details now?" %}')) {
+                            window.location.href = `/history/${data.record_id}/edit/`;
+                        }
+                    }
+                }
+            });
+            return;
+        }
+
+        const body = {
+            patient: fPatient.value,
+            professional: fProf.value,
+            start_time: fStart.value,
+            end_time: fEnd.value,
+            reason: fReason.value,
+            status: newStatus,
+            notes: fNotes.value
+        };
+
+        const url = aptId
+            ? `/api/appointments/${aptId}/edit/`
+            : '{% url "create_appointment" %}';
+
+        fetchJSON(url, 'POST', body).then(data => {
+            if (data.ok) {
+                modal.hide();
+                calendar.refetchEvents();
+            } else {
+                showErrors(data);
+            }
+        }).catch(() => {
+            errorsDiv.classList.remove('d-none');
+            errorsDiv.innerHTML = '{% trans "Connection error with the server." %}';
+        });
+    });
+
+    btnCancel.addEventListener('click', function() {
+        const aptId = fId.value;
+        if (!aptId) return;
+        if (!confirm('{% trans "Are you sure you want to cancel this appointment?" %}')) return;
+
+        fetchJSON(`/api/appointments/${aptId}/cancel/`, 'POST', {}).then(data => {
+            if (data.ok) {
+                modal.hide();
+                calendar.refetchEvents();
+            }
+        });
+    });
+
+});
+</script>
+{% endblock %}

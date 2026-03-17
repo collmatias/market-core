@@ -1,0 +1,172 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-4 col-lg-3">
+        <div class="card shadow-sm mb-3">
+            <div class="card-body text-center">
+                <div class="display-1 text-primary">
+                    {% if patient.species == 'DOG' %}🐶{% elif patient.species == 'CAT' %}🐱{% else %}🐾{% endif %}
+                </div>
+                <h3 class="card-title mb-1">{{ patient.name }}</h3>
+                <span class="badge bg-secondary">{{ patient.get_species_display }}</span>
+                {% if patient.breed %}<span class="badge bg-light text-dark border">{{ patient.breed }}</span>{% endif %}
+
+                <hr>
+                <div class="text-start small">
+                    <p class="mb-1"><i class="bi bi-person-fill text-muted me-1"></i> <strong>{% trans "Owner" %}:</strong>
+                        <a href="{% url 'client_detail' patient.owner.id %}" class="text-decoration-none">
+                            {{ patient.owner.last_name }}, {{ patient.owner.first_name }}
+                        </a>
+                    </p>
+                    <p class="mb-1"><i class="bi bi-telephone-fill text-muted me-1"></i> {{ patient.owner.phone }}</p>
+                    {% if patient.birth_date %}
+                    <p class="mb-1"><i class="bi bi-cake2-fill text-muted me-1"></i> {{ patient.birth_date|date:"d/m/Y" }}
+                        <small class="text-muted">({{ patient.birth_date|timesince }})</small>
+                    </p>
+                    {% endif %}
+                    {% if patient.current_weight %}
+                    <p class="mb-1"><i class="bi bi-speedometer text-muted me-1"></i> <strong>{{ patient.current_weight }} kg</strong></p>
+                    {% endif %}
+                    <p class="mb-0 text-muted"><i class="bi bi-clock-fill me-1"></i> {% trans "Registered" %}: {{ patient.owner.created_at|date:"d/m/Y" }}</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="d-grid gap-2 mb-3">
+            <a href="{% url 'medical_record' patient.id %}" class="btn btn-primary">
+                <i class="bi bi-file-medical"></i> {% trans "Full Medical Record" %}
+            </a>
+            <a href="{% url 'new_consultation' patient.id %}" class="btn btn-outline-primary">
+                <i class="bi bi-plus-circle"></i> {% trans "New Consultation" %}
+            </a>
+            <a href="{% url 'schedule' %}?patient={{ patient.id }}" class="btn btn-outline-success">
+                <i class="bi bi-calendar-plus"></i> {% trans "Book Appointment" %}
+            </a>
+            <a href="{% url 'edit_patient' patient.id %}" class="btn btn-outline-secondary btn-sm">
+                <i class="bi bi-pencil"></i> {% trans "Edit Details" %}
+            </a>
+        </div>
+
+        <a href="{% url 'patient_list' %}" class="btn btn-outline-dark btn-sm w-100">
+            <i class="bi bi-arrow-left"></i> {% trans "Back to list" %}
+        </a>
+    </div>
+
+    <div class="col-md-8 col-lg-9">
+
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-success bg-opacity-10 d-flex justify-content-between align-items-center">
+                <h5 class="mb-0 fw-bold text-success"><i class="bi bi-calendar-check"></i> {% trans "Upcoming Appointments" %}</h5>
+                <span class="badge bg-success rounded-pill">{{ upcoming_appointments|length }}</span>
+            </div>
+            {% if upcoming_appointments %}
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>{% trans "Date" %}</th>
+                            <th>{% trans "Reason" %}</th>
+                            <th>{% trans "Professional" %}</th>
+                            <th>{% trans "Status" %}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for t in upcoming_appointments %}
+                        <tr>
+                            <td>
+                                <strong>{{ t.start_time|date:"d/m/Y" }}</strong><br>
+                                <small class="text-muted">{{ t.start_time|date:"H:i" }} - {{ t.end_time|date:"H:i" }}</small>
+                            </td>
+                            <td>{{ t.reason }}</td>
+                            <td class="text-muted">{{ t.professional.user.get_full_name|default:t.professional.user.username }}</td>
+                            <td>
+                                <span class="badge {% if t.status == 'PENDING' %}bg-secondary{% elif t.status == 'CONFIRMED' %}bg-success{% elif t.status == 'COMPLETED' %}bg-primary{% else %}bg-danger{% endif %}">
+                                    {{ t.get_status_display }}
+                                </span>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="card-body text-center text-muted py-3">
+                <i class="bi bi-calendar-x fs-4"></i><br>{% trans "No upcoming appointments." %}
+            </div>
+            {% endif %}
+        </div>
+
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-primary bg-opacity-10 d-flex justify-content-between align-items-center">
+                <h5 class="mb-0 fw-bold text-primary"><i class="bi bi-file-medical"></i> {% trans "Latest Consultations" %}</h5>
+                <a href="{% url 'medical_record' patient.id %}" class="btn btn-sm btn-outline-primary">{% trans "View all" %}</a>
+            </div>
+            {% if history %}
+            <div class="list-group list-group-flush">
+                {% for h in history %}
+                <div class="list-group-item">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <h6 class="mb-1 fw-bold text-primary">{{ h.reason }}</h6>
+                            <p class="mb-1 small text-muted">
+                                {% if h.diagnosis %}<strong>Dx:</strong> {{ h.diagnosis|truncatewords:20 }}<br>{% endif %}
+                                {% if h.treatment %}<strong>Tx:</strong> {{ h.treatment|truncatewords:20 }}{% endif %}
+                            </p>
+                            {% if h.weight %}<small class="text-muted">{% trans "Weight" %}: {{ h.weight }} kg</small>{% endif %}
+                        </div>
+                        <div class="text-end">
+                            <small class="text-muted">{{ h.date|date:"d/m/Y H:i" }}</small><br>
+                            <a href="{% url 'edit_consultation' h.id %}" class="btn btn-sm btn-outline-secondary mt-1">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="card-body text-center text-muted py-3">
+                <i class="bi bi-journal-x fs-4"></i><br>{% trans "No clinical records yet." %}
+            </div>
+            {% endif %}
+        </div>
+
+        {% if past_appointments %}
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-light">
+                <h5 class="mb-0 fw-bold text-secondary"><i class="bi bi-clock-history"></i> {% trans "Appointment History" %}</h5>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-sm table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>{% trans "Date" %}</th>
+                            <th>{% trans "Reason" %}</th>
+                            <th>{% trans "Professional" %}</th>
+                            <th>{% trans "Status" %}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for t in past_appointments %}
+                        <tr class="{% if t.status == 'CANCELLED' %}text-decoration-line-through text-muted{% endif %}">
+                            <td>{{ t.start_time|date:"d/m/Y H:i" }}</td>
+                            <td>{{ t.reason }}</td>
+                            <td>{{ t.professional.user.get_full_name|default:t.professional.user.username }}</td>
+                            <td>
+                                <span class="badge {% if t.status == 'COMPLETED' %}bg-primary{% else %}bg-danger{% endif %}">
+                                    {{ t.get_status_display }}
+                                </span>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% endif %}
+
+    </div>
+</div>
+{% endblock %}

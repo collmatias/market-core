@@ -1,93 +1,122 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.utils.translation import gettext_lazy as _
+
 
 class TenantManager(models.Manager):
-    def para_empresa(self, user):
-        # Filtra automáticamente por la empresa del usuario
-        return self.get_queryset().filter(empresa=user.profile.empresa)
+    def for_company(self, user):
+        return self.get_queryset().filter(company=user.profile.company)
 
-class Empresa(models.Model):
-    nombre = models.CharField(max_length=100)
-    cuit = models.CharField(max_length=20, unique=True)
-    
-    # --- AGREGAR ESTOS DOS CAMPOS ---
-    direccion = models.CharField(max_length=200, blank=True, null=True)
-    telefono = models.CharField(max_length=50, blank=True, null=True)
-    # --------------------------------
-    
-    # DATOS DE LICENCIA SAAS
+
+class Company(models.Model):
+    CURRENCIES = [
+        ('ARS', _('Argentine Peso ($)')),
+        ('USD', _('US Dollar (US$)')),
+        ('EUR', _('Euro (€)')),
+        ('BRL', _('Brazilian Real (R$)')),
+        ('CLP', _('Chilean Peso (CLP$)')),
+        ('MXN', _('Mexican Peso (MX$)')),
+        ('UYU', _('Uruguayan Peso ($U)')),
+        ('PYG', _('Paraguayan Guarani (₲)')),
+        ('COP', _('Colombian Peso (COL$)')),
+        ('PEN', _('Peruvian Sol (S/)')),
+        ('BOB', _('Bolivian Boliviano (Bs)')),
+    ]
+
+    LANGUAGES = [
+        ('es', _('Spanish')),
+        ('en', _('English')),
+        ('pt', _('Portuguese')),
+    ]
+
+    name = models.CharField(max_length=100)
+    tax_id = models.CharField(max_length=20, unique=True)
+    address = models.CharField(max_length=200, blank=True, null=True)
+    phone = models.CharField(max_length=50, blank=True, null=True)
+    currency = models.CharField(max_length=3, choices=CURRENCIES, default='ARS')
+    language = models.CharField(max_length=5, choices=LANGUAGES, default='es')
+
+    # SaaS license data
     plan = models.CharField(max_length=20, default='FREE')
-    fecha_vencimiento = models.DateField()
-    activo = models.BooleanField(default=True)
+    expiration_date = models.DateField()
+    is_active = models.BooleanField(default=True)
+
+    class Meta:
+        verbose_name_plural = 'companies'
 
     def __str__(self):
-        return self.nombre
+        return self.name
+
 
 class UserProfile(models.Model):
-    # ROLES DISPONIBLES
     ROLES = [
-        ('VETERINARIO', 'Veterinario'),
-        ('ADMINISTRATIVO', 'Administrativo'),
+        ('VET', _('Veterinarian')),
+        ('ADMIN', _('Administrative')),
     ]
 
-    AVATARES = [
-        ('bi-person-fill', '👤 Persona (Estándar)'),
-        ('bi-person-circle', '🧑‍💼 Perfil Clásico'),
-        ('bi-emoji-sunglasses-fill', '😎 Gafas de Sol'),
-        ('bi-emoji-smile-fill', '😊 Carita Feliz'),
+    AVATARS = [
+        ('bi-person-fill', '👤 Default'),
+        ('bi-person-circle', '🧑‍💼 Classic'),
+        ('bi-emoji-sunglasses-fill', '😎 Sunglasses'),
+        ('bi-emoji-smile-fill', '😊 Smiley'),
         ('bi-robot', '🤖 Robot'),
-        ('bi-stars', '✨ Estrellas'),
-        ('bi-heart-pulse-fill', '💖 Corazón Médico'),
-        ('bi-capsule', '💊 Cápsula'),
-        ('bi-bandaid-fill', '🩹 Curita'),
-        ('bi-bug-fill', '🐞 Bichito'),
+        ('bi-stars', '✨ Stars'),
+        ('bi-heart-pulse-fill', '💖 Heart'),
+        ('bi-capsule', '💊 Capsule'),
+        ('bi-bandaid-fill', '🩹 Bandaid'),
+        ('bi-bug-fill', '🐞 Bug'),
         ('bi-controller', '🎮 Gamer'),
-        ('bi-moon-stars-fill', '🌙 Luna'),
-        ('bi-cup-hot-fill', '☕ Café'),
+        ('bi-moon-stars-fill', '🌙 Moon'),
+        ('bi-cup-hot-fill', '☕ Coffee'),
     ]
 
-    # Usamos related_name='profile' para poder hacer request.user.profile
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
-    empresa = models.ForeignKey(Empresa, on_delete=models.CASCADE)
-    
-    # NUEVOS CAMPOS PARA EL EQUIPO
-    rol = models.CharField(max_length=20, choices=ROLES, default='VETERINARIO')
-    es_admin = models.BooleanField(default=False, help_text="Acceso total a configuraciones, precios y corrección de stock")
-    matricula = models.CharField(max_length=50, blank=True, null=True, help_text="Obligatorio para veterinarios")
-    telefono = models.CharField(max_length=20, blank=True, null=True)
-    pin = models.CharField(max_length=4, blank=True, null=True, help_text="PIN de 4 dígitos")
-    avatar = models.CharField(max_length=50, choices=AVATARES, default='bi-person-fill')
+    company = models.ForeignKey(Company, on_delete=models.CASCADE)
+
+    role = models.CharField(max_length=20, choices=ROLES, default='VET')
+    is_admin = models.BooleanField(default=False)
+    license_number = models.CharField(max_length=50, blank=True, null=True)
+    phone = models.CharField(max_length=20, blank=True, null=True)
+    pin = models.CharField(max_length=4, blank=True, null=True)
+    avatar = models.CharField(max_length=50, choices=AVATARS, default='bi-person-fill')
 
     def __str__(self):
-        return f"{self.user.username} - {self.get_rol_display()}"
+        return f"{self.user.username} - {self.get_role_display()}"
 
     @property
-    def es_clinico(self):
-        # Ahora ser clínico depende 100% de la profesión, no del poder de admin
-        return self.rol == 'VETERINARIO'
+    def is_clinical(self):
+        return self.role == 'VET'
 
-class Cliente(models.Model):
-    nombre = models.CharField(max_length=100)
-    apellido = models.CharField(max_length=100)
-    telefono = models.CharField(max_length=20)
+
+class Client(models.Model):
+    company = models.ForeignKey(Company, on_delete=models.CASCADE, null=True)
+    first_name = models.CharField(max_length=100)
+    last_name = models.CharField(max_length=100)
+    phone = models.CharField(max_length=20)
     email = models.EmailField(blank=True, null=True)
-    direccion = models.CharField(max_length=255, blank=True)
-    fecha_alta = models.DateTimeField(auto_now_add=True)
-
-    def __str__(self):
-        return f"{self.apellido}, {self.nombre}"
-
-class Paciente(models.Model):
-    ESPECIES = [('PERRO', 'Perro'), ('GATO', 'Gato'), ('OTRO', 'Otro')]
-
-    empresa = models.ForeignKey(Empresa, on_delete=models.CASCADE)
-    cliente = models.ForeignKey(Cliente, on_delete=models.CASCADE, related_name='mascotas')
-    nombre = models.CharField(max_length=50)
-    especie = models.CharField(max_length=10, choices=ESPECIES)
-    raza = models.CharField(max_length=50, blank=True)
-    fecha_nacimiento = models.DateField(blank=True, null=True)
-    peso_actual = models.DecimalField(max_digits=5, decimal_places=2, help_text="En Kg", null=True)
+    address = models.CharField(max_length=255, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
     objects = TenantManager()
 
     def __str__(self):
-        return f"{self.nombre} ({self.get_especie_display()})"
+        return f"{self.last_name}, {self.first_name}"
+
+
+class Patient(models.Model):
+    SPECIES = [
+        ('DOG', _('Dog')),
+        ('CAT', _('Cat')),
+        ('OTHER', _('Other')),
+    ]
+
+    company = models.ForeignKey(Company, on_delete=models.CASCADE)
+    owner = models.ForeignKey(Client, on_delete=models.CASCADE, related_name='pets')
+    name = models.CharField(max_length=50)
+    species = models.CharField(max_length=10, choices=SPECIES)
+    breed = models.CharField(max_length=50, blank=True)
+    birth_date = models.DateField(blank=True, null=True)
+    current_weight = models.DecimalField(max_digits=5, decimal_places=2, null=True)
+    objects = TenantManager()
+
+    def __str__(self):
+        return f"{self.name} ({self.get_species_display()})"

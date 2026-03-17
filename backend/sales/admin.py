@@ -1,15 +1,16 @@
 from django.contrib import admin
-from .models import Venta, DetalleVenta
+from .models import Sale, SaleItem
 
-class DetalleInline(admin.TabularInline):
-    model = DetalleVenta
+
+class SaleItemInline(admin.TabularInline):
+    model = SaleItem
     extra = 1
-    # Campos de solo lectura para evitar trampas posteriores
     readonly_fields = ('subtotal',)
 
-@admin.register(Venta)
-class VentaAdmin(admin.ModelAdmin):
-    inlines = [DetalleInline]
-    list_display = ('id', 'fecha', 'cliente', 'total', 'metodo_pago')
-    list_filter = ('fecha', 'metodo_pago')
-    search_fields = ('cliente__apellido',)
+
+@admin.register(Sale)
+class SaleAdmin(admin.ModelAdmin):
+    inlines = [SaleItemInline]
+    list_display = ('id', 'date', 'client', 'total', 'payment_method')
+    list_filter = ('date', 'payment_method')
+    search_fields = ('client__last_name',)

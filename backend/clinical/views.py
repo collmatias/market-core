@@ -3,249 +3,239 @@ from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST, require_GET
 from django.utils import timezone
-from core.models import Paciente, UserProfile
-from .models import Historial, Turno
-from .forms import HistorialForm, ArchivoAdjuntoForm, TurnoForm
-from core.decorators import clinico_requerido
+from django.utils.translation import gettext as _
+from core.models import Patient, UserProfile
+from .models import MedicalRecord, Appointment
+from .forms import MedicalRecordForm, AttachmentForm, AppointmentForm
+from core.decorators import clinical_required
 import json
 
-@login_required
-def ficha_medica(request, paciente_id):
-    """Muestra el historial completo de una mascota"""
-    paciente = get_object_or_404(Paciente, pk=paciente_id)
-    historial = paciente.historial_clinico.all().order_by('-fecha')
-    turnos = paciente.turnos.exclude(estado__in=['CANCELADO', 'ATENDIDO']).order_by('fecha_hora_inicio').select_related('profesional__user')
-    
-    return render(request, 'clinical/ficha_medica.html', {
-        'paciente': paciente,
-        'historial': historial,
-        'turnos': turnos,
-    })
 
 @login_required
-@clinico_requerido
-def nueva_consulta(request, paciente_id):
-    paciente = get_object_or_404(Paciente, pk=paciente_id)
-    
-    if request.method == 'POST':
-        form = HistorialForm(request.POST)
-        archivo_form = ArchivoAdjuntoForm(request.POST, request.FILES)
-        
+def medical_record(request, patient_id):
+    patient = get_object_or_404(Patient, pk=patient_id)
+    history = patient.medical_history.all().order_by("-date")
+    appointments = patient.appointments.exclude(status__in=["CANCELLED", "COMPLETED"]).order_by("start_time").select_related("professional__user")
+
+    return render(request, "clinical/medical_record.html", {
+        "patient": patient,
+        "history": history,
+        "appointments": appointments,
+    })
+
+
+@login_required
+@clinical_required
+def new_consultation(request, patient_id):
+    patient = get_object_or_404(Patient, pk=patient_id)
+
+    if request.method == "POST":
+        form = MedicalRecordForm(request.POST)
+        attachment_form = AttachmentForm(request.POST, request.FILES)
+
         if form.is_valid():
-            consulta = form.save(commit=False)
-            consulta.paciente = paciente
-            consulta.save()
-            
-            # Si subió un archivo, lo guardamos
-            if archivo_form.is_valid() and request.FILES.get('archivo'):
-                adjunto = archivo_form.save(commit=False)
-                adjunto.historial = consulta
-                adjunto.save()
-                
-            return redirect('ficha_medica', paciente_id=paciente.id)
+            consultation = form.save(commit=False)
+            consultation.patient = patient
+            consultation.save()
+
+            if attachment_form.is_valid() and request.FILES.get("file"):
+                attachment = attachment_form.save(commit=False)
+                attachment.record = consultation
+                attachment.save()
+
+            return redirect("medical_record", patient_id=patient.id)
     else:
-        # --- AQUÍ RECUPERÉ LO QUE SE HABÍA PERDIDO ---
-        # Pre-cargamos el peso actual del paciente
-        form = HistorialForm(initial={'peso': paciente.peso_actual, 'fecha': timezone.now()})
-        archivo_form = ArchivoAdjuntoForm()
-    
-    return render(request, 'clinical/nueva_consulta.html', {
-        'form': form,
-        'archivo_form': archivo_form,
-        'paciente': paciente
+        form = MedicalRecordForm(initial={"weight": patient.current_weight, "date": timezone.now()})
+        attachment_form = AttachmentForm()
+
+    return render(request, "clinical/new_consultation.html", {
+        "form": form,
+        "attachment_form": attachment_form,
+        "patient": patient
     })
 
+
 @login_required
-@clinico_requerido
-def editar_consulta(request, consulta_id):
-    consulta = get_object_or_404(Historial, pk=consulta_id)
-    paciente = consulta.paciente
-    
-    if request.method == 'POST':
-        form = HistorialForm(request.POST, instance=consulta)
-        archivo_form = ArchivoAdjuntoForm(request.POST, request.FILES)
-        
+@clinical_required
+def edit_consultation(request, consultation_id):
+    consultation = get_object_or_404(MedicalRecord, pk=consultation_id)
+    patient = consultation.patient
+
+    if request.method == "POST":
+        form = MedicalRecordForm(request.POST, instance=consultation)
+        attachment_form = AttachmentForm(request.POST, request.FILES)
+
         if form.is_valid():
             form.save()
-            
-            # Si agrega archivo al editar
-            if archivo_form.is_valid() and request.FILES.get('archivo'):
-                adjunto = archivo_form.save(commit=False)
-                adjunto.historial = consulta
-                adjunto.save()
-                
-            return redirect('ficha_medica', paciente_id=paciente.id)
+            if attachment_form.is_valid() and request.FILES.get("file"):
+                attachment = attachment_form.save(commit=False)
+                attachment.record = consultation
+                attachment.save()
+            return redirect("medical_record", patient_id=patient.id)
     else:
-        form = HistorialForm(instance=consulta)
-        archivo_form = ArchivoAdjuntoForm()
-    
-    return render(request, 'clinical/nueva_consulta.html', {
-        'form': form,
-        'archivo_form': archivo_form,
-        'paciente': paciente,
-        'es_edicion': True
+        form = MedicalRecordForm(instance=consultation)
+        attachment_form = AttachmentForm()
+
+    return render(request, "clinical/new_consultation.html", {
+        "form": form,
+        "attachment_form": attachment_form,
+        "patient": patient,
+        "is_edit": True
     })
 
 
 # =============================================================================
-# MÓDULO DE AGENDA / TURNERO
+# APPOINTMENT / SCHEDULE MODULE
 # =============================================================================
 
 @login_required
-def agenda(request):
-    """Vista principal del calendario de turnos."""
-    empresa = request.user.profile.empresa
-    veterinarios = UserProfile.objects.filter(
-        empresa=empresa, rol='VETERINARIO'
-    ).select_related('user')
-    pacientes = Paciente.objects.filter(empresa=empresa).select_related('cliente')
+def schedule(request):
+    company = request.user.profile.company
+    veterinarians = UserProfile.objects.filter(
+        company=company, role="VET"
+    ).select_related("user")
+    patients = Patient.objects.filter(company=company).select_related("owner")
 
-    # Pre-selección desde enlaces de Paciente o Cliente
-    preselect_paciente = request.GET.get('paciente', '')
-    preselect_cliente = request.GET.get('cliente', '')
+    preselect_patient = request.GET.get("patient", "")
+    preselect_client = request.GET.get("client", "")
 
-    return render(request, 'clinical/agenda.html', {
-        'veterinarios': veterinarios,
-        'pacientes': pacientes,
-        'preselect_paciente': preselect_paciente,
-        'preselect_cliente': preselect_cliente,
+    return render(request, "clinical/schedule.html", {
+        "veterinarians": veterinarians,
+        "patients": patients,
+        "preselect_patient": preselect_patient,
+        "preselect_client": preselect_client,
     })
 
 
 @login_required
 @require_GET
-def api_turnos(request):
-    """Feed JSON para FullCalendar. Filtra por rango start/end y empresa."""
-    empresa = request.user.profile.empresa
-    start = request.GET.get('start')
-    end = request.GET.get('end')
+def api_appointments(request):
+    company = request.user.profile.company
+    start = request.GET.get("start")
+    end = request.GET.get("end")
 
-    turnos = Turno.objects.filter(empresa=empresa).select_related('paciente', 'profesional__user')
+    appointments = Appointment.objects.filter(company=company).select_related("patient", "professional__user")
 
     if start:
-        turnos = turnos.filter(fecha_hora_inicio__gte=start)
+        appointments = appointments.filter(start_time__gte=start)
     if end:
-        turnos = turnos.filter(fecha_hora_fin__lte=end)
+        appointments = appointments.filter(end_time__lte=end)
 
-    eventos = []
-    for t in turnos:
-        eventos.append({
-            'id': t.id,
-            'title': f"{t.paciente.nombre} - {t.motivo}",
-            'start': t.fecha_hora_inicio.isoformat(),
-            'end': t.fecha_hora_fin.isoformat(),
-            'color': t.color,
-            'extendedProps': {
-                'paciente_id': t.paciente.id,
-                'profesional_id': t.profesional.id,
-                'profesional_nombre': t.profesional.user.get_full_name() or t.profesional.user.username,
-                'motivo': t.motivo,
-                'estado': t.estado,
-                'notas': t.notas,
+    events = []
+    for a in appointments:
+        events.append({
+            "id": a.id,
+            "title": f"{a.patient.name} - {a.reason}",
+            "start": a.start_time.isoformat(),
+            "end": a.end_time.isoformat(),
+            "color": a.color,
+            "extendedProps": {
+                "patient_id": a.patient.id,
+                "professional_id": a.professional.id,
+                "professional_name": a.professional.user.get_full_name() or a.professional.user.username,
+                "reason": a.reason,
+                "status": a.status,
+                "notes": a.notes,
             }
         })
 
-    return JsonResponse(eventos, safe=False)
+    return JsonResponse(events, safe=False)
 
 
 @login_required
 @require_POST
-def crear_turno(request):
-    """Crea un turno nuevo desde el modal del calendario."""
-    empresa = request.user.profile.empresa
+def create_appointment(request):
+    company = request.user.profile.company
 
     try:
         data = json.loads(request.body)
     except json.JSONDecodeError:
-        return JsonResponse({'ok': False, 'error': 'JSON inválido.'}, status=400)
+        return JsonResponse({"ok": False, "error": "Invalid JSON."}, status=400)
 
-    form = TurnoForm(data, empresa=empresa)
+    form = AppointmentForm(data, company=company)
     if form.is_valid():
-        turno = form.save(commit=False)
-        turno.empresa = empresa
-        turno.save()
+        appointment = form.save(commit=False)
+        appointment.company = company
+        appointment.save()
         return JsonResponse({
-            'ok': True,
-            'turno': {
-                'id': turno.id,
-                'title': f"{turno.paciente.nombre} - {turno.motivo}",
-                'start': turno.fecha_hora_inicio.isoformat(),
-                'end': turno.fecha_hora_fin.isoformat(),
-                'color': turno.color,
+            "ok": True,
+            "appointment": {
+                "id": appointment.id,
+                "title": f"{appointment.patient.name} - {appointment.reason}",
+                "start": appointment.start_time.isoformat(),
+                "end": appointment.end_time.isoformat(),
+                "color": appointment.color,
             }
         })
     else:
-        return JsonResponse({'ok': False, 'errores': form.errors}, status=400)
+        return JsonResponse({"ok": False, "errors": form.errors}, status=400)
 
 
 @login_required
 @require_POST
-def editar_turno(request, turno_id):
-    """Actualiza un turno (modal o drag & drop)."""
-    empresa = request.user.profile.empresa
-    turno = get_object_or_404(Turno, pk=turno_id, empresa=empresa)
+def edit_appointment(request, appointment_id):
+    company = request.user.profile.company
+    appointment = get_object_or_404(Appointment, pk=appointment_id, company=company)
 
     try:
         data = json.loads(request.body)
     except json.JSONDecodeError:
-        return JsonResponse({'ok': False, 'error': 'JSON inválido.'}, status=400)
+        return JsonResponse({"ok": False, "error": "Invalid JSON."}, status=400)
 
-    form = TurnoForm(data, instance=turno, empresa=empresa)
+    form = AppointmentForm(data, instance=appointment, company=company)
     if form.is_valid():
         form.save()
         return JsonResponse({
-            'ok': True,
-            'turno': {
-                'id': turno.id,
-                'title': f"{turno.paciente.nombre} - {turno.motivo}",
-                'start': turno.fecha_hora_inicio.isoformat(),
-                'end': turno.fecha_hora_fin.isoformat(),
-                'color': turno.color,
+            "ok": True,
+            "appointment": {
+                "id": appointment.id,
+                "title": f"{appointment.patient.name} - {appointment.reason}",
+                "start": appointment.start_time.isoformat(),
+                "end": appointment.end_time.isoformat(),
+                "color": appointment.color,
             }
         })
     else:
-        return JsonResponse({'ok': False, 'errores': form.errors}, status=400)
+        return JsonResponse({"ok": False, "errors": form.errors}, status=400)
 
 
 @login_required
 @require_POST
-def cancelar_turno(request, turno_id):
-    """Cambia el estado del turno a CANCELADO."""
-    empresa = request.user.profile.empresa
-    turno = get_object_or_404(Turno, pk=turno_id, empresa=empresa)
-    turno.estado = 'CANCELADO'
-    turno.save()
-    return JsonResponse({'ok': True, 'color': turno.color})
+def cancel_appointment(request, appointment_id):
+    company = request.user.profile.company
+    appointment = get_object_or_404(Appointment, pk=appointment_id, company=company)
+    appointment.status = "CANCELLED"
+    appointment.save()
+    return JsonResponse({"ok": True, "color": appointment.color})
 
 
 @login_required
 @require_POST
-def atender_turno(request, turno_id):
-    """Marca el turno como ATENDIDO y opcionalmente crea una entrada de historia clínica."""
-    empresa = request.user.profile.empresa
-    turno = get_object_or_404(Turno, pk=turno_id, empresa=empresa)
-    turno.estado = 'ATENDIDO'
-    turno.save()
+def complete_appointment(request, appointment_id):
+    company = request.user.profile.company
+    appointment = get_object_or_404(Appointment, pk=appointment_id, company=company)
+    appointment.status = "COMPLETED"
+    appointment.save()
 
     try:
         data = json.loads(request.body)
     except json.JSONDecodeError:
         data = {}
 
-    crear_historial = data.get('crear_historial', False)
-    historial_id = None
+    create_record = data.get("create_record", False)
+    record_id = None
 
-    if crear_historial:
-        historial = Historial.objects.create(
-            paciente=turno.paciente,
-            motivo=turno.motivo,
-            anamnesis=turno.notas,
+    if create_record:
+        record = MedicalRecord.objects.create(
+            patient=appointment.patient,
+            reason=appointment.reason,
+            anamnesis=appointment.notes,
         )
-        historial_id = historial.id
+        record_id = record.id
 
     return JsonResponse({
-        'ok': True,
-        'color': turno.color,
-        'historial_id': historial_id,
-        'paciente_id': turno.paciente.id,
+        "ok": True,
+        "color": appointment.color,
+        "record_id": record_id,
+        "patient_id": appointment.patient.id,
     })

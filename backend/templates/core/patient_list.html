@@ -1,0 +1,73 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2>{% trans "Patient List" %}</h2>
+    <a href="{% url 'create_patient' %}" class="btn btn-success"><i class="bi bi-plus-circle"></i> {% trans "New Pet" %}</a>
+</div>
+
+<div class="mb-3">
+    <div class="input-group">
+        <span class="input-group-text bg-white"><i class="bi bi-search"></i></span>
+        <input type="text" id="searchPatient" class="form-control" placeholder="{% trans 'Search by name, species, breed or owner...' %}" autofocus>
+    </div>
+</div>
+
+<div class="card shadow-sm">
+    <div class="card-body p-0">
+        <table class="table table-hover mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th>{% trans "Patient" %}</th>
+                    <th>{% trans "Species" %}</th>
+                    <th>{% trans "Owner" %}</th>
+                    <th>{% trans "Weight" %}</th>
+                    <th class="text-end">{% trans "Actions" %}</th>
+                </tr>
+            </thead>
+            <tbody id="patientTable">
+                {% for p in patients %}
+                <tr>
+                    <td class="fw-bold align-middle">
+                        <a href="{% url 'patient_detail' p.id %}" class="text-decoration-none text-dark">{{ p.name }}</a>
+                    </td>
+                    <td class="align-middle">{{ p.get_species_display }}</td>
+                    <td class="align-middle">
+                        <a href="{% url 'client_detail' p.owner.id %}" class="text-decoration-none">{{ p.owner.last_name }}, {{ p.owner.first_name }}</a>
+                    </td>
+                    <td class="align-middle">{{ p.current_weight|default:"-" }} kg</td>
+                    
+                    <td class="text-end">
+                        <div class="btn-group" role="group">
+                            <a href="{% url 'medical_record' p.id %}" class="btn btn-sm btn-info text-white" title="{% trans 'Medical Record' %}">
+                                <i class="bi bi-file-medical"></i>
+                            </a>
+                            <a href="{% url 'schedule' %}?patient={{ p.id }}" class="btn btn-sm btn-outline-success" title="{% trans 'Book Appointment' %}">
+                                <i class="bi bi-calendar-plus"></i>
+                            </a>
+                            <a href="{% url 'edit_patient' p.id %}" class="btn btn-sm btn-outline-primary" title="{% trans 'Edit Details' %}">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="5" class="text-center text-muted py-3">{% trans "No patients registered." %}</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+document.getElementById('searchPatient').addEventListener('input', function() {
+    const filter = this.value.toLowerCase();
+    document.querySelectorAll('#patientTable tr').forEach(function(row) {
+        row.style.display = row.textContent.toLowerCase().includes(filter) ? '' : 'none';
+    });
+});
+</script>
+
+{% include 'includes/pagination.html' with page_obj=patients %}
+{% endblock %}

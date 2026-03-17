@@ -1,154 +1,122 @@
 import json
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
+from django.core.paginator import Paginator
 from django.db import transaction
-from django.db.models import Sum
-from django.utils import timezone
-from django.contrib.auth.decorators import login_required # <--- EL CANDADO
 from django.db.models import Sum, Count
-
-from .models import Venta, DetalleVenta
-from inventory.models import Producto
-from core.models import Cliente
+from django.utils import timezone
+from django.utils.translation import gettext as _
+from django.contrib.auth.decorators import login_required
 from datetime import datetime, time
 
+from .models import Sale, SaleItem
+from inventory.models import Product
+from core.models import Client
 
 
 @login_required
-def nueva_venta(request):
-    if request.method == 'POST':
+def new_sale(request):
+    if request.method == "POST":
         try:
             with transaction.atomic():
-                # 1. Obtener datos básicos
-                cliente_id = request.POST.get('cliente')
-                metodo_pago = request.POST.get('metodo_pago')
-                # El carrito viene como un string JSON desde el frontend
-                carrito_json = request.POST.get('carrito_data') 
-                carrito = json.loads(carrito_json)
+                client_id = request.POST.get("client")
+                payment_method = request.POST.get("payment_method")
+                cart_json = request.POST.get("cart_data")
+                cart = json.loads(cart_json)
 
-                if not carrito:
-                    messages.error(request, "El carrito está vacío.")
-                    return redirect('nueva_venta')
+                if not cart:
+                    messages.error(request, _("Cart is empty."))
+                    return redirect("new_sale")
 
-                # 2. Crear la Cabecera de la Venta
-                venta = Venta.objects.create(
-                    cliente_id=cliente_id if cliente_id else None,
-                    metodo_pago=metodo_pago,
-                    total=0 # Lo calculamos abajo
+                sale = Sale.objects.create(
+                    company=request.user.profile.company,
+                    client_id=client_id if client_id else None,
+                    payment_method=payment_method,
+                    total=0
                 )
 
-                total_acumulado = 0
+                running_total = 0
+                for item in cart:
+                    product = Product.objects.get(id=item["id"])
+                    quantity = int(item["quantity"])
+                    price = float(item["price"])
+                    subtotal = quantity * price
+                    running_total += subtotal
 
-                # 3. Procesar cada ítem del carrito
-                for item in carrito:
-                    producto = Producto.objects.get(id=item['id'])
-                    cantidad = int(item['cantidad'])
-                    precio = float(item['precio']) # Usamos el precio del momento
-                    
-                    subtotal = cantidad * precio
-                    total_acumulado += subtotal
-
-                    DetalleVenta.objects.create(
-                        venta=venta,
-                        producto=producto,
-                        cantidad=cantidad,
-                        precio_unitario=precio,
+                    SaleItem.objects.create(
+                        sale=sale,
+                        product=product,
+                        quantity=quantity,
+                        unit_price=price,
                         subtotal=subtotal
                     )
 
-                # 4. Actualizar total final
-                venta.total = total_acumulado
-                venta.save()
-                
-                messages.success(request, f"Venta #{venta.id} registrada correctamente.")
-                return redirect('detalle_venta', venta_id=venta.id)
+                sale.total = running_total
+                sale.save()
+                messages.success(request, _("Sale #%(id)s registered successfully.") % {"id": sale.id})
+                return redirect("sale_detail", sale_id=sale.id)
 
         except Exception as e:
-            messages.error(request, f"Error al procesar la venta: {str(e)}")
-            return redirect('nueva_venta')
+            messages.error(request, _("Error processing sale: %(error)s") % {"error": str(e)})
+            return redirect("new_sale")
 
-    # --- GET: Mostrar pantalla ---
-    productos = Producto.objects.all().order_by('descripcion')
-    clientes = Cliente.objects.all().order_by('apellido')
-    
-    return render(request, 'sales/nueva_venta.html', {
-        'productos': productos,
-        'clientes': clientes
+    products = Product.objects.filter(company=request.user.profile.company).order_by("description")
+    clients = Client.objects.filter(company=request.user.profile.company).order_by("last_name")
+
+    return render(request, "sales/new_sale.html", {
+        "products": products,
+        "clients": clients
     })
 
-@login_required
-def lista_ventas(request):
-    # Traemos todas las ventas, la más reciente primero
-    ventas = Venta.objects.select_related('cliente').all().order_by('-fecha')
-    return render(request, 'sales/lista_ventas.html', {'ventas': ventas})
 
 @login_required
-def detalle_venta(request, venta_id):
-    # Esta es la vista del Ticket
-    venta = get_object_or_404(Venta, pk=venta_id)
-    return render(request, 'sales/detalle_venta.html', {'venta': venta})
+def sale_list(request):
+    sales_qs = Sale.objects.filter(
+        company=request.user.profile.company
+    ).select_related("client").order_by("-date")
+    paginator = Paginator(sales_qs, 25)
+    page = request.GET.get("page")
+    sales = paginator.get_page(page)
+    return render(request, "sales/sale_list.html", {"sales": sales})
+
 
 @login_required
-def reporte_caja(request):
-    # Obtenemos la fecha de hoy
-    hoy = timezone.now().date()
-    
-    # Filtramos ventas de hoy
-    ventas_hoy = Venta.objects.filter(fecha__date=hoy)
-    
-    # Calculamos totales por método de pago
-    resumen = ventas_hoy.values('metodo_pago').annotate(total_acumulado=Sum('total'))
-    
-    # Calculamos el gran total del día
-    total_general = ventas_hoy.aggregate(Sum('total'))['total__sum'] or 0
-    
-    return render(request, 'sales/reporte_caja.html', {
-        'fecha': hoy,
-        'resumen': resumen,
-        'total_general': total_general,
-        'cantidad_ventas': ventas_hoy.count(),
-        'movimientos': ventas_hoy.order_by('-fecha')
-    })
+def sale_detail(request, sale_id):
+    sale = get_object_or_404(Sale, pk=sale_id, company=request.user.profile.company)
+    return render(request, "sales/sale_detail.html", {"sale": sale})
+
 
 @login_required
-def reporte_caja(request):
-    # 1. Obtener parámetros del filtro (GET)
-    fecha_str = request.GET.get('fecha')
-    turno = request.GET.get('turno', 'todo') # Por defecto: todo el día
+def cash_report(request):
+    date_str = request.GET.get("date")
+    shift = request.GET.get("shift", "all")
 
-    # 2. Determinar la fecha a consultar
-    if fecha_str:
+    if date_str:
         try:
-            fecha_filtro = datetime.strptime(fecha_str, '%Y-%m-%d').date()
+            filter_date = datetime.strptime(date_str, "%Y-%m-%d").date()
         except ValueError:
-            fecha_filtro = timezone.now().date()
+            filter_date = timezone.now().date()
     else:
-        fecha_filtro = timezone.now().date()
-    
-    # 3. Filtrar por Fecha Base
-    ventas = Venta.objects.filter(fecha__date=fecha_filtro)
-    
-    # 4. Filtrar por Turno (Hora)
-    if turno == 'manana':
-        # Ventas antes de las 14:00
-        ventas = ventas.filter(fecha__time__lt=time(14, 0))
-    elif turno == 'tarde':
-        # Ventas desde las 14:00 en adelante
-        ventas = ventas.filter(fecha__time__gte=time(14, 0))
-    
-    # 5. Calcular Totales (Sobre el queryset ya filtrado)
-    total_general = ventas.aggregate(Sum('total'))['total__sum'] or 0
-    
-    desglose_pagos = ventas.values('metodo_pago').annotate(
-        cantidad=Count('id'),
-        total=Sum('total')
-    ).order_by('metodo_pago')
-    
-    return render(request, 'sales/reporte_caja.html', {
-        'ventas': ventas.order_by('-fecha'),
-        'total_general': total_general,
-        'desglose': desglose_pagos,
-        # Pasamos los filtros de vuelta al template para que no se borren del formulario
-        'fecha_seleccionada': fecha_filtro, 
-        'turno_seleccionado': turno
+        filter_date = timezone.now().date()
+
+    sales = Sale.objects.filter(company=request.user.profile.company, date__date=filter_date)
+
+    if shift == "morning":
+        sales = sales.filter(date__time__lt=time(14, 0))
+    elif shift == "afternoon":
+        sales = sales.filter(date__time__gte=time(14, 0))
+
+    grand_total = sales.aggregate(Sum("total"))["total__sum"] or 0
+
+    payment_breakdown = sales.values("payment_method").annotate(
+        count=Count("id"),
+        total=Sum("total")
+    ).order_by("payment_method")
+
+    return render(request, "sales/cash_report.html", {
+        "sales": sales.order_by("-date"),
+        "grand_total": grand_total,
+        "breakdown": payment_breakdown,
+        "selected_date": filter_date,
+        "selected_shift": shift
     })

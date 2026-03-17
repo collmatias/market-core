@@ -1,103 +1,129 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
+from django.core.paginator import Paginator
 from django.db.models import Q
+from django.utils.translation import gettext as _
 from rest_framework import viewsets
 
-# 🌟 IMPORTACIÓN CORREGIDA: Traemos el patovica desde la app 'core'
-from core.decorators import admin_requerido 
+from core.decorators import admin_required
 
-from .models import Producto, MovimientoStock
-from .serializers import ProductoSerializer, MovimientoStockSerializer
-from .forms import ProductoForm, MovimientoStockForm
+from .models import Product, StockMovement
+from .serializers import ProductSerializer, StockMovementSerializer
+from .forms import ProductForm, StockMovementForm
+
 
 # --- API ---
-class ProductoViewSet(viewsets.ModelViewSet):
-    queryset = Producto.objects.all().order_by('descripcion')
-    serializer_class = ProductoSerializer
+class ProductViewSet(viewsets.ModelViewSet):
+    serializer_class = ProductSerializer
 
-class MovimientoStockViewSet(viewsets.ModelViewSet):
-    queryset = MovimientoStock.objects.all().order_by('-fecha')
-    serializer_class = MovimientoStockSerializer
+    def get_queryset(self):
+        return Product.objects.filter(
+            company=self.request.user.profile.company
+        ).order_by("description")
+
+
+class StockMovementViewSet(viewsets.ModelViewSet):
+    serializer_class = StockMovementSerializer
+
+    def get_queryset(self):
+        return StockMovement.objects.filter(
+            product__company=self.request.user.profile.company
+        ).order_by("-date")
+
 
 # --- FRONTEND ---
 
 @login_required
-def lista_productos(request):
-    query = request.GET.get('q')
+def product_list(request):
+    query = request.GET.get("q")
+    qs = Product.objects.for_company(request.user)
     if query:
-        productos = Producto.objects.filter(
-            Q(descripcion__icontains=query) | Q(codigo_barras__icontains=query)
-        ).order_by('descripcion')
-    else:
-        productos = Producto.objects.all().order_by('descripcion')
-        
-    return render(request, 'inventory/lista_productos.html', {'productos': productos})
+        qs = qs.filter(
+            Q(description__icontains=query) | Q(barcode__icontains=query)
+        )
+    products_qs = qs.order_by("description")
+    paginator = Paginator(products_qs, 25)
+    page = request.GET.get("page")
+    products = paginator.get_page(page)
+    return render(request, "inventory/product_list.html", {"products": products})
 
-# 🌟 LÍNEA RESTAURADA: Faltaba el 'def crear_producto(request):'
+
 @login_required
-@admin_requerido
-def crear_producto(request):
-    if request.method == 'POST':
-        form = ProductoForm(request.POST)
+@admin_required
+def create_product(request):
+    if request.method == "POST":
+        form = ProductForm(request.POST)
+        if form.is_valid():
+            product = form.save(commit=False)
+            product.company = request.user.profile.company
+            product.save()
+            messages.success(request, _("Product created successfully."))
+            return redirect("product_list")
+    else:
+        form = ProductForm()
+    return render(request, "inventory/product_form.html", {"form": form})
+
+
+@login_required
+@admin_required
+def edit_product(request, id):
+    product = get_object_or_404(Product, id=id, company=request.user.profile.company)
+    if request.method == "POST":
+        form = ProductForm(request.POST, instance=product)
         if form.is_valid():
             form.save()
-            messages.success(request, "Producto creado exitosamente.")
-            return redirect('lista_productos')
+            messages.success(request, _("Product updated."))
+            return redirect("product_list")
     else:
-        form = ProductoForm()
-    return render(request, 'inventory/producto_form.html', {'form': form})
+        form = ProductForm(instance=product)
+    return render(request, "inventory/product_form.html", {"form": form})
 
-# 🔒 NUEVA VISTA: EDITAR (Solo Admin)
+
 @login_required
-@admin_requerido
-def editar_producto(request, id):
-    producto = get_object_or_404(Producto, id=id)
-    if request.method == 'POST':
-        form = ProductoForm(request.POST, instance=producto)
+@admin_required
+def delete_product(request, id):
+    if request.method != "POST":
+        return redirect("product_list")
+    product = get_object_or_404(Product, id=id, company=request.user.profile.company)
+    product.delete()
+    messages.success(request, _("Product deleted."))
+    return redirect("product_list")
+
+
+@login_required
+def register_movement(request):
+    is_admin = request.user.is_superuser or (hasattr(request.user, "profile") and request.user.profile.is_admin)
+
+    if request.method == "POST":
+        form = StockMovementForm(request.POST, company=request.user.profile.company)
         if form.is_valid():
-            form.save()
-            messages.success(request, "Producto actualizado.")
-            return redirect('lista_productos')
+            movement = form.save(commit=False)
+            if not is_admin and movement.type != "IN":
+                messages.error(request, _("Operation denied. Only administrators can withdraw stock."))
+                return redirect("product_list")
+            movement.user = request.user
+            movement.save()
+            messages.success(request, _("Stock movement recorded."))
+            return redirect("product_list")
     else:
-        form = ProductoForm(instance=producto)
-    return render(request, 'inventory/producto_form.html', {'form': form})
+        form = StockMovementForm(company=request.user.profile.company)
+        if not is_admin:
+            form.fields["type"].choices = [("IN", _("Incoming Stock"))]
 
-# 🔒 NUEVA VISTA: ELIMINAR (Solo Admin)
+    return render(request, "inventory/movement_form.html", {"form": form})
+
+
 @login_required
-@admin_requerido
-def eliminar_producto(request, id):
-    producto = get_object_or_404(Producto, id=id)
-    producto.delete()
-    messages.success(request, "Producto eliminado del sistema.")
-    return redirect('lista_productos')
+def product_labels(request):
+    ids = request.GET.getlist("ids")
+    company = request.user.profile.company
 
-
-# 🌟 MAGIA CONTABLE: Control de Entradas y Salidas
-@login_required
-def registrar_movimiento(request):
-    # Verificamos si es ADMIN
-    es_admin = request.user.is_superuser or (hasattr(request.user, 'profile') and request.user.profile.es_admin)
-
-    if request.method == 'POST':
-        form = MovimientoStockForm(request.POST)
-        if form.is_valid():
-            movimiento = form.save(commit=False)
-            
-            # 🛡️ DEFENSA ACTIVA: Usamos 'tipo' en lugar de 'tipo_movimiento'
-            if not es_admin and movimiento.tipo != 'ENTRADA':
-                messages.error(request, "Operación denegada. Solo los Administradores pueden retirar stock manualmente.")
-                return redirect('lista_productos')
-
-            movimiento.usuario = request.user
-            movimiento.save()
-            messages.success(request, "Movimiento de stock registrado.")
-            return redirect('lista_productos')
+    if ids:
+        products = Product.objects.filter(company=company, id__in=ids).order_by("description")
     else:
-        form = MovimientoStockForm()
-        
-        # 🎨 DEFENSA VISUAL: Restringimos las opciones del selector 'tipo'
-        if not es_admin:
-            form.fields['tipo'].choices = [('ENTRADA', 'Ingreso de Mercadería')]
+        products = Product.objects.filter(company=company).exclude(
+            barcode__isnull=True
+        ).exclude(barcode="").order_by("description")
 
-    return render(request, 'inventory/movimiento_form.html', {'form': form})
+    return render(request, "inventory/product_labels.html", {"products": products})

@@ -105,7 +105,7 @@ def check_local_cache():
                 return True, "Modo Offline (Gracia)"
                 
         return False, "No se pudo verificar la licencia"
-    except:
+    except (json.JSONDecodeError, KeyError, ValueError, OSError):
         return False, "Error de caché"
 
 def check_license():
@@ -137,7 +137,7 @@ def check_license():
         else:
             return False, current_hw_id
             
-    except:
+    except (OSError, ValueError, KeyError):
         return False, current_hw_id
 
 def save_license(key):

@@ -25,12 +25,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-gl!d)td)ccdgnu6v0c^24pu=5p@9^jo)!9d0g4m#9sn4&&zkf8'
+SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-dev-only-key-change-in-production')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.environ.get('DEBUG', '0') == '1'
 
-ALLOWED_HOSTS = ["*"]
+ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
 
 
 # Application definition
@@ -55,12 +55,14 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.middleware.locale.LocaleMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'core.middleware.CompanyLanguageMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'core.middleware.LicenseCheckMiddleware', 
+    'core.middleware.LicenseCheckMiddleware',
 ]
 
 ROOT_URLCONF = 'vetcore.urls'
@@ -75,6 +77,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'core.context_processors.currency_context',
             ],
         },
     },
@@ -136,21 +139,23 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/5.0/topics/i18n/
 
-# 1. Cambiamos el código de idioma a Español de Argentina
-LANGUAGE_CODE = 'es-ar'
+LANGUAGE_CODE = 'es'
 
-# 2. Cambiamos la zona horaria a la de Córdoba/Argentina
-# (Esto es importante para que el cierre de caja corte a las 00:00 de acá y no de Londres)
+from django.utils.translation import gettext_lazy as _
+LANGUAGES = [
+    ('es', _('Spanish')),
+    ('en', _('English')),
+    ('pt', _('Portuguese')),
+]
+
+LOCALE_PATHS = [
+    os.path.join(BASE_DIR, 'locale'),
+]
+
 TIME_ZONE = 'America/Argentina/Cordoba'
 
-# 3. Activamos el sistema de traducción
 USE_I18N = True
-
-# 4. Permitimos que Django formatee fechas y números según la región (es-ar)
-# (Ej: Usar coma para decimales en lugar de punto, día antes que mes, etc.)
 USE_L10N = True
-
-# 5. Soporte para Zona Horaria (Recomendado True para guardar en UTC en la DB y mostrar local al usuario)
 USE_TZ = True
 
 
@@ -158,6 +163,17 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
 STATIC_URL = 'static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+
+# --- DRF: Autenticación por defecto ---
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.SessionAuthentication',
+    ],
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated',
+    ],
+}
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field

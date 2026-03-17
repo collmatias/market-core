@@ -1,69 +1,82 @@
 from django import forms
-from .models import Historial, ArchivoAdjunto, Turno
-from core.models import Paciente, UserProfile
+from django.utils.translation import gettext_lazy as _
+from .models import MedicalRecord, Attachment, Appointment
+from core.models import Patient, UserProfile
 
-class HistorialForm(forms.ModelForm):
+
+class MedicalRecordForm(forms.ModelForm):
     class Meta:
-        model = Historial
-        fields = ['fecha', 'motivo', 'peso', 'anamnesis', 'diagnostico', 'tratamiento', 'proxima_visita']
+        model = MedicalRecord
+        fields = ['date', 'reason', 'weight', 'anamnesis', 'diagnosis', 'treatment', 'next_visit']
+        labels = {
+            'date': _('Date'),
+            'reason': _('Reason'),
+            'weight': _('Weight (kg)'),
+            'anamnesis': _('Anamnesis / Notes'),
+            'diagnosis': _('Diagnosis'),
+            'treatment': _('Treatment / Instructions'),
+            'next_visit': _('Next Visit'),
+        }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         from django.utils import timezone
-        ahora = timezone.localtime(timezone.now()).strftime('%Y-%m-%dT%H:%M')
-        self.fields['fecha'].widget = forms.DateTimeInput(attrs={
-            'class': 'form-control', 'type': 'datetime-local', 'max': ahora
+        now = timezone.localtime(timezone.now()).strftime('%Y-%m-%dT%H:%M')
+        self.fields['date'].widget = forms.DateTimeInput(attrs={
+            'class': 'form-control', 'type': 'datetime-local', 'max': now
         })
-        self.fields['motivo'].widget = forms.TextInput(attrs={'class': 'form-control'})
-        self.fields['peso'].widget = forms.NumberInput(attrs={'class': 'form-control', 'step': '0.1'})
+        self.fields['reason'].widget = forms.TextInput(attrs={'class': 'form-control'})
+        self.fields['weight'].widget = forms.NumberInput(attrs={'class': 'form-control', 'step': '0.1'})
         self.fields['anamnesis'].widget = forms.Textarea(attrs={'class': 'form-control', 'rows': 3})
-        self.fields['diagnostico'].widget = forms.Textarea(attrs={'class': 'form-control', 'rows': 3})
-        self.fields['tratamiento'].widget = forms.Textarea(attrs={'class': 'form-control', 'rows': 3})
-        self.fields['proxima_visita'].widget = forms.DateInput(attrs={'class': 'form-control', 'type': 'date'})
+        self.fields['diagnosis'].widget = forms.Textarea(attrs={'class': 'form-control', 'rows': 3})
+        self.fields['treatment'].widget = forms.Textarea(attrs={'class': 'form-control', 'rows': 3})
+        self.fields['next_visit'].widget = forms.DateInput(attrs={'class': 'form-control', 'type': 'date'})
 
-# Formulario para subir múltiples archivos (Opcional, por ahora uno simple)
-class ArchivoAdjuntoForm(forms.ModelForm):
-    # SOBREESCRIBIMOS el campo para que sea opcional
-    archivo = forms.FileField(
-        required=False,  # <--- ESTO ES LA SOLUCIÓN
+
+class AttachmentForm(forms.ModelForm):
+    file = forms.FileField(
+        required=False,
         widget=forms.FileInput(attrs={'class': 'form-control'})
     )
 
     class Meta:
-        model = ArchivoAdjunto
-        fields = ['archivo', 'descripcion'] # 'archivo' se usa desde la definición de arriba
+        model = Attachment
+        fields = ['file', 'description']
+        labels = {
+            'description': _('Description'),
+        }
         widgets = {
-            # 'archivo': ... (Ya lo definimos arriba, así que lo borramos de aquí)
-            'descripcion': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ej: Radiografía tórax'}),
+            'description': forms.TextInput(attrs={'class': 'form-control'}),
         }
 
 
-class TurnoForm(forms.ModelForm):
+class AppointmentForm(forms.ModelForm):
     class Meta:
-        model = Turno
-        fields = ['paciente', 'profesional', 'fecha_hora_inicio', 'fecha_hora_fin', 'motivo', 'estado', 'notas']
+        model = Appointment
+        fields = ['patient', 'professional', 'start_time', 'end_time', 'reason', 'status', 'notes']
+        labels = {
+            'patient': _('Patient'),
+            'professional': _('Professional'),
+            'start_time': _('Start Time'),
+            'end_time': _('End Time'),
+            'reason': _('Reason'),
+            'status': _('Status'),
+            'notes': _('Notes'),
+        }
         widgets = {
-            'paciente': forms.Select(attrs={'class': 'form-select'}),
-            'profesional': forms.Select(attrs={'class': 'form-select'}),
-            'fecha_hora_inicio': forms.DateTimeInput(attrs={'class': 'form-control', 'type': 'datetime-local'}),
-            'fecha_hora_fin': forms.DateTimeInput(attrs={'class': 'form-control', 'type': 'datetime-local'}),
-            'motivo': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ej: Vacunación, Control, Cirugía'}),
-            'estado': forms.Select(attrs={'class': 'form-select'}),
-            'notas': forms.Textarea(attrs={'class': 'form-control', 'rows': 2, 'placeholder': 'Observaciones adicionales (opcional)'}),
+            'patient': forms.Select(attrs={'class': 'form-select'}),
+            'professional': forms.Select(attrs={'class': 'form-select'}),
+            'start_time': forms.DateTimeInput(attrs={'class': 'form-control', 'type': 'datetime-local'}),
+            'end_time': forms.DateTimeInput(attrs={'class': 'form-control', 'type': 'datetime-local'}),
+            'reason': forms.TextInput(attrs={'class': 'form-control'}),
+            'status': forms.Select(attrs={'class': 'form-select'}),
+            'notes': forms.Textarea(attrs={'class': 'form-control', 'rows': 2}),
         }
 
-    def __init__(self, *args, empresa=None, **kwargs):
+    def __init__(self, *args, company=None, **kwargs):
         super().__init__(*args, **kwargs)
-        if empresa:
-            self.fields['paciente'].queryset = Paciente.objects.filter(empresa=empresa)
-            self.fields['profesional'].queryset = UserProfile.objects.filter(
-                empresa=empresa, rol='VETERINARIO'
-            ).select_related('user')
-
-    def clean(self):
-        cleaned_data = super().clean()
-        inicio = cleaned_data.get('fecha_hora_inicio')
-        fin = cleaned_data.get('fecha_hora_fin')
-        if inicio and fin and fin <= inicio:
-            raise forms.ValidationError('La hora de fin debe ser posterior a la hora de inicio.')
-        return cleaned_data
+        if company:
+            self.fields['patient'].queryset = Patient.objects.filter(company=company)
+            self.fields['professional'].queryset = UserProfile.objects.filter(
+                company=company, role='VET'
+            )

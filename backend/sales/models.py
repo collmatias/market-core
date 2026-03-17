@@ -1,35 +1,38 @@
 from django.db import models
 from django.utils import timezone
-from core.models import Cliente
-from inventory.models import Producto
+from core.models import Client, Company, TenantManager
+from inventory.models import Product
 
-class Venta(models.Model):
-    METODOS_PAGO = [
-        ('EFECTIVO', 'Efectivo'),
-        ('TARJETA', 'Tarjeta Débito/Crédito'),
-        ('TRANSFERENCIA', 'Transferencia'),
-        ('QR', 'Billetera Virtual (QR)'),
+
+class Sale(models.Model):
+    PAYMENT_METHODS = [
+        ('CASH', 'Cash'),
+        ('CARD', 'Debit/Credit Card'),
+        ('TRANSFER', 'Bank Transfer'),
+        ('QR', 'Digital Wallet (QR)'),
     ]
 
-    fecha = models.DateTimeField(default=timezone.now)
-    cliente = models.ForeignKey(Cliente, on_delete=models.SET_NULL, null=True, related_name='compras')
+    company = models.ForeignKey(Company, on_delete=models.CASCADE, null=True)
+    date = models.DateTimeField(default=timezone.now)
+    client = models.ForeignKey(Client, on_delete=models.SET_NULL, null=True, related_name='purchases')
     total = models.DecimalField(max_digits=12, decimal_places=2, default=0)
-    metodo_pago = models.CharField(max_length=20, choices=METODOS_PAGO, default='EFECTIVO')
-    
-    def __str__(self):
-        return f"Venta #{self.id} - {self.fecha.strftime('%d/%m/%Y')}"
+    payment_method = models.CharField(max_length=20, choices=PAYMENT_METHODS, default='CASH')
+    objects = TenantManager()
 
-class DetalleVenta(models.Model):
-    venta = models.ForeignKey(Venta, on_delete=models.CASCADE, related_name='detalles')
-    producto = models.ForeignKey(Producto, on_delete=models.PROTECT) # PROTECT evita borrar productos que ya se vendieron
-    cantidad = models.PositiveIntegerField(default=1)
-    precio_unitario = models.DecimalField(max_digits=10, decimal_places=2)
+    def __str__(self):
+        return f"Sale #{self.id} - {self.date.strftime('%d/%m/%Y')}"
+
+
+class SaleItem(models.Model):
+    sale = models.ForeignKey(Sale, on_delete=models.CASCADE, related_name='items')
+    product = models.ForeignKey(Product, on_delete=models.PROTECT)
+    quantity = models.PositiveIntegerField(default=1)
+    unit_price = models.DecimalField(max_digits=10, decimal_places=2)
     subtotal = models.DecimalField(max_digits=12, decimal_places=2)
 
     def save(self, *args, **kwargs):
-        # 1. Calculamos el subtotal automáticamente
-        self.subtotal = self.cantidad * self.precio_unitario
+        self.subtotal = self.quantity * self.unit_price
         super().save(*args, **kwargs)
 
     def __str__(self):
-        return f"{self.cantidad}x {self.producto.descripcion}"
+        return f"{self.quantity}x {self.product.description}"
