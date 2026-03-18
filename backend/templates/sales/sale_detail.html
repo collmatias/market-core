@@ -1,0 +1,87 @@
+{% extends 'base.html' %}
+{% load i18n currency %}
+
+{% block content %}
+<div class="d-flex justify-content-between mb-4 no-print">
+    <a href="{% url 'sale_list' %}" class="btn btn-secondary"><i class="bi bi-arrow-left"></i> {% trans "Back to History" %}</a>
+    <div>
+        <a href="{% url 'new_sale' %}" class="btn btn-success me-2"><i class="bi bi-cart-plus"></i> {% trans "New Sale" %}</a>
+        <button onclick="window.print()" class="btn btn-primary"><i class="bi bi-printer"></i> {% trans "Print Ticket" %}</button>
+    </div>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-md-6 col-lg-5">
+        <div class="card shadow-lg border-0" id="printable-ticket">
+            <div class="card-body p-5">
+                
+                <div class="text-center mb-4">
+                    <h2 class="fw-bold"><i class="bi bi-hospital"></i> VetCore</h2>
+                    <p class="text-muted mb-0">{% trans "Veterinary Clinic" %}</p>
+                    <hr class="my-3">
+                    <h5 class="fw-bold mb-0">{% trans "SALE TICKET" %} #{{ sale.id }}</h5>
+                    <p class="small text-muted">{{ sale.date|date:"d/m/Y H:i:s" }}</p>
+                </div>
+
+                <div class="mb-4 small">
+                    <strong>{% trans "Client" %}:</strong> 
+                    {% if sale.client %}
+                        {{ sale.client.last_name }}, {{ sale.client.first_name }}
+                    {% else %}
+                        {% trans "Walk-in Customer" %}
+                    {% endif %}
+                    <br>
+                    <strong>{% trans "Payment" %}:</strong> {{ sale.payment_method }}
+                </div>
+
+                <table class="table table-sm table-borderless small">
+                    <thead class="border-bottom">
+                        <tr>
+                            <th>{% trans "Qty" %}</th>
+                            <th>{% trans "Description" %}</th>
+                            <th class="text-end">{% trans "Total" %}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in sale.items.all %}
+                        <tr>
+                            <td>{{ item.quantity }}</td>
+                            <td>{{ item.product.description }}</td>
+                            <td class="text-end">{% currency item.subtotal %}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                    <tfoot class="border-top fw-bold">
+                        <tr>
+                            <td colspan="2" class="text-end pt-3">{% trans "TOTAL:" %}</td>
+                            <td class="text-end pt-3 fs-5">{% currency sale.total %}</td>
+                        </tr>
+                    </tfoot>
+                </table>
+
+                <div class="text-center mt-5 pt-3 border-top small text-muted">
+                    <p class="mb-1">{% trans "Thank you for choosing us!" %}</p>
+                    <p>www.vetcore.com.ar</p>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    @media print {
+        body * { visibility: hidden; }
+        .navbar, .no-print { display: none !important; }
+        #printable-ticket, #printable-ticket * { visibility: visible; }
+        #printable-ticket {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+            border: none !important;
+            box-shadow: none !important;
+        }
+    }
+</style>
+{% endblock %}

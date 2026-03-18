@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load i18n %}
 
 {% block content %}
 <div class="container py-5">
@@ -6,15 +7,15 @@
         <div class="col-md-8 col-lg-6">
             <div class="card shadow-lg border-0 rounded-3">
                 <div class="card-header bg-success text-white text-center py-4">
-                    <h2 class="mb-0"><i class="bi bi-rocket-takeoff-fill"></i> Bienvenido a VetCore</h2>
-                    <p class="mb-0 opacity-75">Configuración Inicial del Sistema</p>
+                    <h2 class="mb-0"><i class="bi bi-rocket-takeoff-fill"></i> {% trans "Welcome to VetCore" %}</h2>
+                    <p class="mb-0 opacity-75">{% trans "Initial System Setup" %}</p>
                 </div>
                 <div class="card-body p-5">
                     <div class="alert alert-info border-0 d-flex align-items-center" role="alert">
                         <i class="bi bi-gift-fill fs-4 me-3"></i>
                         <div>
-                            <strong>¡30 Días de Prueba Gratis!</strong><br>
-                            Al registrarte, obtendrás acceso completo por un mes.
+                            <strong>{% trans "30 Days Free Trial!" %}</strong><br>
+                            {% trans "By registering, you'll get full access for one month." %}
                         </div>
                     </div>
 
@@ -23,7 +24,7 @@
 
                         {% if form.errors %}
                             <div class="alert alert-danger">
-                                <strong>⚠️ Por favor corrige los siguientes errores:</strong>
+                                <strong>{% trans "Please correct the following errors:" %}</strong>
                                 <ul>
                                     {% for field in form %}
                                         {% for error in field.errors %}
@@ -36,7 +37,7 @@
                                 </ul>
                             </div>
                         {% endif %}            
-                        <h5 class="text-muted mb-3 border-bottom pb-2">👤 Datos de Administrador</h5>
+                        <h5 class="text-muted mb-3 border-bottom pb-2">👤 {% trans "Administrator Details" %}</h5>
                         <div class="mb-3">
                             {{ form.username.label_tag }}
                             {{ form.username }}
@@ -62,25 +63,25 @@
                             <div class="form-text text-danger">{{ form.non_field_errors }}</div>
                         </div>
 
-                        <h5 class="text-muted mb-3 border-bottom pb-2 mt-4">🏥 Datos de la Veterinaria</h5>
+                        <h5 class="text-muted mb-3 border-bottom pb-2 mt-4">🏥 {% trans "Clinic Details" %}</h5>
                         <div class="mb-3">
-                            {{ form.nombre_empresa.label_tag }}
-                            {{ form.nombre_empresa }}
+                            {{ form.company_name.label_tag }}
+                            {{ form.company_name }}
                         </div>
                         <div class="row mb-3">
                             <div class="col">
-                                {{ form.cuit.label_tag }}
-                                {{ form.cuit }}
+                                {{ form.tax_id.label_tag }}
+                                {{ form.tax_id }}
                             </div>
                             <div class="col">
-                                {{ form.telefono.label_tag }}
-                                {{ form.telefono }}
+                                {{ form.phone.label_tag }}
+                                {{ form.phone }}
                             </div>
                         </div>
 
                         <div class="d-grid gap-2 mt-5">
                             <button type="submit" class="btn btn-success btn-lg">
-                                Instalar y Comenzar <i class="bi bi-arrow-right"></i>
+                                {% trans "Install and Start" %} <i class="bi bi-arrow-right"></i>
                             </button>
                         </div>
                     </form>

@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load i18n %}
 
 {% block content %}
 
@@ -6,7 +7,7 @@
     <div class="row mb-4 fade-in">
         <div class="col-12 d-flex justify-content-between align-items-center">
             <h2 class="display-6 fw-bold text-dark">
-                👋 Hola, {{ user.first_name|default:user.username|title }}
+                👋 {% trans "Hello" %}, {{ user.first_name|default:user.username|title }}
             </h2>
             <span class="badge bg-white text-secondary border shadow-sm p-2">
                 <i class="bi bi-calendar-event"></i> {% now "l d F Y" %}
@@ -19,9 +20,9 @@
             <i class="bi bi-router-fill fs-4"></i>
         </div>
         <div>
-            <h6 class="fw-bold m-0 text-dark">Acceso Remoto</h6>
+            <h6 class="fw-bold m-0 text-dark">{% trans "Remote Access" %}</h6>
             <p class="mb-0 small text-muted">
-                IP del Servidor: <strong class="text-primary">http://{{ server_ip }}:8000</strong>
+                {% trans "Server IP" %}: <strong class="text-primary">http://{{ server_ip }}:8000</strong>
             </p>
         </div>
     </div>
@@ -33,10 +34,10 @@
                 <div class="card-body">
                     <div class="d-flex align-items-center mb-2">
                         <i class="bi bi-cart4 fs-3 text-success me-2"></i>
-                        <h5 class="card-title fw-bold mb-0">Caja</h5>
+                        <h5 class="card-title fw-bold mb-0">{% trans "POS" %}</h5>
                     </div>
-                    <p class="card-text small text-muted">Nueva venta rápida.</p>
-                    <a href="{% url 'nueva_venta' %}" class="btn btn-sm btn-success w-100 stretched-link">Cobrar</a>
+                    <p class="card-text small text-muted">{% trans "Quick new sale." %}</p>
+                    <a href="{% url 'new_sale' %}" class="btn btn-sm btn-success w-100 stretched-link">{% trans "Checkout" %}</a>
                 </div>
             </div>
         </div>
@@ -46,10 +47,10 @@
                 <div class="card-body">
                     <div class="d-flex align-items-center mb-2">
                         <i class="bi bi-receipt fs-3 text-dark me-2"></i>
-                        <h5 class="card-title fw-bold mb-0">Historial</h5>
+                        <h5 class="card-title fw-bold mb-0">{% trans "History" %}</h5>
                     </div>
-                    <p class="card-text small text-muted">Ver tickets y ventas.</p>
-                    <a href="{% url 'lista_ventas' %}" class="btn btn-sm btn-outline-dark w-100 stretched-link">Ver Listado</a>
+                    <p class="card-text small text-muted">{% trans "View tickets and sales." %}</p>
+                    <a href="{% url 'sale_list' %}" class="btn btn-sm btn-outline-dark w-100 stretched-link">{% trans "View List" %}</a>
                 </div>
             </div>
         </div>
@@ -59,10 +60,10 @@
                 <div class="card-body">
                     <div class="d-flex align-items-center mb-2">
                         <i class="bi bi-graph-up-arrow fs-3 text-info me-2"></i>
-                        <h5 class="card-title fw-bold mb-0">Cierre Caja</h5>
+                        <h5 class="card-title fw-bold mb-0">{% trans "Cash Report" %}</h5>
                     </div>
-                    <p class="card-text small text-muted">Totales del día.</p>
-                    <a href="{% url 'reporte_caja' %}" class="btn btn-sm btn-outline-info w-100 stretched-link text-dark">Ver Reporte</a>
+                    <p class="card-text small text-muted">{% trans "Daily totals." %}</p>
+                    <a href="{% url 'cash_report' %}" class="btn btn-sm btn-outline-info w-100 stretched-link text-dark">{% trans "View Report" %}</a>
                 </div>
             </div>
         </div>
@@ -72,10 +73,10 @@
                 <div class="card-body">
                     <div class="d-flex align-items-center mb-2">
                         <i class="bi bi-heart-pulse fs-3 text-danger me-2"></i>
-                        <h5 class="card-title fw-bold mb-0">Pacientes</h5>
+                        <h5 class="card-title fw-bold mb-0">{% trans "Patients" %}</h5>
                     </div>
-                    <p class="card-text small text-muted">Fichas médicas.</p>
-                    <a href="{% url 'lista_pacientes' %}" class="btn btn-sm btn-outline-danger w-100 stretched-link">Gestionar</a>
+                    <p class="card-text small text-muted">{% trans "Medical records." %}</p>
+                    <a href="{% url 'patient_list' %}" class="btn btn-sm btn-outline-danger w-100 stretched-link">{% trans "Manage" %}</a>
                 </div>
             </div>
         </div>
@@ -85,10 +86,10 @@
                 <div class="card-body">
                     <div class="d-flex align-items-center mb-2">
                         <i class="bi bi-people fs-3 text-primary me-2"></i>
-                        <h5 class="card-title fw-bold mb-0">Clientes</h5>
+                        <h5 class="card-title fw-bold mb-0">{% trans "Clients" %}</h5>
                     </div>
-                    <p class="card-text small text-muted">Dueños y contacto.</p>
-                    <a href="{% url 'lista_clientes' %}" class="btn btn-sm btn-outline-primary w-100 stretched-link">Directorio</a>
+                    <p class="card-text small text-muted">{% trans "Owners and contacts." %}</p>
+                    <a href="{% url 'client_list' %}" class="btn btn-sm btn-outline-primary w-100 stretched-link">{% trans "Directory" %}</a>
                 </div>
             </div>
         </div>
@@ -98,10 +99,10 @@
                 <div class="card-body">
                     <div class="d-flex align-items-center mb-2">
                         <i class="bi bi-box-seam fs-3 text-warning me-2"></i>
-                        <h5 class="card-title fw-bold mb-0">Stock</h5>
+                        <h5 class="card-title fw-bold mb-0">{% trans "Stock" %}</h5>
                     </div>
-                    <p class="card-text small text-muted">Productos y precios.</p>
-                    <a href="{% url 'lista_productos' %}" class="btn btn-sm btn-outline-warning text-dark w-100 stretched-link">Ver Stock</a>
+                    <p class="card-text small text-muted">{% trans "Products and prices." %}</p>
+                    <a href="{% url 'product_list' %}" class="btn btn-sm btn-outline-warning text-dark w-100 stretched-link">{% trans "View Stock" %}</a>
                 </div>
             </div>
         </div>
@@ -111,23 +112,36 @@
                 <div class="card-body">
                     <div class="d-flex align-items-center mb-2">
                         <i class="bi bi-arrow-left-right fs-3 text-secondary me-2"></i>
-                        <h5 class="card-title fw-bold mb-0">Entradas</h5>
+                        <h5 class="card-title fw-bold mb-0">{% trans "Incoming" %}</h5>
                     </div>
-                    <p class="card-text small text-muted">Cargar facturas prov.</p>
-                    <a href="{% url 'registrar_movimiento' %}" class="btn btn-sm btn-outline-secondary w-100 stretched-link">Registrar</a>
+                    <p class="card-text small text-muted">{% trans "Load supplier invoices." %}</p>
+                    <a href="{% url 'register_movement' %}" class="btn btn-sm btn-outline-secondary w-100 stretched-link">{% trans "Register" %}</a>
                 </div>
             </div>
         </div>
-        {% if user.profile.rol == 'ADMIN' or user.is_superuser %}
+
+        <div class="col">
+            <div class="card h-100 border-0 shadow-sm hover-card border-top border-4 border-primary bg-primary bg-opacity-10">
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-2">
+                        <i class="bi bi-calendar-event fs-3 text-primary me-2"></i>
+                        <h5 class="card-title fw-bold mb-0 text-primary">{% trans "Schedule" %}</h5>
+                    </div>
+                    <p class="card-text small text-muted">{% trans "Appointments and calendar." %}</p>
+                    <a href="{% url 'schedule' %}" class="btn btn-sm btn-primary w-100 stretched-link">{% trans "View Schedule" %}</a>
+                </div>
+            </div>
+        </div>
+        {% if user.profile.role == 'ADMIN' or user.is_superuser %}
             <div class="col">
                 <div class="card h-100 border-0 shadow-sm hover-card border-top border-4 border-secondary bg-light">
                     <div class="card-body">
                         <div class="d-flex align-items-center mb-2">
                             <i class="bi bi-cloud-download fs-3 text-dark me-2"></i>
-                            <h5 class="card-title fw-bold mb-0">Backup</h5>
+                            <h5 class="card-title fw-bold mb-0">{% trans "Backup" %}</h5>
                         </div>
-                        <p class="card-text small text-muted">Guardar base de datos.</p>
-                        <a href="{% url 'descargar_backup' %}" class="btn btn-sm btn-dark w-100 stretched-link">Descargar</a>
+                        <p class="card-text small text-muted">{% trans "Save database." %}</p>
+                        <a href="{% url 'download_backup' %}" class="btn btn-sm btn-dark w-100 stretched-link">{% trans "Download" %}</a>
                     </div>
                 </div>
             </div>
@@ -137,10 +151,10 @@
                 <div class="card-body">
                     <div class="d-flex align-items-center mb-2">
                         <i class="bi bi-person-vcard fs-3 text-success me-2"></i>
-                        <h5 class="card-title fw-bold mb-0 text-success">Equipo</h5>
+                        <h5 class="card-title fw-bold mb-0 text-success">{% trans "Team" %}</h5>
                     </div>
-                    <p class="card-text small text-muted">Usuarios, permisos y roles.</p>
-                    <a href="{% url 'gestion_equipo' %}" class="btn btn-sm btn-success w-100 stretched-link">Administrar</a>
+                    <p class="card-text small text-muted">{% trans "Users, permissions and roles." %}</p>
+                    <a href="{% url 'team_management' %}" class="btn btn-sm btn-success w-100 stretched-link">{% trans "Manage" %}</a>
                 </div>
             </div>
         </div>
@@ -153,9 +167,9 @@
 {% else %}
     <div class="px-4 py-5 my-5 text-center">
         <h1 class="display-4 fw-bold text-primary mb-3">🐶 VetCore</h1>
-        <p class="lead text-muted mb-4">Sistema Integral de Gestión Veterinaria</p>
+        <p class="lead text-muted mb-4">{% trans "Comprehensive Veterinary Management System" %}</p>
         <div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
-            <a href="{% url 'login' %}" class="btn btn-primary btn-lg px-5 shadow-sm">Iniciar Sesión</a>
+            <a href="{% url 'login' %}" class="btn btn-primary btn-lg px-5 shadow-sm">{% trans "Sign In" %}</a>
         </div>
     </div>
 {% endif %}

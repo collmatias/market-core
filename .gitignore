@@ -16,9 +16,15 @@ pip-log.txt
 db.sqlite3
 db.sqlite3-journal
 *.sqlite3
+*.sqlite3.pre_*
+
+# Migrations (recreated from scratch during development)
+**/migrations/0*.py
+**/migrations/__pycache__/
 
 # Archivos estáticos recolectados (si corres collectstatic)
 staticfiles/
+backend/staticfiles/
 
 # Archivos subidos por usuarios (nunca se suben al repo)
 media/
@@ -77,6 +83,9 @@ dist/
 .idea/
 .DS_Store
 Thumbs.db
+
+# Legacy data (Vetter migration source)
+Vetter/
 
 
 # Ignorar migraciones en etapa de desarrollo

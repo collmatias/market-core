@@ -1,0 +1,137 @@
+{% extends 'base.html' %}
+{% load i18n currency %}
+
+{% block content %}
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
+    <div>
+        <h2 class="mb-0"><i class="bi bi-cash-coin"></i> {% trans "Cash Report" %}</h2>
+        <p class="text-muted mb-0">{% trans "Summary of operations." %}</p>
+    </div>
+    
+    <form method="get" class="d-flex gap-2 align-items-center bg-white p-2 rounded shadow-sm border">
+        
+        <div class="input-group input-group-sm">
+            <span class="input-group-text bg-light"><i class="bi bi-calendar"></i></span>
+            <input type="date" name="date" class="form-control" 
+                   value="{{ selected_date|date:'Y-m-d' }}" 
+                   onchange="this.form.submit()">
+        </div>
+
+        <select name="shift" class="form-select form-select-sm" onchange="this.form.submit()" style="width: 130px;">
+            <option value="all" {% if selected_shift == 'all' %}selected{% endif %}>{% trans "All Day" %}</option>
+            <option value="morning" {% if selected_shift == 'morning' %}selected{% endif %}>🌅 {% trans "Morning" %}</option>
+            <option value="afternoon" {% if selected_shift == 'afternoon' %}selected{% endif %}>🌆 {% trans "Afternoon" %}</option>
+        </select>
+
+        <div class="vr mx-1"></div>
+        <button type="button" onclick="window.print()" class="btn btn-sm btn-outline-secondary" title="{% trans 'Print' %}">
+            <i class="bi bi-printer"></i>
+        </button>
+        <a href="{% url 'cash_report' %}" class="btn btn-sm btn-outline-danger" title="{% trans 'Clear Filters' %}">
+            <i class="bi bi-x-lg"></i>
+        </a>
+    </form>
+</div>
+
+<div class="alert alert-light border-start border-4 border-primary shadow-sm mb-4">
+    <div class="d-flex align-items-center">
+        <i class="bi bi-funnel-fill text-primary me-3 fs-4"></i>
+        <div>
+            <strong>{% trans "Viewing report for" %}:</strong> {{ selected_date|date:"l d F Y" }}
+            <span class="mx-2">•</span>
+            <strong>{% trans "Shift" %}:</strong> 
+            {% if selected_shift == 'morning' %}{% trans "Morning (Until 2pm)" %}{% endif %}
+            {% if selected_shift == 'afternoon' %}{% trans "Afternoon (2pm onwards)" %}{% endif %}
+            {% if selected_shift == 'all' %}{% trans "Full Day" %}{% endif %}
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-6">
+        <div class="card bg-primary text-white shadow-sm h-100">
+            <div class="card-body text-center">
+                <h5 class="card-title opacity-75">{% trans "DAY TOTAL" %}</h5>
+                <h1 class="display-4 fw-bold">{% currency grand_total %}</h1>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="card shadow-sm h-100">
+            <div class="card-body">
+                <h5 class="card-title text-muted mb-3">{% trans "By Payment Method" %}</h5>
+                <ul class="list-group list-group-flush">
+                    {% for item in breakdown %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <span>
+                            <i class="bi bi-credit-card me-2"></i> {{ item.payment_method }}
+                            <span class="badge bg-secondary rounded-pill ms-1">{{ item.count }} {% trans "ops" %}</span>
+                        </span>
+                        <span class="fw-bold">{% currency item.total %}</span>
+                    </li>
+                    {% empty %}
+                    <li class="list-group-item text-center text-muted">{% trans "No transactions today" %}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card shadow-sm">
+    <div class="card-header bg-white py-3">
+        <h5 class="mb-0">{% trans "Transaction Details" %}</h5>
+    </div>
+    <div class="table-responsive">
+        <table class="table table-hover mb-0 align-middle">
+            <thead class="table-light">
+                <tr>
+                    <th>{% trans "Time" %}</th>
+                    <th>{% trans "Ticket" %} #</th>
+                    <th>{% trans "Client" %}</th>
+                    <th>{% trans "Method" %}</th>
+                    <th class="text-end">{% trans "Total" %}</th>
+                    <th class="text-end">{% trans "Action" %}</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for sale in sales %}
+                <tr>
+                    <td>{{ sale.date|date:"H:i" }}</td>
+                    <td>#{{ sale.id }}</td>
+                    <td>
+                        {% if sale.client %}
+                            {{ sale.client.last_name }}, {{ sale.client.first_name }}
+                        {% else %}
+                            <span class="text-muted fst-italic">{% trans "Walk-in Customer" %}</span>
+                        {% endif %}
+                    </td>
+                    <td><span class="badge bg-light text-dark border">{{ sale.payment_method }}</span></td>
+                    <td class="text-end fw-bold">{% currency sale.total %}</td>
+                    <td class="text-end">
+                        <a href="{% url 'sale_detail' sale.id %}" class="btn btn-sm btn-outline-primary" title="{% trans 'View Ticket' %}">
+                            <i class="bi bi-eye"></i>
+                        </a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" class="text-center py-4 text-muted">
+                        <i class="bi bi-inbox display-6 d-block mb-2"></i>
+                        {% trans "No sales recorded today." %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<style>
+    @media print {
+        .btn, .navbar { display: none !important; }
+        .card { border: none !important; box-shadow: none !important; }
+    }
+</style>
+{% endblock %}

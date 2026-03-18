@@ -1,27 +1,20 @@
 from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
-from .models import DetalleVenta
+from .models import SaleItem
 
-@receiver(post_save, sender=DetalleVenta)
-def descontar_stock(sender, instance, created, **kwargs):
-    """
-    Se ejecuta automáticamente cuando se guarda un renglón de venta.
-    Si es una venta nueva y es PRODUCTO físico, descuenta stock.
-    """
+
+@receiver(post_save, sender=SaleItem)
+def deduct_stock(sender, instance, created, **kwargs):
     if created:
-        producto = instance.producto
-        
-        # Solo descontamos si es un producto físico
-        if producto.tipo == 'PRODUCTO':
-            producto.cantidad_actual -= instance.cantidad
-            producto.save()
+        product = instance.product
+        if product.type == 'PRODUCT':
+            product.current_stock -= instance.quantity
+            product.save()
 
-@receiver(post_delete, sender=DetalleVenta)
-def devolver_stock(sender, instance, **kwargs):
-    """
-    Si borramos una venta (anulación), devolvemos el stock.
-    """
-    producto = instance.producto
-    if producto.tipo == 'PRODUCTO':
-        producto.cantidad_actual += instance.cantidad
-        producto.save()
+
+@receiver(post_delete, sender=SaleItem)
+def restore_stock(sender, instance, **kwargs):
+    product = instance.product
+    if product.type == 'PRODUCT':
+        product.current_stock += instance.quantity
+        product.save()

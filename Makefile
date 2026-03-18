@@ -13,6 +13,7 @@ help:
 	@echo "  make shell       : Entra a la consola de Python/Django"
 	@echo "  make bash        : Entra a la terminal del contenedor"
 	@echo "  make perms       : Arregla permisos de archivos en Linux (sudo)"
+	@echo "  make seed        : Carga datos ficticios de demo (limpia la DB primero)"
 
 # --- Comandos Docker ---
 up:
@@ -54,6 +55,10 @@ perms:
 # --- Testing ---
 test:
 	$(COMPOSE) exec $(API_CONTAINER) python manage.py test
+
+# Carga datos ficticios de demo (limpia la DB primero)
+seed:
+	$(COMPOSE) run --rm api_desktop python manage.py seed_demo
 
 # Borra base de datos, volúmenes, migraciones y reinicia todo limpio
 reset-db:

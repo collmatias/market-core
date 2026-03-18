@@ -1,21 +1,17 @@
 from rest_framework import serializers
-from .models import Cliente, Paciente#, HistoriaClinica
+from .models import Client, Patient
 
-class ClienteSerializer(serializers.ModelSerializer):
+
+class ClientSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Cliente
+        model = Client
         fields = '__all__'
 
-class PacienteSerializer(serializers.ModelSerializer):
-    # Para que al leer muestre el nombre del dueño en vez del ID
-    nombre_cliente = serializers.ReadOnlyField(source='cliente.nombre')
-    apellido_cliente = serializers.ReadOnlyField(source='cliente.apellido')
+
+class PatientSerializer(serializers.ModelSerializer):
+    owner_first_name = serializers.ReadOnlyField(source='owner.first_name')
+    owner_last_name = serializers.ReadOnlyField(source='owner.last_name')
 
     class Meta:
-        model = Paciente
+        model = Patient
         fields = '__all__'
-
-# class HistoriaClinicaSerializer(serializers.ModelSerializer):
-#     class Meta:
-#         model = HistoriaClinica
-#         fields = '__all__'

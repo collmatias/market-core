@@ -21,11 +21,15 @@ services:
     command: python manage.py runserver 0.0.0.0:8000
     volumes:
       - ./backend:/app
+      - ./Vetter:/vetter:ro
     environment:
       - DEPLOYMENT_MODE=DESKTOP
       - DEBUG=1
-      - SECRET_KEY=tu_secret_key_de_django_aqui
+      - SECRET_KEY=${SECRET_KEY:-django-insecure-dev-only-key-change-in-production}
+      - ALLOWED_HOSTS=*
       - LICENSE_API_URL=http://cloud_api:8000/check-license
+      - AM_I_IN_DOCKER=1
+      - VETCORE_MODE=DEV
     ports:
       - "8000:8000"
     depends_on:
@@ -46,9 +50,12 @@ services:
       - POSTGRES_PASSWORD=vetcore_pass
       - POSTGRES_HOST=db
       - POSTGRES_PORT=5432
-      - SECRET_KEY=tu_secret_key_de_django_aqui
+      - SECRET_KEY=${SECRET_KEY:-django-insecure-dev-only-key-change-in-production}
+      - ALLOWED_HOSTS=*
       - DEBUG=1
       - LICENSE_API_URL=http://cloud_api:8000/check-license
+      - AM_I_IN_DOCKER=1
+      - VETCORE_MODE=DEV
     ports:
       - "8001:8000"
     depends_on:
@@ -71,11 +78,17 @@ services:
     build: ./cloud_api
     container_name: cloud_api_service
     command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+    volumes:
+      - ./cloud_api:/app
     ports:
       - "5000:8000"
     environment:
       - DATABASE_URL=postgresql://cloud_admin:cloud_secret_pass@cloud_db/licenses_db
-      - API_SECRET=MI_CLAVE_MAESTRA_PARA_CREAR_LICENCIAS
+      - API_SECRET=${API_SECRET:-vetcore-dev-secret-change-in-prod}
+      - JWT_SECRET=${JWT_SECRET:-vetcore-jwt-dev-secret-change-in-prod}
+      - DEBUG=1
+      - CORS_ORIGINS=*
+      - RATE_LIMIT_DEFAULT=120/minute
     depends_on:
       - cloud_db
 

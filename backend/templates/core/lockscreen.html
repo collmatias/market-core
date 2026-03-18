@@ -1,8 +1,9 @@
+{% load i18n %}
 <!DOCTYPE html>
-<html lang="es">
+<html lang="{{ LANGUAGE_CODE }}">
 <head>
     <meta charset="UTF-8">
-    <title>VetCore - Ingreso Rápido</title>
+    <title>VetCore - {% trans "Quick Login" %}</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
     <style>
@@ -17,8 +18,8 @@
 
 <div class="container">
     <div class="text-center mb-5">
-        <h1 class="display-5 fw-bold text-primary"><i class="bi bi-shield-lock"></i> Estación de Trabajo</h1>
-        <p class="text-muted lead">Selecciona tu usuario para ingresar</p>
+        <h1 class="display-5 fw-bold text-primary"><i class="bi bi-shield-lock"></i> {% trans "Workstation" %}</h1>
+        <p class="text-muted lead">{% trans "Select your user to sign in" %}</p>
     </div>
 
     {% if messages %}
@@ -32,15 +33,15 @@
     {% endif %}
 
     <div class="row justify-content-center g-4">
-        {% for perfil in empleados %}
+        {% for profile in employees %}
         <div class="col-6 col-md-4 col-lg-3">
-            <div class="card user-card border-0 shadow-sm h-100 bg-white" onclick="abrirPinPad('{{ perfil.user.id }}', '{{ perfil.user.first_name|default:perfil.user.username }}')">
+            <div class="card user-card border-0 shadow-sm h-100 bg-white" onclick="openPinPad('{{ profile.user.id }}', '{{ profile.user.first_name|default:profile.user.username }}')">
                 <div class="card-body text-center p-4">
                     <div class="bg-primary bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 80px; height: 80px;">
-                        <i class="{{ perfil.avatar|default:'bi-person-fill' }} fs-1 text-primary"></i>
+                        <i class="{{ profile.avatar|default:'bi-person-fill' }} fs-1 text-primary"></i>
                     </div>
-                    <h5 class="fw-bold mb-1">{{ perfil.user.first_name|default:perfil.user.username|title }}</h5>
-                    <span class="badge bg-secondary small">{{ perfil.get_rol_display }}</span>
+                    <h5 class="fw-bold mb-1">{{ profile.user.first_name|default:profile.user.username|title }}</h5>
+                    <span class="badge bg-secondary small">{{ profile.get_role_display }}</span>
                 </div>
             </div>
         </div>
@@ -48,7 +49,7 @@
     </div>
 
     <div class="text-center mt-5">
-        <a href="{% url 'login' %}" class="btn btn-outline-secondary"><i class="bi bi-box-arrow-in-right"></i> Ingreso Completo (Contraseña)</a>
+        <a href="{% url 'login' %}" class="btn btn-outline-secondary"><i class="bi bi-box-arrow-in-right"></i> {% trans "Full Login (Password)" %}</a>
     </div>
 </div>
 
@@ -56,7 +57,7 @@
     <div class="modal-dialog modal-sm modal-dialog-centered">
         <div class="modal-content border-0 shadow-lg" style="border-radius: 20px;">
             <div class="modal-body p-4 text-center">
-                <h5 id="modalUserName" class="fw-bold mb-3">Usuario</h5>
+                <h5 id="modalUserName" class="fw-bold mb-3">{% trans "User" %}</h5>
                 
                 <form id="pinForm" method="post" action="{% url 'lockscreen' %}">
                     {% csrf_token %}
@@ -90,9 +91,9 @@
     const pinModal = new bootstrap.Modal(pinModalElement);
     const pinInput = document.getElementById('pinInput');
     
-    function abrirPinPad(userId, userName) {
+    function openPinPad(userId, userName) {
         document.getElementById('hiddenUserId').value = userId;
-        document.getElementById('modalUserName').innerText = 'Hola, ' + userName;
+        document.getElementById('modalUserName').innerText = userName;
         pinInput.value = '';
         pinModal.show();
     }
@@ -101,7 +102,6 @@
         if (pinInput.value.length < 4) {
             pinInput.value += num;
         }
-        // Auto-enviar si llega a 4 dígitos
         if (pinInput.value.length === 4) {
             setTimeout(() => { document.getElementById('pinForm').submit(); }, 200);
         }
@@ -111,23 +111,15 @@
         pinInput.value = pinInput.value.slice(0, -1);
     }
 
-    // 🌟 NUEVO: MAGIA PARA EL TECLADO FÍSICO
     document.addEventListener('keydown', function(event) {
-        // Solo escuchamos el teclado si la ventanita del PIN está abierta
         if (pinModalElement.classList.contains('show')) {
             const key = event.key;
-            
-            // Si presiona un número del 0 al 9
             if (key >= '0' && key <= '9') {
                 addPin(key);
-            } 
-            // Si presiona la tecla de borrar
-            else if (key === 'Backspace') {
+            } else if (key === 'Backspace') {
                 clearPin();
-            }
-            // Si presiona Enter y ya escribió los 4 dígitos
-            else if (key === 'Enter' && pinInput.value.length === 4) {
-                event.preventDefault(); // Evitamos que el Enter haga cosas raras
+            } else if (key === 'Enter' && pinInput.value.length === 4) {
+                event.preventDefault();
                 document.getElementById('pinForm').submit();
             }
         }

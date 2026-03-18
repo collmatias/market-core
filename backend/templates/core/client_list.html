@@ -1,0 +1,72 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2>{% trans "Client List" %}</h2>
+    <a href="{% url 'create_client' %}" class="btn btn-success"><i class="bi bi-plus-circle"></i> {% trans "New Client" %}</a>
+</div>
+
+<div class="mb-3">
+    <form method="get" action="{% url 'client_list' %}" class="input-group">
+        <span class="input-group-text bg-white"><i class="bi bi-search"></i></span>
+        <input type="text" name="q" class="form-control" placeholder="{% trans 'Search by name, phone or email...' %}" value="{{ q }}" autofocus>
+        {% if q %}
+        <a href="{% url 'client_list' %}" class="btn btn-outline-secondary" title="{% trans 'Clear' %}"><i class="bi bi-x-lg"></i></a>
+        {% endif %}
+        <button type="submit" class="btn btn-primary">{% trans "Search" %}</button>
+    </form>
+</div>
+
+{% if q %}
+<div class="mb-2">
+    <small class="text-muted">
+        {% blocktrans with total=clients.paginator.count query=q %}{{ total }} results for "{{ query }}"{% endblocktrans %}
+    </small>
+</div>
+{% endif %}
+
+<div class="card shadow-sm">
+    <div class="card-body p-0">
+        <table class="table table-hover mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th>{% trans "Name" %}</th>
+                    <th>{% trans "Phone" %}</th>
+                    <th>{% trans "Email" %}</th>
+                    <th class="text-end">{% trans "Actions" %}</th>
+                </tr>
+            </thead>
+            <tbody id="clientTable">
+                {% for client in clients %}
+                <tr>
+                    <td class="fw-bold align-middle">
+                        <a href="{% url 'client_detail' client.id %}" class="text-decoration-none text-dark">{{ client.last_name }}, {{ client.first_name }}</a>
+                    </td>
+                    <td class="align-middle">{{ client.phone }}</td>
+                    <td class="align-middle">{{ client.email|default:"-" }}</td>
+                    <td class="text-end">
+                        <div class="btn-group" role="group">
+                            <a href="{% url 'schedule' %}?client={{ client.id }}" class="btn btn-sm btn-outline-success" title="{% trans 'Book Appointment' %}">
+                                <i class="bi bi-calendar-plus"></i>
+                            </a>
+                            <a href="{% url 'edit_client' client.id %}" class="btn btn-sm btn-outline-primary" title="{% trans 'Edit Client' %}">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="4" class="text-center text-muted py-3">
+                        {% if q %}{% trans "No clients match your search." %}{% else %}{% trans "No clients registered." %}{% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{% include 'includes/pagination.html' with page_obj=clients %}
+{% endblock %}

@@ -1,54 +1,61 @@
 from django.shortcuts import redirect
 from django.urls import reverse
 from django.conf import settings
+from django.utils import translation
 from .license import check_license
-from .models import Empresa
+from .models import Company
 from django.contrib.auth.models import User
+import os
+
 
 class LicenseCheckMiddleware:
     def __init__(self, get_response):
         self.get_response = get_response
 
     def __call__(self, request):
-        setup_url = reverse('setup_wizard') # <--- Nueva ruta
+        setup_url = reverse('setup_wizard')
 
-        # 1. EXCEPCIONES: Rutas que siempre pasan (Static, Admin, Setup)
-        if request.path.startswith('/static/') or request.path.startswith('/media/') or request.path == setup_url:
-             return self.get_response(request)
+        exempt_prefixes = ['/static/', '/media/', setup_url]
+        for prefix in exempt_prefixes:
+            if request.path.startswith(prefix):
+                return self.get_response(request)
 
-        # 2. DETECTOR DE INSTALACIÓN LIMPIA
-        # Si no hay usuarios en la DB, redirigir al Wizard.
         if not User.objects.exists():
             return redirect('setup_wizard')
 
-        # 1. Rutas permitidas siempre (Login, Static, Admin, Activación)
-        allowed_prefixes = [
-            reverse('activacion'),
-            reverse('login'), # Importante: dejar entrar al login
+        allowed_paths = [
+            reverse('activation'),
+            reverse('login'),
             '/admin/',
-            '/static/',
-            '/media/',
-            # IMPORTANTE: Permitir la ruta de configuración para no crear un bucle infinito
-            reverse('configuracion_empresa'), 
+            reverse('company_settings'),
         ]
-
-        for path in allowed_prefixes:
+        for path in allowed_paths:
             if request.path.startswith(path):
                 return self.get_response(request)
 
-        # 2. VALIDACIÓN DE LICENCIA (Tu código existente Desktop/SaaS...)
-        # ... (aquí va tu if SaaS / if Desktop check_license) ...
-        # (Copia tu lógica anterior aquí)
-
-        # ----------------------------------------------------
-        # 3. VALIDACIÓN DE EMPRESA / PERFIL
-        # ----------------------------------------------------
-        if request.user.is_authenticated:
-            # Si no hay empresas en la DB
-            if not Empresa.objects.exists():
-                return redirect('configuracion_empresa') # (o 'setup_wizard' si usas esa ruta)
-            
-            if not hasattr(request.user, 'profile'):
-                 return redirect('configuracion_empresa')
+        if not os.environ.get('VETCORE_MODE'):
+            deployment = getattr(settings, 'DEPLOYMENT_MODE', 'DESKTOP')
+            if deployment == 'DESKTOP':
+                is_valid, hw_id = check_license()
+                if not is_valid:
+                    return redirect('activation')
 
         return self.get_response(request)
+
+
+class CompanyLanguageMiddleware:
+    """Sets the active language based on the company's language preference."""
+
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        if request.user.is_authenticated:
+            try:
+                lang = request.user.profile.company.language
+                translation.activate(lang)
+                request.LANGUAGE_CODE = lang
+            except Exception:
+                pass
+        response = self.get_response(request)
+        return response

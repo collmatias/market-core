@@ -1,93 +1,87 @@
-from fastapi import FastAPI, Depends, HTTPException, Header
-from sqlalchemy.orm import Session
-from datetime import date
-from pydantic import BaseModel
-from typing import Optional
-from mangum import Mangum # <--- ESTO ES LA MAGIA PARA AWS LAMBDA
-import os
+"""
+VetCore Cloud API — FastAPI application.
 
-from database import engine, Base, get_db
-from models import License
+Modular architecture with routers for each domain:
+  /           — health check
+  /license/   — license check and admin CRUD
+  /admin/     — JWT token generation
+"""
+import logging
 
-# Crear tablas automáticamente al iniciar
-Base.metadata.create_all(bind=engine)
+from fastapi import FastAPI, Request, Response
+from fastapi.middleware.cors import CORSMiddleware
+from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi.util import get_remote_address
+from slowapi.errors import RateLimitExceeded
+from mangum import Mangum
 
-app = FastAPI(title="VetCore Cloud License Manager")
+from core.config import get_settings
+from core.database import Base, engine
 
-# --- MANGUM HANDLER ---
-# Esta variable 'handler' es lo que configurarás en AWS Lambda como "Entry Point"
+# --- Logging ---
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
+)
+logger = logging.getLogger("vetcore.cloud")
+
+# --- Rate limiter ---
+settings = get_settings()
+limiter = Limiter(key_func=get_remote_address, default_limits=[settings.rate_limit_default])
+
+# --- App ---
+app = FastAPI(
+    title=settings.app_name,
+    version="1.0.0",
+    docs_url="/docs",
+    redoc_url="/redoc",
+)
+
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+
+# --- CORS ---
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=settings.cors_origins.split(","),
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# --- Request logging middleware ---
+@app.middleware("http")
+async def log_requests(request: Request, call_next):
+    logger.info(f"{request.method} {request.url.path}")
+    response: Response = await call_next(request)
+    return response
+
+
+# --- Create tables (dev convenience; production uses Alembic) ---
+if settings.debug:
+    Base.metadata.create_all(bind=engine)
+
+# --- Register routers ---
+from routers.health import router as health_router  # noqa: E402
+from routers.license import router as license_router  # noqa: E402
+from routers.admin import router as admin_router  # noqa: E402
+
+app.include_router(health_router)
+app.include_router(license_router)
+app.include_router(admin_router)
+
+# --- Legacy backward-compatible endpoint ---
+# Old Desktop clients call POST /check-license directly at root level
+from routers.license import check_license as _check_license, LicenseCheckRequest  # noqa: E402
+from core.database import get_db  # noqa: E402
+from fastapi import Depends  # noqa: E402
+from sqlalchemy.orm import Session  # noqa: E402
+
+
+@app.post("/check-license", include_in_schema=False)
+def legacy_check_license(req: LicenseCheckRequest, db: Session = Depends(get_db)):
+    return _check_license(req, db)
+
+
+# --- Mangum handler for AWS Lambda ---
 handler = Mangum(app)
-
-# --- SCHEMAS (Validación de datos) ---
-class LicenseCheckRequest(BaseModel):
-    hw_id: str
-
-class LicenseCreateRequest(BaseModel):
-    hw_id: str
-    client_name: str
-    expiration_date: date
-    secret: str # Seguridad básica para crear licencias
-
-# --- ENDPOINTS ---
-
-@app.get("/")
-def health_check():
-    return {"status": "Cloud API Running", "env": "Production-Ready"}
-
-@app.post("/check-license")
-def check_license(req: LicenseCheckRequest, db: Session = Depends(get_db)):
-    """
-    Este endpoint lo consume el software VetCore instalado en la PC del cliente.
-    """
-    license_entry = db.query(License).filter(License.hardware_id == req.hw_id).first()
-    
-    # 1. No existe
-    if not license_entry:
-        return {"status": "DENIED", "reason": "Not Found"}
-    
-    # 2. Está desactivada manualmente
-    if not license_entry.is_active:
-        return {"status": "DENIED", "reason": "Revoked"}
-    
-    # 3. Verificar fecha
-    today = date.today()
-    if license_entry.expiration_date >= today:
-        return {
-            "status": "ACTIVE", 
-            "expires": license_entry.expiration_date.isoformat()
-        }
-    else:
-        return {
-            "status": "EXPIRED", 
-            "expires": license_entry.expiration_date.isoformat()
-        }
-
-@app.post("/admin/create-license")
-def create_license(req: LicenseCreateRequest, db: Session = Depends(get_db)):
-    """
-    Endpoint administrativo para que TÚ crees licencias (desde Postman o script).
-    """
-    # Validación de seguridad muy simple (puedes mejorarla)
-    if req.secret != os.environ.get("API_SECRET"):
-        raise HTTPException(status_code=403, detail="Unauthorized")
-        
-    # Verificar si ya existe
-    existing = db.query(License).filter(License.hardware_id == req.hw_id).first()
-    
-    if existing:
-        # Actualizar (Renovar suscripción)
-        existing.expiration_date = req.expiration_date
-        existing.is_active = True
-        existing.client_name = req.client_name
-        db.commit()
-        return {"message": "Licencia actualizada/renovada", "hw_id": req.hw_id}
-    else:
-        # Crear nueva
-        new_license = License(
-            hardware_id=req.hw_id,
-            client_name=req.client_name,
-            expiration_date=req.expiration_date
-        )
-        db.add(new_license)
-        db.commit()
-        return {"message": "Licencia creada", "hw_id": req.hw_id}

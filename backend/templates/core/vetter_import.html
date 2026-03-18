@@ -1,0 +1,429 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block content %}
+<div class="row justify-content-center mt-4">
+    <div class="col-md-9">
+
+        <div class="d-flex align-items-center mb-3">
+            <a href="{% url 'import_hub' %}" class="btn btn-outline-secondary me-3">
+                <i class="bi bi-arrow-left"></i>
+            </a>
+            <h4 class="mb-0"><i class="bi bi-database-up text-warning me-2"></i>{% trans "Vetter Data Import" %}</h4>
+        </div>
+
+        <div class="card shadow-lg border-0">
+            <div class="card-header bg-warning text-dark text-center py-3">
+                <h5 class="mb-0">
+                    {% trans "Migrate data from Vetter (FoxPro) to VetCore" %}
+                </h5>
+            </div>
+            <div class="card-body p-4">
+
+                {% if error %}
+                <div class="alert alert-danger">
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i> {{ error }}
+                </div>
+                {% endif %}
+
+                {% if not result %}
+                {# --- STEP 1: FORM --- #}
+                <div class="alert alert-info">
+                    <i class="bi bi-info-circle-fill me-2"></i>
+                    {% trans "This tool will import clients, patients, clinical history, vaccines, products and sales from a Vetter data directory." %}
+                    <br>
+                    <i class="bi bi-shield-check me-2 text-success"></i>
+                    <strong>{% trans "A backup of the database will be created automatically before importing." %}</strong>
+                    <br>
+                    <i class="bi bi-exclamation-triangle me-2 text-warning"></i>
+                    {% trans "Existing data will NOT be deleted, but duplicate data may be created if you run the import multiple times." %}
+                </div>
+
+                <form method="post" id="importForm">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="data_dir" class="form-label fw-bold">
+                            <i class="bi bi-folder2-open me-1"></i> {% trans "Vetter data directory" %}
+                        </label>
+                        <div class="input-group">
+                            <input type="text" class="form-control form-control-lg" id="data_dir" name="data_dir"
+                                   value="{{ data_dir|default:'' }}"
+                                   placeholder="{% trans 'Select a folder...' %}" readonly required>
+                            <button type="button" class="btn btn-outline-secondary btn-lg" id="btnBrowse">
+                                <i class="bi bi-folder2-open me-1"></i> {% trans "Browse..." %}
+                            </button>
+                        </div>
+                        <div class="form-text">
+                            {% trans "Navigate the server's filesystem and select the folder containing .DBF files." %}
+                        </div>
+                        <div id="dbfBadge" class="mt-2" style="display:none;">
+                            <span class="badge bg-success"><i class="bi bi-check-circle me-1"></i> {% trans "DBF files detected in this folder" %}</span>
+                        </div>
+                    </div>
+
+                    {# --- TABLE SELECTION --- #}
+                    <div id="tableSelection" class="mb-4" style="display:none;">
+                        <label class="form-label fw-bold">
+                            <i class="bi bi-list-check me-1"></i> {% trans "Select tables to import" %}
+                        </label>
+                        <div id="tableLoading" class="text-center py-3" style="display:none;">
+                            <div class="spinner-border spinner-border-sm text-primary me-2"></div>
+                            <span class="text-muted">{% trans "Analyzing data files..." %}</span>
+                        </div>
+                        <div class="list-group" id="tableList">
+                            <label class="list-group-item d-flex align-items-center">
+                                <input class="form-check-input me-3 flex-shrink-0" type="checkbox" name="tables" value="clients" id="tbl_clients" checked>
+                                <div class="flex-grow-1">
+                                    <span class="fw-semibold">{% trans "Clients" %}</span>
+                                    <span class="badge bg-primary ms-2 tbl-count" data-table="clients"></span>
+                                </div>
+                            </label>
+                            <label class="list-group-item d-flex align-items-center">
+                                <input class="form-check-input me-3 flex-shrink-0" type="checkbox" name="tables" value="patients" id="tbl_patients" checked>
+                                <div class="flex-grow-1">
+                                    <span class="fw-semibold">{% trans "Patients" %}</span>
+                                    <span class="badge bg-success ms-2 tbl-count" data-table="patients"></span>
+                                </div>
+                            </label>
+                            <label class="list-group-item d-flex align-items-center">
+                                <input class="form-check-input me-3 flex-shrink-0" type="checkbox" name="tables" value="records" id="tbl_records" checked>
+                                <div class="flex-grow-1">
+                                    <span class="fw-semibold">{% trans "Clinical Records" %}</span>
+                                    <span class="badge bg-info ms-2 tbl-count" data-table="records"></span>
+                                </div>
+                            </label>
+                            <label class="list-group-item d-flex align-items-center">
+                                <input class="form-check-input me-3 flex-shrink-0" type="checkbox" name="tables" value="vaccines" id="tbl_vaccines" checked>
+                                <div class="flex-grow-1">
+                                    <span class="fw-semibold">{% trans "Vaccines" %}</span>
+                                    <span class="badge bg-warning text-dark ms-2 tbl-count" data-table="vaccines"></span>
+                                </div>
+                            </label>
+                            <label class="list-group-item d-flex align-items-center">
+                                <input class="form-check-input me-3 flex-shrink-0" type="checkbox" name="tables" value="products" id="tbl_products">
+                                <div class="flex-grow-1">
+                                    <span class="fw-semibold">{% trans "Products" %}</span>
+                                    <span class="badge bg-secondary ms-2 tbl-count" data-table="products"></span>
+                                    <br><small class="text-muted">{% trans "May contain junk entries from ad-hoc billing items" %}</small>
+                                </div>
+                            </label>
+                            <label class="list-group-item d-flex align-items-center">
+                                <input class="form-check-input me-3 flex-shrink-0" type="checkbox" name="tables" value="sales" id="tbl_sales">
+                                <div class="flex-grow-1">
+                                    <span class="fw-semibold">{% trans "Sales" %}</span>
+                                    <span class="badge bg-dark ms-2 tbl-count" data-table="sales"></span>
+                                    <br><small class="text-muted">{% trans "May create additional products for unmapped sale items" %}</small>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="form-check mb-4">
+                        <input class="form-check-input" type="checkbox" id="confirm" name="confirm" required>
+                        <label class="form-check-label" for="confirm">
+                            {% trans "I confirm that I want to import the selected Vetter data into the current company." %}
+                        </label>
+                    </div>
+
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-warning btn-lg fw-bold" id="btnImport" disabled>
+                            <i class="bi bi-upload me-2"></i> {% trans "Start Import" %}
+                        </button>
+                    </div>
+                </form>
+
+                {# --- FOLDER BROWSER MODAL --- #}
+                <div class="modal fade" id="folderModal" tabindex="-1" aria-hidden="true">
+                    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+                        <div class="modal-content">
+                            <div class="modal-header bg-light">
+                                <h5 class="modal-title"><i class="bi bi-folder2-open me-2"></i>{% trans "Select Folder" %}</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                            </div>
+                            <div class="modal-body p-0">
+                                <div class="bg-light border-bottom px-3 py-2 d-flex align-items-center gap-2">
+                                    <button type="button" class="btn btn-sm btn-outline-secondary" id="btnUp" title="{% trans 'Go up' %}">
+                                        <i class="bi bi-arrow-up"></i>
+                                    </button>
+                                    <code id="currentPath" class="flex-grow-1 text-truncate fs-6">/</code>
+                                    <span id="dbfIndicator" class="badge bg-success" style="display:none;">
+                                        <i class="bi bi-file-earmark-binary me-1"></i> .DBF
+                                    </span>
+                                </div>
+                                <div id="folderLoading" class="text-center py-4" style="display:none;">
+                                    <div class="spinner-border text-primary"></div>
+                                </div>
+                                <div id="folderError" class="alert alert-danger m-3" style="display:none;"></div>
+                                <div class="list-group list-group-flush" id="dirList" style="max-height: 400px; overflow-y: auto;">
+                                </div>
+                                <div id="emptyDir" class="text-center text-muted py-4" style="display:none;">
+                                    <i class="bi bi-folder-x fs-1 d-block mb-2"></i>
+                                    {% trans "No subfolders found" %}
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{% trans "Cancel" %}</button>
+                                <button type="button" class="btn btn-primary" id="btnSelectFolder">
+                                    <i class="bi bi-check-lg me-1"></i> {% trans "Select This Folder" %}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {% else %}
+                {# --- STEP 2: RESULTS --- #}
+                <div class="alert alert-success">
+                    <i class="bi bi-check-circle-fill me-2"></i>
+                    <strong>{% trans "Import completed successfully!" %}</strong>
+                </div>
+
+                <div class="row g-3 mb-4">
+                    <div class="col-md-4">
+                        <div class="card text-center border-primary">
+                            <div class="card-body">
+                                <h2 class="text-primary">{{ result.clients }}</h2>
+                                <small class="text-muted">{% trans "Clients" %}</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card text-center border-success">
+                            <div class="card-body">
+                                <h2 class="text-success">{{ result.patients }}</h2>
+                                <small class="text-muted">{% trans "Patients" %}</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card text-center border-info">
+                            <div class="card-body">
+                                <h2 class="text-info">{{ result.records }}</h2>
+                                <small class="text-muted">{% trans "Clinical Records" %}</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card text-center border-warning">
+                            <div class="card-body">
+                                <h2 class="text-warning">{{ result.vaccines }}</h2>
+                                <small class="text-muted">{% trans "Vaccines" %}</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card text-center border-secondary">
+                            <div class="card-body">
+                                <h2 class="text-secondary">{{ result.products }}</h2>
+                                <small class="text-muted">{% trans "Products" %}</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card text-center border-dark">
+                            <div class="card-body">
+                                <h2>{{ result.sales }}</h2>
+                                <small class="text-muted">{% trans "Sales" %}</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {% if result.errors %}
+                <div class="alert alert-warning">
+                    <strong><i class="bi bi-exclamation-triangle me-1"></i> {% trans "Warnings" %} ({{ result.errors|length }}):</strong>
+                    <ul class="mb-0 mt-2" style="max-height: 200px; overflow-y: auto;">
+                        {% for err in result.errors %}
+                        <li><small>{{ err }}</small></li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                {% endif %}
+
+                <details class="mb-4">
+                    <summary class="fw-bold text-muted cursor-pointer">
+                        <i class="bi bi-terminal me-1"></i> {% trans "Import Log" %}
+                    </summary>
+                    <pre class="bg-dark text-light p-3 mt-2 rounded" style="max-height: 400px; overflow-y: auto; font-size: 0.85rem;">{% for line in log %}{{ line }}
+{% endfor %}</pre>
+                </details>
+
+                <div class="d-flex gap-2">
+                    <a href="{% url 'home' %}" class="btn btn-primary">
+                        <i class="bi bi-house me-1"></i> {% trans "Go to Home" %}
+                    </a>
+                    <a href="{% url 'client_list' %}" class="btn btn-outline-secondary">
+                        <i class="bi bi-people me-1"></i> {% trans "View Clients" %}
+                    </a>
+                </div>
+                {% endif %}
+
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+{% if not result %}
+<script>
+(function() {
+    const BROWSE_URL = '{% url "browse_server_dirs" %}';
+    const ANALYZE_URL = '{% url "vetter_analyze" %}';
+    const modal = new bootstrap.Modal(document.getElementById('folderModal'));
+    const dirList = document.getElementById('dirList');
+    const currentPathEl = document.getElementById('currentPath');
+    const dbfIndicator = document.getElementById('dbfIndicator');
+    const folderLoading = document.getElementById('folderLoading');
+    const folderError = document.getElementById('folderError');
+    const emptyDir = document.getElementById('emptyDir');
+    const btnUp = document.getElementById('btnUp');
+    const btnSelectFolder = document.getElementById('btnSelectFolder');
+    const dataDirInput = document.getElementById('data_dir');
+    const dbfBadge = document.getElementById('dbfBadge');
+    const btnImport = document.getElementById('btnImport');
+    const tableSelection = document.getElementById('tableSelection');
+    const tableLoading = document.getElementById('tableLoading');
+
+    // Table dependency graph: key requires all values
+    const DEPS = {
+        patients: ['clients'],
+        records: ['clients', 'patients'],
+        vaccines: ['clients', 'patients'],
+        sales: ['clients'],
+    };
+
+    let currentDir = '/';
+    let currentHasDbf = false;
+
+    function loadDir(path) {
+        folderLoading.style.display = '';
+        folderError.style.display = 'none';
+        emptyDir.style.display = 'none';
+        dirList.innerHTML = '';
+        dbfIndicator.style.display = 'none';
+
+        fetch(BROWSE_URL + '?path=' + encodeURIComponent(path))
+            .then(r => r.json())
+            .then(data => {
+                folderLoading.style.display = 'none';
+                if (data.error) {
+                    folderError.textContent = data.error;
+                    folderError.style.display = '';
+                    return;
+                }
+                currentDir = data.path;
+                currentHasDbf = data.has_dbf;
+                currentPathEl.textContent = data.path;
+                btnUp.disabled = !data.parent;
+
+                if (data.has_dbf) {
+                    dbfIndicator.style.display = '';
+                    btnSelectFolder.classList.remove('btn-primary');
+                    btnSelectFolder.classList.add('btn-success');
+                } else {
+                    btnSelectFolder.classList.remove('btn-success');
+                    btnSelectFolder.classList.add('btn-primary');
+                }
+
+                if (data.dirs.length === 0) {
+                    emptyDir.style.display = '';
+                    return;
+                }
+
+                data.dirs.forEach(function(name) {
+                    var a = document.createElement('a');
+                    a.href = '#';
+                    a.className = 'list-group-item list-group-item-action d-flex align-items-center py-2';
+                    a.innerHTML = '<i class="bi bi-folder-fill text-warning me-2 fs-5"></i> ' +
+                                  '<span>' + name.replace(/</g, '&lt;') + '</span>';
+                    a.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        loadDir(currentDir + (currentDir.endsWith('/') ? '' : '/') + name);
+                    });
+                    dirList.appendChild(a);
+                });
+            })
+            .catch(function() {
+                folderLoading.style.display = 'none';
+                folderError.textContent = 'Connection error';
+                folderError.style.display = '';
+            });
+    }
+
+    btnUp.addEventListener('click', function() {
+        var parent = currentDir.substring(0, currentDir.lastIndexOf('/')) || '/';
+        loadDir(parent);
+    });
+
+    btnSelectFolder.addEventListener('click', function() {
+        dataDirInput.value = currentDir;
+        if (currentHasDbf) {
+            dbfBadge.style.display = '';
+        } else {
+            dbfBadge.style.display = 'none';
+        }
+        modal.hide();
+        analyzeFolder(currentDir);
+    });
+
+    function analyzeFolder(path) {
+        tableSelection.style.display = '';
+        tableLoading.style.display = '';
+        document.getElementById('tableList').style.display = 'none';
+        btnImport.disabled = true;
+
+        fetch(ANALYZE_URL + '?path=' + encodeURIComponent(path))
+            .then(r => r.json())
+            .then(data => {
+                tableLoading.style.display = 'none';
+                document.getElementById('tableList').style.display = '';
+                if (data.error) return;
+                const counts = data.counts;
+                document.querySelectorAll('.tbl-count').forEach(function(el) {
+                    var key = el.dataset.table;
+                    var n = counts[key];
+                    el.textContent = n >= 0 ? n.toLocaleString() : '—';
+                });
+                btnImport.disabled = false;
+            })
+            .catch(function() {
+                tableLoading.style.display = 'none';
+                document.getElementById('tableList').style.display = '';
+                btnImport.disabled = false;
+            });
+    }
+
+    // Dependency enforcement
+    document.querySelectorAll('input[name="tables"]').forEach(function(cb) {
+        cb.addEventListener('change', function() {
+            if (this.checked) {
+                // Auto-check dependencies
+                var deps = DEPS[this.value] || [];
+                deps.forEach(function(dep) {
+                    document.getElementById('tbl_' + dep).checked = true;
+                });
+            } else {
+                // Auto-uncheck dependents
+                Object.keys(DEPS).forEach(function(key) {
+                    if (DEPS[key].indexOf(cb.value) !== -1) {
+                        document.getElementById('tbl_' + key).checked = false;
+                    }
+                });
+            }
+        });
+    });
+
+    document.getElementById('btnBrowse').addEventListener('click', function() {
+        loadDir(dataDirInput.value || '/');
+        modal.show();
+    });
+
+    document.getElementById('importForm').addEventListener('submit', function() {
+        btnImport.disabled = true;
+        btnImport.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span> {% trans "Importing... please wait" %}';
+    });
+})();
+</script>
+{% endif %}
+{% endblock %}

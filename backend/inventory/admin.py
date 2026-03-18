@@ -1,11 +1,9 @@
 from django.contrib import admin
+from .models import Product, StockMovement
 
-# Register your models here.
-from django.contrib import admin
-from .models import Producto, MovimientoStock
 
-class ProductoAdmin(admin.ModelAdmin):
-    list_display = ('descripcion', 'precio_venta', 'cantidad_actual', 'necesita_reposicion')
+class ProductAdmin(admin.ModelAdmin):
+    list_display = ('description', 'sale_price', 'current_stock', 'needs_restock')
 
-admin.site.register(Producto, ProductoAdmin)
-admin.site.register(MovimientoStock)
+admin.site.register(Product, ProductAdmin)
+admin.site.register(StockMovement)

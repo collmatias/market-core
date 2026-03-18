@@ -1,48 +1,51 @@
 from django.db import models
-
-# Create your models here.
-from django.db import models
 from django.contrib.auth.models import User
+from core.models import Company, TenantManager
 
-class Producto(models.Model):
-    # Agregamos esta opción para diferenciar
-    TIPO_CHOICES = [
-        ('PRODUCTO', 'Producto Físico (Control de Stock)'),
-        ('SERVICIO', 'Servicio (Mano de obra, Cirugía, etc)')
+
+class Product(models.Model):
+    TYPE_CHOICES = [
+        ('PRODUCT', 'Physical Product'),
+        ('SERVICE', 'Service'),
     ]
 
-    codigo_barras = models.CharField(max_length=50, unique=True, blank=True, null=True)
-    descripcion = models.CharField(max_length=200)
-    tipo = models.CharField(max_length=10, choices=TIPO_CHOICES, default='PRODUCTO') # <--- NUEVO
-    costo = models.DecimalField(max_digits=10, decimal_places=2, default=0)
-    precio_venta = models.DecimalField(max_digits=10, decimal_places=2)
-    cantidad_actual = models.IntegerField(default=0)
-    cantidad_minima = models.IntegerField(default=5)
-    
+    company = models.ForeignKey(Company, on_delete=models.CASCADE, null=True)
+    barcode = models.CharField(max_length=50, unique=True, blank=True, null=True)
+    description = models.CharField(max_length=200)
+    type = models.CharField(max_length=10, choices=TYPE_CHOICES, default='PRODUCT')
+    cost = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    sale_price = models.DecimalField(max_digits=10, decimal_places=2)
+    current_stock = models.IntegerField(default=0)
+    minimum_stock = models.IntegerField(default=5)
+    objects = TenantManager()
+
     @property
-    def necesita_reposicion(self):
-        # Los servicios nunca necesitan reposición
-        if self.tipo == 'SERVICIO':
+    def needs_restock(self):
+        if self.type == 'SERVICE':
             return False
-        return self.cantidad_actual <= self.cantidad_minima
+        return self.current_stock <= self.minimum_stock
 
     def __str__(self):
-        return f"{self.descripcion}"
+        return self.description
 
-class MovimientoStock(models.Model):
-    TIPO = [('ENTRADA', 'Compra/Ingreso'), ('SALIDA', 'Venta/Uso Interno'), ('AJUSTE', 'Corrección')]
-    
-    producto = models.ForeignKey(Producto, on_delete=models.CASCADE)
-    fecha = models.DateTimeField(auto_now_add=True)
-    tipo = models.CharField(max_length=10, choices=TIPO)
-    cantidad = models.IntegerField()
-    usuario = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+
+class StockMovement(models.Model):
+    TYPES = [
+        ('IN', 'Purchase/Incoming'),
+        ('OUT', 'Sale/Internal Use'),
+        ('ADJUST', 'Adjustment'),
+    ]
+
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    date = models.DateTimeField(auto_now_add=True)
+    type = models.CharField(max_length=10, choices=TYPES)
+    quantity = models.IntegerField()
+    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
 
     def save(self, *args, **kwargs):
-        # Lógica simple de actualización de stock
-        if not self.pk: 
-            if self.tipo in ['SALIDA', 'AJUSTE'] and self.cantidad > 0:
-                 self.cantidad = self.cantidad * -1
-            self.producto.cantidad_actual += self.cantidad
-            self.producto.save()
+        if not self.pk:
+            if self.type in ['OUT', 'ADJUST'] and self.quantity > 0:
+                self.quantity = self.quantity * -1
+            self.product.current_stock += self.quantity
+            self.product.save()
         super().save(*args, **kwargs)

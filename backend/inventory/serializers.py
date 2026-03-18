@@ -1,14 +1,16 @@
 from rest_framework import serializers
-from .models import Producto, MovimientoStock
+from .models import Product, StockMovement
 
-class ProductoSerializer(serializers.ModelSerializer):
+
+class ProductSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Producto
+        model = Product
         fields = '__all__'
 
-class MovimientoStockSerializer(serializers.ModelSerializer):
-    nombre_producto = serializers.ReadOnlyField(source='producto.descripcion')
-    
+
+class StockMovementSerializer(serializers.ModelSerializer):
+    product_name = serializers.ReadOnlyField(source='product.description')
+
     class Meta:
-        model = MovimientoStock
+        model = StockMovement
         fields = '__all__'

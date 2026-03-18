@@ -1,0 +1,248 @@
+{% extends 'base.html' %}
+{% load i18n currency %}
+
+{% block extra_css %}
+<style>
+    #currency-preview { transition: all 0.3s ease; }
+    .settings-card { transition: transform 0.15s; }
+    .settings-card:hover { transform: translateY(-2px); }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center mt-3">
+    <div class="col-lg-10">
+
+        <div class="d-flex align-items-center mb-4">
+            <h2 class="mb-0"><i class="bi bi-gear-fill text-secondary me-2"></i>{% trans "Settings" %}</h2>
+        </div>
+
+        {# ═══ TAB NAV ═══ #}
+        <ul class="nav nav-tabs mb-4" role="tablist">
+            <li class="nav-item">
+                <a class="nav-link {% if not active_tab or active_tab == 'company' %}active{% endif %}"
+                   data-bs-toggle="tab" href="#tab-company" role="tab">
+                    <i class="bi bi-building me-1"></i> {% trans "Company" %}
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link {% if active_tab == 'database' %}active{% endif %}"
+                   data-bs-toggle="tab" href="#tab-database" role="tab">
+                    <i class="bi bi-database me-1"></i> {% trans "Database" %}
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link {% if active_tab == 'import' %}active{% endif %}"
+                   data-bs-toggle="tab" href="#tab-import" role="tab">
+                    <i class="bi bi-box-arrow-in-down me-1"></i> {% trans "Data Import" %}
+                </a>
+            </li>
+        </ul>
+
+        {# ═══ TAB CONTENT ═══ #}
+        <div class="tab-content">
+
+            {# ─── COMPANY TAB ─── #}
+            <div class="tab-pane fade {% if not active_tab or active_tab == 'company' %}show active{% endif %}" id="tab-company" role="tabpanel">
+                <div class="row justify-content-center">
+                    <div class="col-md-8">
+                        <div class="card shadow-sm border-0">
+                            <div class="card-header bg-primary text-white py-3">
+                                <h5 class="mb-0">
+                                    {% if is_new %}
+                                        🚀 {% trans "Initial Setup" %}
+                                    {% else %}
+                                        <i class="bi bi-building me-2"></i>{% trans "Company Details" %}
+                                    {% endif %}
+                                </h5>
+                            </div>
+                            <div class="card-body p-4">
+                                {% if is_new %}
+                                    <p class="text-muted text-center mb-4">
+                                        {% trans "Welcome to VetCore! Before starting, we need to register your clinic's information." %}
+                                    </p>
+                                {% endif %}
+
+                                <form method="post">
+                                    {% csrf_token %}
+
+                                    {% for field in form %}
+                                        {% if field.name != 'currency' and field.name != 'language' %}
+                                        <div class="mb-3">
+                                            <label class="form-label fw-bold">{{ field.label }}</label>
+                                            {{ field }}
+                                            {% if field.errors %}
+                                                <div class="text-danger small">{{ field.errors }}</div>
+                                            {% endif %}
+                                        </div>
+                                        {% endif %}
+                                    {% endfor %}
+
+                                    <h6 class="mt-4 mb-3 border-bottom pb-2"><i class="bi bi-currency-exchange me-2"></i>{% trans "Currency" %}</h6>
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold">{{ form.currency.label }}</label>
+                                        {{ form.currency }}
+                                        {% if form.currency.errors %}
+                                            <div class="text-danger small">{{ form.currency.errors }}</div>
+                                        {% endif %}
+                                    </div>
+
+                                    <div id="currency-preview" class="alert alert-light border mb-3" style="display:none;">
+                                        <small class="text-muted">{% trans "Preview" %}:</small>
+                                        <span id="preview-value" class="fw-bold fs-5 ms-2"></span>
+                                    </div>
+
+                                    <h6 class="mt-4 mb-3 border-bottom pb-2"><i class="bi bi-translate me-2"></i>{% trans "Language" %}</h6>
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold">{{ form.language.label }}</label>
+                                        {{ form.language }}
+                                        {% if form.language.errors %}
+                                            <div class="text-danger small">{{ form.language.errors }}</div>
+                                        {% endif %}
+                                    </div>
+
+                                    <div class="d-grid mt-4">
+                                        <button type="submit" class="btn btn-primary btn-lg">
+                                            {% if is_new %}{% trans "Get Started" %}{% else %}{% trans "Save Changes" %}{% endif %}
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {# ─── DATABASE TAB ─── #}
+            <div class="tab-pane fade {% if active_tab == 'database' %}show active{% endif %}" id="tab-database" role="tabpanel">
+                <div class="row g-4 justify-content-center">
+                    <div class="col-md-5">
+                        <div class="card shadow-sm border-0 settings-card h-100">
+                            <div class="card-body text-center p-4">
+                                <i class="bi bi-cloud-download fs-1 text-primary d-block mb-3"></i>
+                                <h5>{% trans "Download Backup" %}</h5>
+                                <p class="text-muted small">
+                                    {% trans "Download a copy of the current database (.sqlite3) to your computer." %}
+                                </p>
+                                <a href="{% url 'download_backup' %}" class="btn btn-primary">
+                                    <i class="bi bi-download me-1"></i> {% trans "Download" %}
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    {% if is_localhost %}
+                    <div class="col-md-5">
+                        <div class="card shadow-sm border-danger settings-card h-100">
+                            <div class="card-body text-center p-4">
+                                <i class="bi bi-arrow-counterclockwise fs-1 text-danger d-block mb-3"></i>
+                                <h5>{% trans "Restore Backup" %}</h5>
+                                <p class="text-muted small">
+                                    {% trans "Replace the current database with a previously downloaded backup." %}
+                                </p>
+                                <a href="{% url 'restore_backup' %}" class="btn btn-outline-danger">
+                                    <i class="bi bi-arrow-counterclockwise me-1"></i> {% trans "Restore" %}
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+                {% if not is_localhost %}
+                <div class="alert alert-info mt-4">
+                    <i class="bi bi-info-circle me-2"></i>
+                    {% trans "Database restore is only available from the server machine." %}
+                </div>
+                {% endif %}
+            </div>
+
+            {# ─── DATA IMPORT TAB ─── #}
+            <div class="tab-pane fade {% if active_tab == 'import' %}show active{% endif %}" id="tab-import" role="tabpanel">
+                {% if is_localhost %}
+                <div class="row g-4 justify-content-center">
+                    <div class="col-md-5">
+                        <div class="card shadow-sm border-0 settings-card h-100">
+                            <div class="card-body text-center p-4">
+                                <i class="bi bi-database-up fs-1 text-warning d-block mb-3"></i>
+                                <h5>Vetter <small class="text-muted">(FoxPro)</small></h5>
+                                <p class="text-muted small">
+                                    {% trans "Import clients, patients, clinical history, products and sales from a Vetter installation." %}
+                                </p>
+                                <a href="{% url 'vetter_import' %}" class="btn btn-warning">
+                                    <i class="bi bi-box-arrow-in-down me-1"></i> {% trans "Import" %}
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-5">
+                        <div class="card shadow-sm border-0 settings-card h-100 opacity-50">
+                            <div class="card-body text-center p-4">
+                                <i class="bi bi-file-earmark-spreadsheet fs-1 text-success d-block mb-3"></i>
+                                <h5>Excel / CSV</h5>
+                                <p class="text-muted small">
+                                    {% trans "Import data from Excel or CSV spreadsheets." %}
+                                </p>
+                                <button class="btn btn-outline-secondary" disabled>
+                                    <i class="bi bi-clock me-1"></i> {% trans "Coming Soon" %}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% else %}
+                <div class="alert alert-info">
+                    <i class="bi bi-info-circle me-2"></i>
+                    {% trans "Data import is only available from the server machine." %}
+                </div>
+                {% endif %}
+            </div>
+
+        </div>{# /tab-content #}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+const CURRENCY_CONFIG = {
+    'ARS': {symbol: '$', decimals: 2, dec_sep: ',', thou_sep: '.'},
+    'USD': {symbol: 'US$', decimals: 2, dec_sep: '.', thou_sep: ','},
+    'EUR': {symbol: '€', decimals: 2, dec_sep: ',', thou_sep: '.'},
+    'BRL': {symbol: 'R$', decimals: 2, dec_sep: ',', thou_sep: '.'},
+    'CLP': {symbol: 'CLP$', decimals: 0, dec_sep: '', thou_sep: '.'},
+    'MXN': {symbol: 'MX$', decimals: 2, dec_sep: '.', thou_sep: ','},
+    'UYU': {symbol: '$U', decimals: 2, dec_sep: ',', thou_sep: '.'},
+    'PYG': {symbol: '₲', decimals: 0, dec_sep: '', thou_sep: '.'},
+    'COP': {symbol: 'COL$', decimals: 0, dec_sep: '', thou_sep: '.'},
+    'PEN': {symbol: 'S/', decimals: 2, dec_sep: '.', thou_sep: ','},
+    'BOB': {symbol: 'Bs', decimals: 2, dec_sep: ',', thou_sep: '.'},
+};
+
+function formatCurrency(value, config) {
+    const intPart = config.decimals > 0 ? Math.floor(Math.abs(value)) : Math.round(Math.abs(value));
+    let intStr = intPart.toString().replace(/\B(?=(\d{3})+(?!\d))/g, config.thou_sep);
+    let result = config.symbol + intStr;
+    if (config.decimals > 0) {
+        const decPart = Math.abs(value - Math.floor(value)).toFixed(config.decimals).substring(2);
+        result += config.dec_sep + decPart;
+    }
+    return result;
+}
+
+var selectCurrency = document.getElementById('id_currency');
+var preview = document.getElementById('currency-preview');
+var previewValue = document.getElementById('preview-value');
+
+if (selectCurrency) {
+    function updatePreview() {
+        var code = selectCurrency.value;
+        var config = CURRENCY_CONFIG[code];
+        if (config) {
+            previewValue.textContent = formatCurrency(1234.50, config) + '  |  ' + formatCurrency(99999, config);
+            preview.style.display = 'block';
+        }
+    }
+    selectCurrency.addEventListener('change', updatePreview);
+    updatePreview();
+}
+</script>
+{% endblock %}

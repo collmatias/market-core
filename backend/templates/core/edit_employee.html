@@ -1,0 +1,93 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-white border-bottom border-primary border-3 d-flex justify-content-between align-items-center py-3">
+                    <h5 class="mb-0 text-dark"><i class="bi bi-pencil-square text-primary me-2"></i> {% trans "Edit Employee" %}</h5>
+                    <a href="{% url 'team_management' %}" class="btn btn-sm btn-outline-secondary">{% trans "Back" %}</a>
+                </div>
+                <div class="card-body p-4">
+                    
+                    <div class="text-center mb-4">
+                        <div class="bg-light rounded-circle d-inline-flex align-items-center justify-content-center border" style="width: 60px; height: 60px;">
+                            <i class="{{ employee.profile.avatar|default:'bi-person' }} fs-2 text-secondary"></i>
+                        </div>
+                        <h5 class="mt-2 mb-0">{{ employee.username }}</h5>
+                        <p class="text-muted small">{% trans "Editing profile" %}</p>
+                    </div>
+
+                    <form method="post">
+                        {% csrf_token %}
+                        {% if form.errors %}
+                            <div class="alert alert-danger small">{{ form.errors }}</div>
+                        {% endif %}
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label small fw-bold text-secondary">{{ form.first_name.label }}</label>
+                                {{ form.first_name }}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label small fw-bold text-secondary">{{ form.last_name.label }}</label>
+                                {{ form.last_name }}
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold text-secondary">{{ form.email.label }}</label>
+                            {{ form.email }}
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold text-secondary">{{ form.username.label }}</label>
+                            {{ form.username }}
+                        </div>
+
+                        <hr class="my-4 text-muted">
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label small fw-bold text-secondary">{{ form.role.label }}</label>
+                                {{ form.role }}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label small fw-bold text-secondary">{{ form.license_number.label }}</label>
+                                {{ form.license_number }}
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label small fw-bold text-primary"><i class="bi bi-123"></i> {{ form.pin.label }}</label>
+                                {{ form.pin }}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label small fw-bold text-info"><i class="bi bi-image"></i> {{ form.avatar.label }}</label>
+                                {{ form.avatar }}
+                            </div>
+                        </div>
+                        <hr class="my-4 text-muted">
+                        <div class="mb-4 bg-light p-3 rounded border border-danger border-opacity-25">
+                            <div class="form-check form-switch fs-5 d-flex align-items-center">
+                                {{ form.is_admin }}
+                                <label class="form-check-label text-danger fw-bold ms-3" for="{{ form.is_admin.id_for_label }}">
+                                    <i class="bi bi-star-fill"></i> {{ form.is_admin.label }}
+                                </label>
+                            </div>
+                            <div class="form-text small mt-2 text-muted">
+                                {% trans "Enabling this option grants full access to modify prices, manually adjust stock and manage the team." %}
+                            </div>
+                        </div>
+                        <div class="d-grid mt-4">
+                            <button type="submit" class="btn btn-primary btn-lg"><i class="bi bi-save me-2"></i> {% trans "Save Changes" %}</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

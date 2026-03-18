@@ -12,20 +12,19 @@ LICENSE_FILE = os.path.join(settings.BASE_DIR, 'license.key')
 CACHE_FILE = os.path.join(settings.BASE_DIR, 'license_cache.json')
 
 # ENTORNO DE DESARROLLO (Docker / Local)
+# The /check-license legacy endpoint is kept for backward compatibility
 DEBUG_URL = "http://cloud_api:8000/check-license"
 
-# ENTORNO DE PRODUCCIÓN (El dominio real que comprarás)
-# Cuando compiles el .exe, Python no tendrá la variable de entorno de Docker,
-# así que usará esta por defecto o una lógica de fallback.
-PRODUCTION_URL = "https://api.vetcore.com.ar/check-license" 
+# ENTORNO DE PRODUCCIÓN
+# When running as .exe on Windows, uses the production domain.
+# The cloud API exposes /check-license at root for backward compatibility,
+# and the new canonical path is /license/check.
+PRODUCTION_URL = "https://api.vetcore.app/check-license"
 
 # LÓGICA DE SELECCIÓN
-# Si estamos dentro de Docker (tu entorno dev), usamos la local.
-# Si no (es el .exe en Windows del cliente), usamos la de producción.
 if os.environ.get('AM_I_IN_DOCKER'):
     AWS_LAMBDA_URL = os.environ.get('LICENSE_API_URL', DEBUG_URL)
 else:
-    # AQUÍ ES DONDE APUNTARÁ EL EXE FINAL
     AWS_LAMBDA_URL = PRODUCTION_URL
 
 def get_hardware_id():
@@ -105,7 +104,7 @@ def check_local_cache():
                 return True, "Modo Offline (Gracia)"
                 
         return False, "No se pudo verificar la licencia"
-    except:
+    except (json.JSONDecodeError, KeyError, ValueError, OSError):
         return False, "Error de caché"
 
 def check_license():
@@ -137,7 +136,7 @@ def check_license():
         else:
             return False, current_hw_id
             
-    except:
+    except (OSError, ValueError, KeyError):
         return False, current_hw_id
 
 def save_license(key):

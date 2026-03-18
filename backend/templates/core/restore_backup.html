@@ -1,0 +1,105 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block content %}
+<div class="row justify-content-center mt-4">
+    <div class="col-md-7">
+
+        <div class="d-flex align-items-center mb-3">
+            <a href="{% url 'company_settings' %}" class="btn btn-outline-secondary me-3">
+                <i class="bi bi-arrow-left"></i>
+            </a>
+            <h4 class="mb-0"><i class="bi bi-arrow-counterclockwise text-danger me-2"></i>{% trans "Restore Database" %}</h4>
+        </div>
+
+        <div class="card shadow-lg border-0">
+            <div class="card-header bg-danger text-white text-center py-3">
+                <h5 class="mb-0">
+                    {% trans "Replace the current database with a previous backup" %}
+                </h5>
+            </div>
+            <div class="card-body p-4">
+
+                {% if done %}
+                <div class="alert alert-success">
+                    <i class="bi bi-check-circle-fill me-2"></i>
+                    <strong>{% trans "Database restored successfully!" %}</strong>
+                    <p class="mb-0 mt-2">{% trans "A safety copy of the previous database was saved. Please log in again." %}</p>
+                </div>
+
+                <div class="d-grid mt-3">
+                    <a href="{% url 'login' %}" class="btn btn-primary btn-lg">
+                        <i class="bi bi-box-arrow-in-right me-1"></i> {% trans "Go to Login" %}
+                    </a>
+                </div>
+
+                {% else %}
+                <div class="alert alert-danger border-danger">
+                    <i class="bi bi-exclamation-octagon-fill me-2 fs-4"></i>
+                    <strong>{% trans "WARNING — Destructive operation" %}</strong>
+                    <p class="mb-0 mt-2">
+                        {% trans "This will completely replace the current database. All current data (clients, patients, sales, etc.) will be lost and replaced with the backup contents." %}
+                    </p>
+                </div>
+
+                <form method="post" enctype="multipart/form-data" id="restoreForm">
+                    {% csrf_token %}
+
+                    <div class="mb-3">
+                        <label for="backup_file" class="form-label fw-bold">
+                            <i class="bi bi-file-earmark-arrow-up me-1"></i> {% trans "Backup file (.sqlite3)" %}
+                        </label>
+                        <input type="file" class="form-control form-control-lg" id="backup_file" name="backup_file"
+                               accept=".sqlite3" required>
+                        <div class="form-text">
+                            {% trans "Select a .sqlite3 file previously downloaded from VetCore's backup." %}
+                        </div>
+                    </div>
+
+                    <div class="card bg-light border-warning mb-3">
+                        <div class="card-body">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="confirmRestore" required>
+                                <label class="form-check-label text-danger fw-bold" for="confirmRestore">
+                                    {% trans "I understand that ALL current data will be permanently replaced." %}
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-danger btn-lg fw-bold" id="btnRestore" disabled>
+                            <i class="bi bi-arrow-counterclockwise me-2"></i> {% trans "Restore Backup" %}
+                        </button>
+                        <a href="{% url 'home' %}" class="btn btn-outline-secondary">
+                            {% trans "Cancel" %}
+                        </a>
+                    </div>
+                </form>
+
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+{% if not done %}
+<script>
+(function() {
+    var checkbox = document.getElementById('confirmRestore');
+    var btn = document.getElementById('btnRestore');
+
+    checkbox.addEventListener('change', function() {
+        btn.disabled = !this.checked;
+    });
+
+    document.getElementById('restoreForm').addEventListener('submit', function() {
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span> {% trans "Restoring... please wait" %}';
+    });
+})();
+</script>
+{% endif %}
+{% endblock %}

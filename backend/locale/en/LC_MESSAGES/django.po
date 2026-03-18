@@ -1,0 +1,1496 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-03-17 13:42-0300\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+#: clinical/forms.py:12 templates/clinical/new_consultation.html:24
+#: templates/core/client_detail.html:89 templates/core/client_detail.html:136
+#: templates/core/patient_detail.html:69 templates/core/patient_detail.html:145
+#: templates/sales/sale_list.html:16
+msgid "Date"
+msgstr ""
+
+#: clinical/forms.py:13 clinical/forms.py:62
+#: templates/clinical/new_consultation.html:28
+#: templates/clinical/schedule.html:77 templates/core/client_detail.html:91
+#: templates/core/client_detail.html:138 templates/core/patient_detail.html:70
+#: templates/core/patient_detail.html:146
+msgid "Reason"
+msgstr ""
+
+#: clinical/forms.py:14 core/forms.py:90
+#: templates/clinical/new_consultation.html:35
+msgid "Weight (kg)"
+msgstr ""
+
+#: clinical/forms.py:15
+msgid "Anamnesis / Notes"
+msgstr ""
+
+#: clinical/forms.py:16 templates/clinical/medical_record.html:70
+#: templates/clinical/new_consultation.html:50
+msgid "Diagnosis"
+msgstr ""
+
+#: clinical/forms.py:17
+msgid "Treatment / Instructions"
+msgstr ""
+
+#: clinical/forms.py:18 templates/clinical/new_consultation.html:39
+msgid "Next Visit"
+msgstr ""
+
+#: clinical/forms.py:46 inventory/forms.py:12
+#: templates/inventory/product_list.html:29 templates/sales/sale_detail.html:41
+msgid "Description"
+msgstr ""
+
+#: clinical/forms.py:58 templates/clinical/schedule.html:46
+#: templates/core/patient_list.html:22
+msgid "Patient"
+msgstr ""
+
+#: clinical/forms.py:59 templates/clinical/schedule.html:56
+#: templates/core/client_detail.html:92 templates/core/client_detail.html:139
+#: templates/core/patient_detail.html:71 templates/core/patient_detail.html:147
+msgid "Professional"
+msgstr ""
+
+#: clinical/forms.py:60
+msgid "Start Time"
+msgstr ""
+
+#: clinical/forms.py:61
+msgid "End Time"
+msgstr ""
+
+#: clinical/forms.py:63 templates/clinical/schedule.html:82
+#: templates/core/client_detail.html:93 templates/core/client_detail.html:140
+#: templates/core/patient_detail.html:72 templates/core/patient_detail.html:148
+#: templates/core/team_management.html:49
+msgid "Status"
+msgstr ""
+
+#: clinical/forms.py:64 templates/clinical/schedule.html:92
+msgid "Notes"
+msgstr ""
+
+#: core/decorators.py:16
+msgid "Access restricted: Only veterinary staff can modify health records."
+msgstr ""
+
+#: core/decorators.py:30
+msgid "Access restricted: Only administrators can perform this action."
+msgstr ""
+
+#: core/forms.py:9
+msgid "New Password"
+msgstr ""
+
+#: core/forms.py:13 core/forms.py:128
+msgid "Confirm Password"
+msgstr ""
+
+#: core/forms.py:22 core/forms.py:138
+msgid "Passwords do not match."
+msgstr ""
+
+#: core/forms.py:28
+msgid "New PIN"
+msgstr ""
+
+#: core/forms.py:38
+msgid "Confirm PIN"
+msgstr ""
+
+#: core/forms.py:54
+msgid "PINs do not match."
+msgstr ""
+
+#: core/forms.py:56
+msgid "PIN must be exactly 4 digits."
+msgstr ""
+
+#: core/forms.py:65
+msgid "First Name"
+msgstr ""
+
+#: core/forms.py:66
+msgid "Last Name"
+msgstr ""
+
+#: core/forms.py:67 core/forms.py:110 core/forms.py:133
+#: templates/core/client_list.html:23
+msgid "Phone"
+msgstr ""
+
+#: core/forms.py:68 core/forms.py:126 templates/core/client_list.html:24
+msgid "Email"
+msgstr ""
+
+#: core/forms.py:69 core/forms.py:109 core/forms.py:132
+msgid "Address"
+msgstr ""
+
+#: core/forms.py:85 templates/clinical/medical_record.html:15
+#: templates/core/patient_detail.html:18 templates/core/patient_list.html:24
+msgid "Owner"
+msgstr ""
+
+#: core/forms.py:86 templates/core/client_list.html:22
+msgid "Name"
+msgstr ""
+
+#: core/forms.py:87 templates/core/patient_list.html:23
+msgid "Species"
+msgstr ""
+
+#: core/forms.py:88
+msgid "Breed"
+msgstr ""
+
+#: core/forms.py:89
+msgid "Birth Date"
+msgstr ""
+
+#: core/forms.py:107
+msgid "Company Name"
+msgstr ""
+
+#: core/forms.py:108 core/forms.py:131
+msgid "Tax ID"
+msgstr ""
+
+#: core/forms.py:111 templates/core/company_settings.html:40
+msgid "Currency"
+msgstr ""
+
+#: core/forms.py:112 templates/core/company_settings.html:57
+msgid "Language"
+msgstr ""
+
+#: core/forms.py:125 templates/core/team_management.html:45
+#: templates/registration/login.html:53 templates/registration/login.html:54
+msgid "Username"
+msgstr ""
+
+#: core/forms.py:127 core/forms.py:146 templates/registration/login.html:58
+#: templates/registration/login.html:59
+msgid "Password"
+msgstr ""
+
+#: core/forms.py:130
+msgid "Clinic Name"
+msgstr ""
+
+#: core/forms.py:144
+msgid "Is Administrator?"
+msgstr ""
+
+#: core/forms.py:145 core/forms.py:170
+msgid "License Number"
+msgstr ""
+
+#: core/forms.py:147
+msgid "Quick PIN (4 digits)"
+msgstr ""
+
+#: core/forms.py:148 core/forms.py:172
+msgid "Profile Icon"
+msgstr ""
+
+#: core/forms.py:163
+msgid "License number is required for veterinarians."
+msgstr ""
+
+#: core/forms.py:169
+msgid "Administrator permissions"
+msgstr ""
+
+#: core/forms.py:171
+msgid "Quick Access PIN (4 digits)"
+msgstr ""
+
+#: core/forms.py:188
+msgid "License number is required."
+msgstr ""
+
+#: core/models.py:13
+msgid "Argentine Peso ($)"
+msgstr ""
+
+#: core/models.py:14
+msgid "US Dollar (US$)"
+msgstr ""
+
+#: core/models.py:15
+msgid "Euro (€)"
+msgstr ""
+
+#: core/models.py:16
+msgid "Brazilian Real (R$)"
+msgstr ""
+
+#: core/models.py:17
+msgid "Chilean Peso (CLP$)"
+msgstr ""
+
+#: core/models.py:18
+msgid "Mexican Peso (MX$)"
+msgstr ""
+
+#: core/models.py:19
+msgid "Uruguayan Peso ($U)"
+msgstr ""
+
+#: core/models.py:20
+msgid "Paraguayan Guarani (₲)"
+msgstr ""
+
+#: core/models.py:21
+msgid "Colombian Peso (COL$)"
+msgstr ""
+
+#: core/models.py:22
+msgid "Peruvian Sol (S/)"
+msgstr ""
+
+#: core/models.py:23
+msgid "Bolivian Boliviano (Bs)"
+msgstr ""
+
+#: core/models.py:27 vetcore/settings.py:146
+msgid "Spanish"
+msgstr ""
+
+#: core/models.py:28 vetcore/settings.py:147
+msgid "English"
+msgstr ""
+
+#: core/models.py:29 vetcore/settings.py:148
+msgid "Portuguese"
+msgstr ""
+
+#: core/models.py:53
+msgid "Veterinarian"
+msgstr ""
+
+#: core/models.py:54
+msgid "Administrative"
+msgstr ""
+
+#: core/models.py:107
+msgid "Dog"
+msgstr ""
+
+#: core/models.py:108
+msgid "Cat"
+msgstr ""
+
+#: core/models.py:109
+msgid "Other"
+msgstr ""
+
+#: core/views.py:65 core/views.py:385
+msgid "Access denied. Administrator permissions required."
+msgstr ""
+
+#: core/views.py:116
+msgid "Incorrect or unconfigured PIN."
+msgstr ""
+
+#: core/views.py:118
+msgid "Invalid user."
+msgstr ""
+
+#: core/views.py:181
+#, python-format
+msgid "Client %(first)s %(last)s registered successfully."
+msgstr ""
+
+#: core/views.py:238
+#, python-format
+msgid "Patient %(name)s registered successfully."
+msgstr ""
+
+#: core/views.py:299
+msgid "Invalid key. Please verify your code or internet connection."
+msgstr ""
+
+#: core/views.py:411
+#, python-format
+msgid "Employee %(name)s created successfully."
+msgstr ""
+
+#: core/views.py:414
+#, python-format
+msgid "Error creating user: %(error)s"
+msgstr ""
+
+#: core/views.py:429
+msgid "Access denied."
+msgstr ""
+
+#: core/views.py:447
+#, python-format
+msgid "%(name)s data updated."
+msgstr ""
+
+#: core/views.py:470
+msgid "You cannot deactivate your own admin account."
+msgstr ""
+
+#: core/views.py:476
+msgid "activated"
+msgstr ""
+
+#: core/views.py:476
+msgid "deactivated"
+msgstr ""
+
+#: core/views.py:478
+#, python-format
+msgid "User %(name)s has been %(status)s."
+msgstr ""
+
+#: inventory/forms.py:11
+msgid "Barcode"
+msgstr ""
+
+#: inventory/forms.py:13 templates/inventory/product_list.html:30
+msgid "Type"
+msgstr ""
+
+#: inventory/forms.py:14
+msgid "Cost"
+msgstr ""
+
+#: inventory/forms.py:15 templates/inventory/product_list.html:31
+msgid "Sale Price"
+msgstr ""
+
+#: inventory/forms.py:16
+msgid "Minimum Stock"
+msgstr ""
+
+#: inventory/forms.py:33 templates/inventory/product_list.html:45
+#: templates/sales/new_sale.html:83
+msgid "Product"
+msgstr ""
+
+#: inventory/forms.py:34
+msgid "Movement Type"
+msgstr ""
+
+#: inventory/forms.py:35
+msgid "Quantity"
+msgstr ""
+
+#: inventory/views.py:61
+msgid "Product created successfully."
+msgstr ""
+
+#: inventory/views.py:76
+msgid "Product updated."
+msgstr ""
+
+#: inventory/views.py:90
+msgid "Product deleted."
+msgstr ""
+
+#: inventory/views.py:103
+msgid "Operation denied. Only administrators can withdraw stock."
+msgstr ""
+
+#: inventory/views.py:107
+msgid "Stock movement recorded."
+msgstr ""
+
+#: inventory/views.py:112
+msgid "Incoming Stock"
+msgstr ""
+
+#: sales/views.py:28
+msgid "Cart is empty."
+msgstr ""
+
+#: sales/views.py:56
+#, python-format
+msgid "Sale #%(id)s registered successfully."
+msgstr ""
+
+#: sales/views.py:60
+#, python-format
+msgid "Error processing sale: %(error)s"
+msgstr ""
+
+#: templates/base.html:7
+msgid "Veterinary Management"
+msgstr ""
+
+#: templates/base.html:33 templates/core/home.html:89
+msgid "Clients"
+msgstr ""
+
+#: templates/base.html:36 templates/core/home.html:76
+msgid "Patients"
+msgstr ""
+
+#: templates/base.html:40 templates/core/home.html:128
+msgid "Schedule"
+msgstr ""
+
+#: templates/base.html:46 templates/inventory/product_list.html:6
+msgid "Inventory"
+msgstr ""
+
+#: templates/base.html:49
+msgid "View Products"
+msgstr ""
+
+#: templates/base.html:50
+msgid "Move Stock"
+msgstr ""
+
+#: templates/base.html:56
+msgid "Sales"
+msgstr ""
+
+#: templates/base.html:59
+msgid "POS (New Sale)"
+msgstr ""
+
+#: templates/base.html:60 templates/core/home.html:50
+msgid "History"
+msgstr ""
+
+#: templates/base.html:62 templates/core/home.html:63
+#: templates/sales/cash_report.html:7
+msgid "Cash Report"
+msgstr ""
+
+#: templates/base.html:68 templates/core/home.html:154
+msgid "Team"
+msgstr ""
+
+#: templates/base.html:78
+msgid "Switch User"
+msgstr ""
+
+#: templates/base.html:79
+msgid "Switch"
+msgstr ""
+
+#: templates/base.html:96 templates/core/change_password.html:11
+msgid "Change Password"
+msgstr ""
+
+#: templates/base.html:101 templates/core/change_pin.html:11
+msgid "Change My PIN"
+msgstr ""
+
+#: templates/base.html:108
+msgid "Settings"
+msgstr ""
+
+#: templates/base.html:113
+msgid "Database Backup"
+msgstr ""
+
+#: templates/base.html:122
+msgid "Sign Out"
+msgstr ""
+
+#: templates/base.html:129 templates/core/home.html:172
+msgid "Sign In"
+msgstr ""
+
+#: templates/clinical/medical_record.html:16
+msgid "Age"
+msgstr ""
+
+#: templates/clinical/medical_record.html:17
+msgid "Current Weight"
+msgstr ""
+
+#: templates/clinical/medical_record.html:23
+#: templates/clinical/new_consultation.html:13
+#: templates/core/patient_detail.html:42
+msgid "New Consultation"
+msgstr ""
+
+#: templates/clinical/medical_record.html:26
+#: templates/core/client_detail.html:28 templates/core/client_list.html:38
+#: templates/core/patient_detail.html:45 templates/core/patient_list.html:46
+msgid "Book Appointment"
+msgstr ""
+
+#: templates/clinical/medical_record.html:28
+#: templates/core/edit_employee.html:11 templates/core/reset_password.html:13
+#: templates/inventory/product_labels.html:57
+msgid "Back"
+msgstr ""
+
+#: templates/clinical/medical_record.html:34
+msgid "Appointments"
+msgstr ""
+
+#: templates/clinical/medical_record.html:50
+#: templates/core/client_detail.html:64 templates/core/patient_list.html:43
+msgid "Medical Record"
+msgstr ""
+
+#: templates/clinical/medical_record.html:62
+msgid "Edit this consultation"
+msgstr ""
+
+#: templates/clinical/medical_record.html:74
+msgid "Treatment"
+msgstr ""
+
+#: templates/clinical/medical_record.html:78
+msgid "Observations"
+msgstr ""
+
+#: templates/clinical/medical_record.html:85
+msgid "Attachments"
+msgstr ""
+
+#: templates/clinical/medical_record.html:96
+msgid "Recorded weight"
+msgstr ""
+
+#: templates/clinical/medical_record.html:102
+msgid "No medical records for this patient. Start a new consultation."
+msgstr ""
+
+#: templates/clinical/new_consultation.html:11
+msgid "Edit Consultation"
+msgstr ""
+
+#: templates/clinical/new_consultation.html:45
+msgid "Anamnesis / Observations"
+msgstr ""
+
+#: templates/clinical/new_consultation.html:55
+msgid "Treatment / Prescription"
+msgstr ""
+
+#: templates/clinical/new_consultation.html:60
+msgid "Attach File (Optional)"
+msgstr ""
+
+#: templates/clinical/new_consultation.html:71
+msgid "Save Consultation"
+msgstr ""
+
+#: templates/clinical/new_consultation.html:72
+#: templates/core/change_password.html:49 templates/core/change_pin.html:52
+#: templates/core/client_form.html:32 templates/core/patient_form.html:32
+#: templates/inventory/movement_form.html:18
+#: templates/inventory/product_form.html:20
+msgid "Cancel"
+msgstr ""
+
+#: templates/clinical/schedule.html:23
+msgid "Appointment Schedule"
+msgstr ""
+
+#: templates/clinical/schedule.html:25 templates/clinical/schedule.html:84
+#: templates/clinical/schedule.html:299
+msgid "Pending"
+msgstr ""
+
+#: templates/clinical/schedule.html:26 templates/clinical/schedule.html:85
+#: templates/clinical/schedule.html:299
+msgid "Confirmed"
+msgstr ""
+
+#: templates/clinical/schedule.html:27 templates/clinical/schedule.html:86
+#: templates/clinical/schedule.html:299
+msgid "Cancelled"
+msgstr ""
+
+#: templates/clinical/schedule.html:28 templates/clinical/schedule.html:87
+#: templates/clinical/schedule.html:299
+msgid "Completed"
+msgstr ""
+
+#: templates/clinical/schedule.html:38 templates/clinical/schedule.html:230
+msgid "New Appointment"
+msgstr ""
+
+#: templates/clinical/schedule.html:48 templates/clinical/schedule.html:58
+msgid "Select"
+msgstr ""
+
+#: templates/clinical/schedule.html:60
+msgid "Lic."
+msgstr ""
+
+#: templates/clinical/schedule.html:67
+msgid "Start"
+msgstr ""
+
+#: templates/clinical/schedule.html:71
+msgid "End"
+msgstr ""
+
+#: templates/clinical/schedule.html:78
+msgid "E.g.: Vaccination, Checkup, Surgery"
+msgstr ""
+
+#: templates/clinical/schedule.html:93
+msgid "Additional notes (optional)"
+msgstr ""
+
+#: templates/clinical/schedule.html:99 templates/sales/new_sale.html:21
+msgid "Close"
+msgstr ""
+
+#: templates/clinical/schedule.html:101
+msgid "Cancel Appointment"
+msgstr ""
+
+#: templates/clinical/schedule.html:104
+#: templates/inventory/product_form.html:19
+msgid "Save"
+msgstr ""
+
+#: templates/clinical/schedule.html:246
+msgid "Edit Appointment"
+msgstr ""
+
+#: templates/clinical/schedule.html:320
+msgid "Do you want to create a Medical Record entry for this consultation?"
+msgstr ""
+
+#: templates/clinical/schedule.html:321
+msgid ""
+"Accept: A record will be created in the patient file with the appointment "
+"reason and notes."
+msgstr ""
+
+#: templates/clinical/schedule.html:322
+msgid "Cancel: Only marks as Completed without creating a record."
+msgstr ""
+
+#: templates/clinical/schedule.html:330
+msgid ""
+"Medical record created. Do you want to complete the consultation details now?"
+msgstr ""
+
+#: templates/clinical/schedule.html:362
+msgid "Connection error with the server."
+msgstr ""
+
+#: templates/clinical/schedule.html:369
+msgid "Are you sure you want to cancel this appointment?"
+msgstr ""
+
+#: templates/core/activation.html:7 templates/core/activation.html:19
+msgid "Activation Required"
+msgstr ""
+
+#: templates/core/activation.html:20
+msgid "This system is protected against unauthorized copies."
+msgstr ""
+
+#: templates/core/activation.html:24
+msgid "Your Hardware ID"
+msgstr ""
+
+#: templates/core/activation.html:28
+msgid "Send this code to the provider to receive your license."
+msgstr ""
+
+#: templates/core/activation.html:43
+msgid "ACTIVATE SYSTEM"
+msgstr ""
+
+#: templates/core/change_password.html:17
+msgid ""
+"For security reasons, enter your current password before setting a new one. "
+"The new password must not be too similar to your personal information."
+msgstr ""
+
+#: templates/core/change_password.html:47
+msgid "Update Password"
+msgstr ""
+
+#: templates/core/change_pin.html:21
+msgid ""
+"Choose an easy-to-remember 4-digit numeric PIN for quick access at the "
+"workstation."
+msgstr ""
+
+#: templates/core/change_pin.html:50
+msgid "Update PIN"
+msgstr ""
+
+#: templates/core/client_detail.html:21 templates/core/patient_detail.html:32
+msgid "Registered"
+msgstr ""
+
+#: templates/core/client_detail.html:31 templates/core/patient_detail.html:48
+#: templates/core/patient_list.html:49
+msgid "Edit Details"
+msgstr ""
+
+#: templates/core/client_detail.html:36 templates/core/patient_detail.html:53
+msgid "Back to list"
+msgstr ""
+
+#: templates/core/client_detail.html:44
+msgid "Pets"
+msgstr ""
+
+#: templates/core/client_detail.html:74
+msgid "This client has no registered pets."
+msgstr ""
+
+#: templates/core/client_detail.html:81 templates/core/patient_detail.html:61
+msgid "Upcoming Appointments"
+msgstr ""
+
+#: templates/core/client_detail.html:90 templates/core/client_detail.html:137
+msgid "Pet"
+msgstr ""
+
+#: templates/core/client_detail.html:122 templates/core/patient_detail.html:96
+msgid "No upcoming appointments."
+msgstr ""
+
+#: templates/core/client_detail.html:130 templates/core/patient_detail.html:139
+msgid "Appointment History"
+msgstr ""
+
+#: templates/core/client_form.html:11 templates/core/client_list.html:41
+msgid "Edit Client"
+msgstr ""
+
+#: templates/core/client_form.html:13 templates/core/client_list.html:7
+msgid "New Client"
+msgstr ""
+
+#: templates/core/client_form.html:31
+msgid "Save Client"
+msgstr ""
+
+#: templates/core/client_list.html:6
+msgid "Client List"
+msgstr ""
+
+#: templates/core/client_list.html:13
+msgid "Search by name, phone or email..."
+msgstr ""
+
+#: templates/core/client_list.html:25 templates/core/patient_list.html:26
+#: templates/core/team_management.html:50
+#: templates/inventory/product_list.html:33 templates/sales/sale_list.html:20
+msgid "Actions"
+msgstr ""
+
+#: templates/core/client_list.html:49
+msgid "No clients registered."
+msgstr ""
+
+#: templates/core/company_settings.html:11
+msgid "Initial Setup"
+msgstr ""
+
+#: templates/core/company_settings.html:13
+msgid "System Settings"
+msgstr ""
+
+#: templates/core/company_settings.html:20
+msgid ""
+"Welcome to VetCore! Before starting, we need to register your clinic's "
+"information."
+msgstr ""
+
+#: templates/core/company_settings.html:27
+msgid "Company Details"
+msgstr ""
+
+#: templates/core/company_settings.html:48
+msgid "The selected currency will apply to all prices, sales and reports."
+msgstr ""
+
+#: templates/core/company_settings.html:53
+msgid "Preview"
+msgstr ""
+
+#: templates/core/company_settings.html:65
+msgid "The selected language will apply to the entire application interface."
+msgstr ""
+
+#: templates/core/company_settings.html:71
+msgid "Get Started"
+msgstr ""
+
+#: templates/core/company_settings.html:71 templates/core/edit_employee.html:85
+msgid "Save Changes"
+msgstr ""
+
+#: templates/core/edit_employee.html:10
+msgid "Edit Employee"
+msgstr ""
+
+#: templates/core/edit_employee.html:20
+msgid "Editing profile"
+msgstr ""
+
+#: templates/core/edit_employee.html:81
+msgid ""
+"Enabling this option grants full access to modify prices, manually adjust "
+"stock and manage the team."
+msgstr ""
+
+#: templates/core/home.html:10
+msgid "Hello"
+msgstr ""
+
+#: templates/core/home.html:23
+msgid "Remote Access"
+msgstr ""
+
+#: templates/core/home.html:25
+msgid "Server IP"
+msgstr ""
+
+#: templates/core/home.html:37
+msgid "POS"
+msgstr ""
+
+#: templates/core/home.html:39
+msgid "Quick new sale."
+msgstr ""
+
+#: templates/core/home.html:40
+msgid "Checkout"
+msgstr ""
+
+#: templates/core/home.html:52
+msgid "View tickets and sales."
+msgstr ""
+
+#: templates/core/home.html:53
+msgid "View List"
+msgstr ""
+
+#: templates/core/home.html:65
+msgid "Daily totals."
+msgstr ""
+
+#: templates/core/home.html:66
+msgid "View Report"
+msgstr ""
+
+#: templates/core/home.html:78
+msgid "Medical records."
+msgstr ""
+
+#: templates/core/home.html:79 templates/core/home.html:157
+msgid "Manage"
+msgstr ""
+
+#: templates/core/home.html:91
+msgid "Owners and contacts."
+msgstr ""
+
+#: templates/core/home.html:92
+msgid "Directory"
+msgstr ""
+
+#: templates/core/home.html:102
+msgid "Stock"
+msgstr ""
+
+#: templates/core/home.html:104
+msgid "Products and prices."
+msgstr ""
+
+#: templates/core/home.html:105
+msgid "View Stock"
+msgstr ""
+
+#: templates/core/home.html:115
+msgid "Incoming"
+msgstr ""
+
+#: templates/core/home.html:117
+msgid "Load supplier invoices."
+msgstr ""
+
+#: templates/core/home.html:118
+msgid "Register"
+msgstr ""
+
+#: templates/core/home.html:130
+msgid "Appointments and calendar."
+msgstr ""
+
+#: templates/core/home.html:131
+msgid "View Schedule"
+msgstr ""
+
+#: templates/core/home.html:141
+msgid "Backup"
+msgstr ""
+
+#: templates/core/home.html:143
+msgid "Save database."
+msgstr ""
+
+#: templates/core/home.html:144
+msgid "Download"
+msgstr ""
+
+#: templates/core/home.html:156
+msgid "Users, permissions and roles."
+msgstr ""
+
+#: templates/core/home.html:170
+msgid "Comprehensive Veterinary Management System"
+msgstr ""
+
+#: templates/core/lockscreen.html:6
+msgid "Quick Login"
+msgstr ""
+
+#: templates/core/lockscreen.html:21
+msgid "Workstation"
+msgstr ""
+
+#: templates/core/lockscreen.html:22
+msgid "Select your user to sign in"
+msgstr ""
+
+#: templates/core/lockscreen.html:52
+msgid "Full Login (Password)"
+msgstr ""
+
+#: templates/core/lockscreen.html:60
+msgid "User"
+msgstr ""
+
+#: templates/core/patient_detail.html:39
+msgid "Full Medical Record"
+msgstr ""
+
+#: templates/core/patient_detail.html:103
+msgid "Latest Consultations"
+msgstr ""
+
+#: templates/core/patient_detail.html:104
+msgid "View all"
+msgstr ""
+
+#: templates/core/patient_detail.html:117 templates/core/patient_list.html:25
+msgid "Weight"
+msgstr ""
+
+#: templates/core/patient_detail.html:131
+msgid "No clinical records yet."
+msgstr ""
+
+#: templates/core/patient_form.html:11
+msgid "Edit Patient"
+msgstr ""
+
+#: templates/core/patient_form.html:13
+msgid "New Patient"
+msgstr ""
+
+#: templates/core/patient_form.html:31
+msgid "Save Patient"
+msgstr ""
+
+#: templates/core/patient_list.html:6
+msgid "Patient List"
+msgstr ""
+
+#: templates/core/patient_list.html:7
+msgid "New Pet"
+msgstr ""
+
+#: templates/core/patient_list.html:13
+msgid "Search by name, species, breed or owner..."
+msgstr ""
+
+#: templates/core/patient_list.html:56
+msgid "No patients registered."
+msgstr ""
+
+#: templates/core/reset_password.html:11
+msgid "New Password for"
+msgstr ""
+
+#: templates/core/reset_password.html:18
+msgid "You are forcing a password change for user"
+msgstr ""
+
+#: templates/core/reset_password.html:18
+msgid "The previous password will stop working immediately."
+msgstr ""
+
+#: templates/core/reset_password.html:47
+msgid "Set New Password"
+msgstr ""
+
+#: templates/core/setup_wizard.html:10
+msgid "Welcome to VetCore"
+msgstr ""
+
+#: templates/core/setup_wizard.html:11
+msgid "Initial System Setup"
+msgstr ""
+
+#: templates/core/setup_wizard.html:17
+msgid "30 Days Free Trial!"
+msgstr ""
+
+#: templates/core/setup_wizard.html:18
+msgid "By registering, you'll get full access for one month."
+msgstr ""
+
+#: templates/core/setup_wizard.html:27
+msgid "Please correct the following errors:"
+msgstr ""
+
+#: templates/core/setup_wizard.html:40
+msgid "Administrator Details"
+msgstr ""
+
+#: templates/core/setup_wizard.html:66
+msgid "Clinic Details"
+msgstr ""
+
+#: templates/core/setup_wizard.html:84
+msgid "Install and Start"
+msgstr ""
+
+#: templates/core/team_management.html:11
+msgid "New Employee"
+msgstr ""
+
+#: templates/core/team_management.html:28
+msgid "Create User"
+msgstr ""
+
+#: templates/core/team_management.html:38
+msgid "Work Team"
+msgstr ""
+
+#: templates/core/team_management.html:39
+msgid "Members"
+msgstr ""
+
+#: templates/core/team_management.html:46
+msgid "Full Name"
+msgstr ""
+
+#: templates/core/team_management.html:47
+msgid "Role"
+msgstr ""
+
+#: templates/core/team_management.html:48
+msgid "License"
+msgstr ""
+
+#: templates/core/team_management.html:66
+msgid "Has admin permissions"
+msgstr ""
+
+#: templates/core/team_management.html:73
+msgid "Active"
+msgstr ""
+
+#: templates/core/team_management.html:75
+msgid "Inactive"
+msgstr ""
+
+#: templates/core/team_management.html:80
+msgid "Edit details"
+msgstr ""
+
+#: templates/core/team_management.html:84
+msgid "Force password change"
+msgstr ""
+
+#: templates/core/team_management.html:89
+msgid ""
+"Are you sure you want to deactivate this user? They will lose access "
+"immediately."
+msgstr ""
+
+#: templates/core/team_management.html:91
+msgid "Revoke access"
+msgstr ""
+
+#: templates/core/team_management.html:96
+msgid "Do you want to reactivate this user?"
+msgstr ""
+
+#: templates/core/team_management.html:98
+msgid "Restore access"
+msgstr ""
+
+#: templates/core/team_management.html:107
+msgid "No employees registered."
+msgstr ""
+
+#: templates/inventory/movement_form.html:8
+msgid "Stock Movement"
+msgstr ""
+
+#: templates/inventory/movement_form.html:11
+msgid ""
+"Use this for loading purchase invoices or manual adjustments. Sales will be "
+"deducted automatically from the POS."
+msgstr ""
+
+#: templates/inventory/movement_form.html:17
+msgid "Record Movement"
+msgstr ""
+
+#: templates/inventory/product_form.html:8
+msgid "New Product / Service"
+msgstr ""
+
+#: templates/inventory/product_labels.html:6
+#: templates/inventory/product_labels.html:60
+msgid "Product Labels"
+msgstr ""
+
+#: templates/inventory/product_labels.html:67
+msgid "Show price"
+msgstr ""
+
+#: templates/inventory/product_labels.html:70
+msgid "Print / Save PDF"
+msgstr ""
+
+#: templates/inventory/product_labels.html:90
+msgid "No products with barcode"
+msgstr ""
+
+#: templates/inventory/product_labels.html:91
+msgid "Assign barcodes to your products from the inventory to generate labels."
+msgstr ""
+
+#: templates/inventory/product_labels.html:92
+msgid "Go to Inventory"
+msgstr ""
+
+#: templates/inventory/product_list.html:8
+msgid "Print Labels"
+msgstr ""
+
+#: templates/inventory/product_list.html:9
+msgid "Adjust Stock"
+msgstr ""
+
+#: templates/inventory/product_list.html:10
+msgid "New Item"
+msgstr ""
+
+#: templates/inventory/product_list.html:17
+msgid "Search by name or barcode..."
+msgstr ""
+
+#: templates/inventory/product_list.html:18
+msgid "Search"
+msgstr ""
+
+#: templates/inventory/product_list.html:28 templates/sales/new_sale.html:291
+msgid "Code"
+msgstr ""
+
+#: templates/inventory/product_list.html:32
+msgid "Current Stock"
+msgstr ""
+
+#: templates/inventory/product_list.html:43
+msgid "Service"
+msgstr ""
+
+#: templates/inventory/product_list.html:62
+msgid "Edit"
+msgstr ""
+
+#: templates/inventory/product_list.html:66
+msgid "Are you sure you want to delete this product?"
+msgstr ""
+
+#: templates/inventory/product_list.html:68
+msgid "Delete"
+msgstr ""
+
+#: templates/inventory/product_list.html:73
+msgid "Restricted"
+msgstr ""
+
+#: templates/inventory/product_list.html:78
+msgid "No products registered."
+msgstr ""
+
+#: templates/registration/login.html:7
+msgid "Login"
+msgstr ""
+
+#: templates/registration/login.html:39
+msgid "Veterinary Management System"
+msgstr ""
+
+#: templates/registration/login.html:48
+msgid "Invalid username or password."
+msgstr ""
+
+#: templates/registration/login.html:63
+msgid "SIGN IN"
+msgstr ""
+
+#: templates/sales/cash_report.html:8
+msgid "Summary of operations."
+msgstr ""
+
+#: templates/sales/cash_report.html:21
+msgid "All Day"
+msgstr ""
+
+#: templates/sales/cash_report.html:22
+msgid "Morning"
+msgstr ""
+
+#: templates/sales/cash_report.html:23
+msgid "Afternoon"
+msgstr ""
+
+#: templates/sales/cash_report.html:27
+msgid "Print"
+msgstr ""
+
+#: templates/sales/cash_report.html:30
+msgid "Clear Filters"
+msgstr ""
+
+#: templates/sales/cash_report.html:40
+msgid "Viewing report for"
+msgstr ""
+
+#: templates/sales/cash_report.html:42
+msgid "Shift"
+msgstr ""
+
+#: templates/sales/cash_report.html:43
+msgid "Morning (Until 2pm)"
+msgstr ""
+
+#: templates/sales/cash_report.html:44
+msgid "Afternoon (2pm onwards)"
+msgstr ""
+
+#: templates/sales/cash_report.html:45
+msgid "Full Day"
+msgstr ""
+
+#: templates/sales/cash_report.html:54
+msgid "DAY TOTAL"
+msgstr ""
+
+#: templates/sales/cash_report.html:63
+msgid "By Payment Method"
+msgstr ""
+
+#: templates/sales/cash_report.html:69
+msgid "ops"
+msgstr ""
+
+#: templates/sales/cash_report.html:74
+msgid "No transactions today"
+msgstr ""
+
+#: templates/sales/cash_report.html:84
+msgid "Transaction Details"
+msgstr ""
+
+#: templates/sales/cash_report.html:90
+msgid "Time"
+msgstr ""
+
+#: templates/sales/cash_report.html:91
+msgid "Ticket"
+msgstr ""
+
+#: templates/sales/cash_report.html:92 templates/sales/new_sale.html:58
+#: templates/sales/sale_detail.html:27 templates/sales/sale_list.html:17
+msgid "Client"
+msgstr ""
+
+#: templates/sales/cash_report.html:93
+msgid "Method"
+msgstr ""
+
+#: templates/sales/cash_report.html:94 templates/sales/sale_detail.html:42
+#: templates/sales/sale_list.html:19
+msgid "Total"
+msgstr ""
+
+#: templates/sales/cash_report.html:95
+msgid "Action"
+msgstr ""
+
+#: templates/sales/cash_report.html:107 templates/sales/sale_detail.html:31
+#: templates/sales/sale_list.html:32
+msgid "Walk-in Customer"
+msgstr ""
+
+#: templates/sales/cash_report.html:113 templates/sales/sale_list.html:38
+msgid "View Ticket"
+msgstr ""
+
+#: templates/sales/cash_report.html:122
+msgid "No sales recorded today."
+msgstr ""
+
+#: templates/sales/new_sale.html:9
+msgid "Search Products"
+msgstr ""
+
+#: templates/sales/new_sale.html:11
+msgid "Scan"
+msgstr ""
+
+#: templates/sales/new_sale.html:18
+msgid "Camera active — Scan the code"
+msgstr ""
+
+#: templates/sales/new_sale.html:29
+msgid "Type name or code..."
+msgstr ""
+
+#: templates/sales/new_sale.html:30
+msgid "Add"
+msgstr ""
+
+#: templates/sales/new_sale.html:40
+msgid ""
+"Type the name, use the Scan button to read codes with the camera, or connect "
+"a USB barcode reader."
+msgstr ""
+
+#: templates/sales/new_sale.html:49
+msgid "Current Sale"
+msgstr ""
+
+#: templates/sales/new_sale.html:60
+msgid "Walk-in / Anonymous"
+msgstr ""
+
+#: templates/sales/new_sale.html:68
+msgid "Payment Method"
+msgstr ""
+
+#: templates/sales/new_sale.html:70
+msgid "Cash"
+msgstr ""
+
+#: templates/sales/new_sale.html:71
+msgid "Card"
+msgstr ""
+
+#: templates/sales/new_sale.html:72
+msgid "Transfer"
+msgstr ""
+
+#: templates/sales/new_sale.html:73
+msgid "QR / Wallet"
+msgstr ""
+
+#: templates/sales/new_sale.html:84 templates/sales/sale_detail.html:40
+msgid "Qty"
+msgstr ""
+
+#: templates/sales/new_sale.html:85
+msgid "Subtotal"
+msgstr ""
+
+#: templates/sales/new_sale.html:96
+msgid "Checkout & Finalize"
+msgstr ""
+
+#: templates/sales/new_sale.html:186
+msgid "Product not found. Select one from the list or scan a valid code."
+msgstr ""
+
+#: templates/sales/new_sale.html:232
+msgid "The cart is empty."
+msgstr ""
+
+#: templates/sales/new_sale.html:288
+msgid "added to cart"
+msgstr ""
+
+#: templates/sales/new_sale.html:291
+msgid "not found"
+msgstr ""
+
+#: templates/sales/new_sale.html:328
+msgid "Could not access camera. HTTPS is required on mobile devices."
+msgstr ""
+
+#: templates/sales/sale_detail.html:6
+msgid "Back to History"
+msgstr ""
+
+#: templates/sales/sale_detail.html:8 templates/sales/sale_list.html:7
+msgid "New Sale"
+msgstr ""
+
+#: templates/sales/sale_detail.html:9
+msgid "Print Ticket"
+msgstr ""
+
+#: templates/sales/sale_detail.html:20
+msgid "Veterinary Clinic"
+msgstr ""
+
+#: templates/sales/sale_detail.html:22
+msgid "SALE TICKET"
+msgstr ""
+
+#: templates/sales/sale_detail.html:34 templates/sales/sale_list.html:18
+msgid "Payment"
+msgstr ""
+
+#: templates/sales/sale_detail.html:56
+msgid "TOTAL:"
+msgstr ""
+
+#: templates/sales/sale_detail.html:63
+msgid "Thank you for choosing us!"
+msgstr ""
+
+#: templates/sales/sale_list.html:6
+msgid "Sales History"
+msgstr ""
+
+#: templates/sales/sale_list.html:44
+msgid "No sales recorded yet."
+msgstr ""

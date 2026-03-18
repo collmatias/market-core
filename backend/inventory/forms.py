@@ -1,30 +1,48 @@
 from django import forms
-from .models import Producto, MovimientoStock
+from django.utils.translation import gettext_lazy as _
+from .models import Product, StockMovement
 
-class ProductoForm(forms.ModelForm):
+
+class ProductForm(forms.ModelForm):
     class Meta:
-        model = Producto
-        fields = ['codigo_barras', 'descripcion', 'tipo', 'costo', 'precio_venta', 'cantidad_minima']
+        model = Product
+        fields = ['barcode', 'description', 'type', 'cost', 'sale_price', 'minimum_stock']
+        labels = {
+            'barcode': _('Barcode'),
+            'description': _('Description'),
+            'type': _('Type'),
+            'cost': _('Cost'),
+            'sale_price': _('Sale Price'),
+            'minimum_stock': _('Minimum Stock'),
+        }
         widgets = {
-            'codigo_barras': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Opcional'}),
-            'descripcion': forms.TextInput(attrs={'class': 'form-control'}),
-            'tipo': forms.Select(attrs={'class': 'form-select'}),
-            'costo': forms.NumberInput(attrs={'class': 'form-control'}),
-            'precio_venta': forms.NumberInput(attrs={'class': 'form-control'}),
-            'cantidad_minima': forms.NumberInput(attrs={'class': 'form-control'}),
+            'barcode': forms.TextInput(attrs={'class': 'form-control'}),
+            'description': forms.TextInput(attrs={'class': 'form-control'}),
+            'type': forms.Select(attrs={'class': 'form-select'}),
+            'cost': forms.NumberInput(attrs={'class': 'form-control'}),
+            'sale_price': forms.NumberInput(attrs={'class': 'form-control'}),
+            'minimum_stock': forms.NumberInput(attrs={'class': 'form-control'}),
         }
 
-class MovimientoStockForm(forms.ModelForm):
+
+class StockMovementForm(forms.ModelForm):
     class Meta:
-        model = MovimientoStock
-        fields = ['producto', 'tipo', 'cantidad']
-        widgets = {
-            'producto': forms.Select(attrs={'class': 'form-select'}),
-            'tipo': forms.Select(attrs={'class': 'form-select'}),
-            'cantidad': forms.NumberInput(attrs={'class': 'form-control'}),
+        model = StockMovement
+        fields = ['product', 'type', 'quantity']
+        labels = {
+            'product': _('Product'),
+            'type': _('Movement Type'),
+            'quantity': _('Quantity'),
         }
-    
-    def __init__(self, *args, **kwargs):
+        widgets = {
+            'product': forms.Select(attrs={'class': 'form-select'}),
+            'type': forms.Select(attrs={'class': 'form-select'}),
+            'quantity': forms.NumberInput(attrs={'class': 'form-control'}),
+        }
+
+    def __init__(self, *args, company=None, **kwargs):
         super().__init__(*args, **kwargs)
-        # En el selector de movimientos, solo mostramos productos físicos (no servicios)
-        self.fields['producto'].queryset = Producto.objects.filter(tipo='PRODUCTO')
+        qs = Product.objects.filter(type='PRODUCT')
+        if company:
+            qs = qs.filter(company=company)
+        self.fields['product'].queryset = qs
