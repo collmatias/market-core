@@ -78,11 +78,17 @@ services:
     build: ./cloud_api
     container_name: cloud_api_service
     command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+    volumes:
+      - ./cloud_api:/app
     ports:
       - "5000:8000"
     environment:
       - DATABASE_URL=postgresql://cloud_admin:cloud_secret_pass@cloud_db/licenses_db
-      - API_SECRET=MI_CLAVE_MAESTRA_PARA_CREAR_LICENCIAS
+      - API_SECRET=${API_SECRET:-vetcore-dev-secret-change-in-prod}
+      - JWT_SECRET=${JWT_SECRET:-vetcore-jwt-dev-secret-change-in-prod}
+      - DEBUG=1
+      - CORS_ORIGINS=*
+      - RATE_LIMIT_DEFAULT=120/minute
     depends_on:
       - cloud_db
 
