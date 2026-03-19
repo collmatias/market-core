@@ -49,36 +49,50 @@
                         <div class="card shadow-sm border-0">
                             <div class="card-header bg-primary text-white py-3">
                                 <h5 class="mb-0">
-                                    {% if is_new %}
-                                        🚀 {% trans "Initial Setup" %}
-                                    {% else %}
-                                        <i class="bi bi-building me-2"></i>{% trans "Company Details" %}
-                                    {% endif %}
+                                    <i class="bi bi-building me-2"></i>{% trans "Company Details" %}
                                 </h5>
                             </div>
                             <div class="card-body p-4">
-                                {% if is_new %}
-                                    <p class="text-muted text-center mb-4">
-                                        {% trans "Welcome to VetCore! Before starting, we need to register your clinic's information." %}
-                                    </p>
+
+                                {# ─── Identity fields (read-only) ─── #}
+                                {% if company %}
+                                <h6 class="mb-3 border-bottom pb-2"><i class="bi bi-lock-fill me-2 text-muted"></i>{% trans "Clinic Identity" %}</h6>
+                                <div class="alert alert-light border small mb-3">
+                                    <i class="bi bi-info-circle me-1"></i>
+                                    {% trans "These fields were set during initial setup and cannot be modified." %}
+                                </div>
+                                <div class="row mb-2">
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label fw-bold text-muted">{% trans "Company Name" %}</label>
+                                        <input type="text" class="form-control" value="{{ company.name }}" disabled>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label fw-bold text-muted">{% trans "Tax ID" %}</label>
+                                        <input type="text" class="form-control" value="{{ company.tax_id }}" disabled>
+                                    </div>
+                                </div>
+                                <div class="row mb-2">
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label fw-bold text-muted">{% trans "Phone" %}</label>
+                                        <input type="text" class="form-control" value="{{ company.phone|default_if_none:'' }}" disabled>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label fw-bold text-muted">{% trans "Company Email" %}</label>
+                                        <input type="email" class="form-control" value="{{ company.email|default_if_none:'' }}" disabled>
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold text-muted">{% trans "Address" %}</label>
+                                    <input type="text" class="form-control" value="{{ company.address|default_if_none:'' }}" disabled>
+                                </div>
+                                <hr>
                                 {% endif %}
 
+                                {# ─── Editable preferences ─── #}
                                 <form method="post">
                                     {% csrf_token %}
 
-                                    {% for field in form %}
-                                        {% if field.name != 'currency' and field.name != 'language' %}
-                                        <div class="mb-3">
-                                            <label class="form-label fw-bold">{{ field.label }}</label>
-                                            {{ field }}
-                                            {% if field.errors %}
-                                                <div class="text-danger small">{{ field.errors }}</div>
-                                            {% endif %}
-                                        </div>
-                                        {% endif %}
-                                    {% endfor %}
-
-                                    <h6 class="mt-4 mb-3 border-bottom pb-2"><i class="bi bi-currency-exchange me-2"></i>{% trans "Currency" %}</h6>
+                                    <h6 class="mt-3 mb-3 border-bottom pb-2"><i class="bi bi-currency-exchange me-2"></i>{% trans "Currency" %}</h6>
                                     <div class="mb-3">
                                         <label class="form-label fw-bold">{{ form.currency.label }}</label>
                                         {{ form.currency }}
@@ -103,7 +117,7 @@
 
                                     <div class="d-grid mt-4">
                                         <button type="submit" class="btn btn-primary btn-lg">
-                                            {% if is_new %}{% trans "Get Started" %}{% else %}{% trans "Save Changes" %}{% endif %}
+                                            {% trans "Save Preferences" %}
                                         </button>
                                     </div>
                                 </form>

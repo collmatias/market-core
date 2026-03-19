@@ -1,0 +1,28 @@
+{% load i18n %}
+<nav class="vc-nav sticky-top">
+    <div class="container d-flex align-items-center justify-content-between">
+        <a href="/" class="brand">🐶 VetCoreSoft</a>
+        <div class="d-flex align-items-center gap-2">
+            {% if current_page != "home" %}
+            <a href="/" class="btn btn-link btn-sm text-white text-decoration-none">
+                <i class="bi bi-house me-1"></i>{% trans "Home" %}
+            </a>
+            {% endif %}
+            {% if current_page != "download" %}
+            <a href="{% url 'landing' %}" class="btn btn-outline-light btn-sm">
+                <i class="bi bi-download me-1"></i>{% trans "Download" %}
+            </a>
+            {% endif %}
+            {% if current_page != "register" and deployment_mode == 'SAAS' %}
+            <a href="{% url 'register' %}" class="btn btn-success btn-sm">
+                <i class="bi bi-person-plus me-1"></i>{% trans "Register" %}
+            </a>
+            {% endif %}
+            {% if current_page != "login" %}
+            <a href="{% url 'login' %}" class="btn btn-primary btn-sm">
+                <i class="bi bi-box-arrow-in-right me-1"></i>{% trans "Sign In" %}
+            </a>
+            {% endif %}
+        </div>
+    </div>
+</nav>

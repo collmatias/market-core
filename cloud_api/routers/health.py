@@ -9,7 +9,7 @@ router = APIRouter(tags=["Health"])
 
 @router.get("/", summary="Health check")
 def health_check():
-    return {"status": "ok", "service": "VetCore Cloud API"}
+    return {"status": "ok", "service": "VetCoreSoft Cloud API"}
 
 
 @router.get("/health", summary="Detailed health check")

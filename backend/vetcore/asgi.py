@@ -1,5 +1,5 @@
 """
-ASGI config for vetcore project.
+ASGI config for vetcoresoft project.
 
 It exposes the ASGI callable as a module-level variable named ``application``.
 

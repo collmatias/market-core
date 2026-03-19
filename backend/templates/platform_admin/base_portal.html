@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block extra_css %}
+<style>
+    .portal-sidebar { min-height: calc(100vh - 120px); }
+    .portal-nav .nav-link { color: #495057; padding: 0.6rem 1rem; border-radius: 0.5rem; margin-bottom: 0.25rem; }
+    .portal-nav .nav-link:hover { background-color: #e9ecef; }
+    .portal-nav .nav-link.active { background-color: #0d6efd; color: white; }
+    .stat-card { transition: transform 0.15s; }
+    .stat-card:hover { transform: translateY(-2px); }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    {# ─── Sidebar ─── #}
+    <div class="col-md-3 col-lg-2">
+        <div class="portal-sidebar">
+            <h6 class="text-uppercase text-muted fw-bold mb-3 small">
+                <i class="bi bi-shield-lock me-1"></i> {% trans "Admin Portal" %}
+            </h6>
+            <nav class="portal-nav nav flex-column">
+                <a class="nav-link {% if active_portal_tab == 'dashboard' %}active{% endif %}"
+                   href="{% url 'platform_dashboard' %}">
+                    <i class="bi bi-speedometer2 me-2"></i> {% trans "Dashboard" %}
+                </a>
+                <a class="nav-link {% if active_portal_tab == 'licenses' %}active{% endif %}"
+                   href="{% url 'platform_license_list' %}">
+                    <i class="bi bi-key me-2"></i> {% trans "Licenses" %}
+                </a>
+                <a class="nav-link {% if active_portal_tab == 'create' %}active{% endif %}"
+                   href="{% url 'platform_license_create' %}">
+                    <i class="bi bi-plus-circle me-2"></i> {% trans "Create License" %}
+                </a>
+                <a class="nav-link {% if active_portal_tab == 'transfer' %}active{% endif %}"
+                   href="{% url 'platform_license_transfer' %}">
+                    <i class="bi bi-arrow-left-right me-2"></i> {% trans "Transfer" %}
+                </a>
+            </nav>
+        </div>
+    </div>
+
+    {# ─── Main Content ─── #}
+    <div class="col-md-9 col-lg-10">
+        {% block portal_content %}{% endblock %}
+    </div>
+</div>
+{% endblock %}

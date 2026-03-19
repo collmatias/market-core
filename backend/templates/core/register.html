@@ -1,0 +1,215 @@
+{% load i18n %}
+<!DOCTYPE html>
+<html lang="{{ LANGUAGE_CODE|default:'es' }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% trans "Create Account" %} — VetCoreSoft</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <style>
+        :root { --vc-dark: #0a1628; }
+        body {
+            background: linear-gradient(135deg, #0d6efd 0%, #0dcaf0 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        .vc-nav { background: rgba(10,22,40,.95); backdrop-filter: blur(8px); padding: .75rem 0; }
+        .vc-nav .brand { color: #fff; font-size: 1.4rem; font-weight: 700; text-decoration: none; }
+        .register-wrapper { flex: 1; display: flex; align-items: center; justify-content: center; padding: 2rem 1rem; }
+        .register-card {
+            width: 100%; max-width: 560px;
+            border-radius: 16px;
+            box-shadow: 0 12px 40px rgba(0,0,0,.25);
+            border: none;
+            overflow: hidden;
+        }
+        .register-header {
+            background: var(--vc-dark);
+            color: #fff;
+            padding: 2rem 2rem 1.5rem;
+            text-align: center;
+        }
+        .register-header .logo { font-size: 2.5rem; }
+        .step-indicator { display: flex; gap: .5rem; justify-content: center; margin-bottom: 1rem; }
+        .step-dot {
+            width: 10px; height: 10px; border-radius: 50%;
+            background: rgba(255,255,255,.3); transition: all .3s;
+        }
+        .step-dot.active { background: #0d6efd; width: 28px; border-radius: 5px; }
+        .register-body { padding: 2rem; background: #fff; }
+        .step-section { display: none; }
+        .step-section.active { display: block; }
+        .trial-badge {
+            display: inline-block; background: #198754; color: #fff;
+            padding: .25rem .75rem; border-radius: 50px; font-size: .8rem; font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+
+{% include "core/_public_navbar.html" with current_page="register" %}
+
+<div class="register-wrapper">
+    <div class="register-card">
+        <div class="register-header">
+            <div class="logo">🐶</div>
+            <h3 class="fw-bold mb-1">VetCoreSoft</h3>
+            <p class="mb-2 opacity-75" id="stepTitle">{% trans "Create your account" %}</p>
+            <div class="step-indicator">
+                <div class="step-dot active" id="dot1"></div>
+                <div class="step-dot" id="dot2"></div>
+            </div>
+            <span class="trial-badge"><i class="bi bi-gift me-1"></i>{% trans "30 days free" %}</span>
+        </div>
+
+        <div class="register-body">
+            {% if form.non_field_errors %}
+            <div class="alert alert-danger py-2 small mb-3">
+                {% for error in form.non_field_errors %}
+                    <div>{{ error }}</div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <form method="post" id="registerForm" novalidate>
+                {% csrf_token %}
+
+                <!-- STEP 1: Account -->
+                <div class="step-section active" id="step1">
+                    <h5 class="fw-bold mb-3"><i class="bi bi-person-plus me-2"></i>{% trans "Your Account" %}</h5>
+
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold">{% trans "Username" %}</label>
+                        {{ form.username }}
+                        {% if form.username.errors %}<div class="text-danger small mt-1">{{ form.username.errors.0 }}</div>{% endif %}
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold">{% trans "Email" %}</label>
+                        {{ form.email }}
+                        {% if form.email.errors %}<div class="text-danger small mt-1">{{ form.email.errors.0 }}</div>{% endif %}
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label small fw-bold">{% trans "Password" %}</label>
+                            {{ form.password }}
+                            {% if form.password.errors %}<div class="text-danger small mt-1">{{ form.password.errors.0 }}</div>{% endif %}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label small fw-bold">{% trans "Confirm Password" %}</label>
+                            {{ form.password_confirm }}
+                        </div>
+                    </div>
+
+                    <div class="d-grid mt-2">
+                        <button type="button" class="btn btn-primary btn-lg" onclick="goToStep(2)">
+                            {% trans "Continue" %} <i class="bi bi-arrow-right ms-1"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- STEP 2: Clinic -->
+                <div class="step-section" id="step2">
+                    <h5 class="fw-bold mb-3"><i class="bi bi-building me-2"></i>{% trans "Your Clinic" %}</h5>
+
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold">{% trans "Account Type" %} *</label>
+                        {{ form.account_type }}
+                        {% if form.account_type.errors %}<div class="text-danger small mt-1">{{ form.account_type.errors.0 }}</div>{% endif %}
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold">{% trans "Clinic / Business Name" %} *</label>
+                        {{ form.company_name }}
+                        {% if form.company_name.errors %}<div class="text-danger small mt-1">{{ form.company_name.errors.0 }}</div>{% endif %}
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold">{% trans "Clinic Email" %} *</label>
+                        {{ form.company_email }}
+                        {% if form.company_email.errors %}<div class="text-danger small mt-1">{{ form.company_email.errors.0 }}</div>{% endif %}
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label small fw-bold">{% trans "Tax ID" %}</label>
+                            {{ form.tax_id }}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label small fw-bold">{% trans "Phone" %}</label>
+                            {{ form.phone }}
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label small fw-bold">{% trans "Address" %}</label>
+                            {{ form.address }}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label small fw-bold">{% trans "Region" %}</label>
+                            {{ form.region }}
+                        </div>
+                    </div>
+
+                    <div class="d-flex gap-2 mt-2">
+                        <button type="button" class="btn btn-outline-secondary btn-lg flex-fill" onclick="goToStep(1)">
+                            <i class="bi bi-arrow-left me-1"></i> {% trans "Back" %}
+                        </button>
+                        <button type="submit" class="btn btn-success btn-lg flex-fill" id="submitBtn">
+                            <i class="bi bi-check-lg me-1"></i> {% trans "Create Account" %}
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <div class="card-footer text-center bg-light py-3 border-0">
+            <span class="small text-muted">
+                {% trans "Already have an account?" %}
+                <a href="{% url 'login' %}">{% trans "Sign In" %}</a>
+            </span>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+const titles = {
+    1: "{% trans 'Create your account' %}",
+    2: "{% trans 'Tell us about your clinic' %}"
+};
+function goToStep(n) {
+    // Client-side validation for step 1
+    if (n === 2) {
+        const username = document.querySelector('[name=username]');
+        const email = document.querySelector('[name=email]');
+        const pw = document.querySelector('[name=password]');
+        const pw2 = document.querySelector('[name=password_confirm]');
+        if (!username.value || !email.value || !pw.value || !pw2.value) {
+            username.reportValidity() || email.reportValidity() || pw.reportValidity();
+            return;
+        }
+        if (pw.value !== pw2.value) {
+            pw2.setCustomValidity("{% trans 'Passwords do not match.' %}");
+            pw2.reportValidity();
+            pw2.setCustomValidity("");
+            return;
+        }
+    }
+    document.querySelectorAll('.step-section').forEach(s => s.classList.remove('active'));
+    document.getElementById('step' + n).classList.add('active');
+    document.querySelectorAll('.step-dot').forEach((d, i) => {
+        d.classList.toggle('active', i === n - 1);
+    });
+    document.getElementById('stepTitle').textContent = titles[n];
+}
+// If server returned errors on step 2 fields, show step 2
+{% if form.company_name.errors or form.company_email.errors or form.tax_id.errors %}
+    goToStep(2);
+{% endif %}
+// Prevent double-submit
+document.getElementById('registerForm').addEventListener('submit', function() {
+    document.getElementById('submitBtn').disabled = true;
+    document.getElementById('submitBtn').innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>{% trans "Creating..." %}';
+});
+</script>
+</body>
+</html>

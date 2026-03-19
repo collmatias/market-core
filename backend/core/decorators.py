@@ -46,3 +46,17 @@ def localhost_required(view_func):
             return redirect('home')
         return view_func(request, *args, **kwargs)
     return _wrapped_view
+
+
+def owner_required(view_func):
+    @wraps(view_func)
+    def _wrapped_view(request, *args, **kwargs):
+        is_owner = request.user.is_superuser or (
+            hasattr(request.user, 'profile') and request.user.profile.is_owner
+        )
+        if is_owner:
+            return view_func(request, *args, **kwargs)
+        else:
+            messages.error(request, _("Access restricted: Owner permission required."))
+            return redirect('home')
+    return _wrapped_view

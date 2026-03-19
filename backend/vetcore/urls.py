@@ -21,6 +21,7 @@ urlpatterns = [
     path('', include('clinical.urls')),
     path('', include('inventory.urls')),
     path('', include('sales.urls')),
+    path('platform/', include('platform_admin.urls')),
 ]
 
 if settings.DEBUG:

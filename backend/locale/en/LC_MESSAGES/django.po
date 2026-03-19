@@ -819,7 +819,7 @@ msgstr ""
 
 #: templates/core/company_settings.html:20
 msgid ""
-"Welcome to VetCore! Before starting, we need to register your clinic's "
+"Welcome to VetCoreSoft! Before starting, we need to register your clinic's "
 "information."
 msgstr ""
 
@@ -1054,7 +1054,7 @@ msgid "Set New Password"
 msgstr ""
 
 #: templates/core/setup_wizard.html:10
-msgid "Welcome to VetCore"
+msgid "Welcome to VetCoreSoft"
 msgstr ""
 
 #: templates/core/setup_wizard.html:11

@@ -26,7 +26,7 @@ class Settings(BaseSettings):
     cors_origins: str = "*"
 
     # --- App ---
-    app_name: str = "VetCore Cloud API"
+    app_name: str = "VetCoreSoft Cloud API"
     debug: bool = False
 
     class Config:

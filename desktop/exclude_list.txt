@@ -1,0 +1,6 @@
+__pycache__
+*.pyc
+.sqlite3
+Dockerfile
+media\historias_clinicas
+staticfiles

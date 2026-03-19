@@ -1,6 +1,8 @@
 import os
 import shutil
+import secrets
 from django.conf import settings
+from django.core.mail import send_mail
 from django.http import FileResponse, HttpResponse, HttpResponseNotFound
 from django.utils import timezone
 from django.utils.translation import gettext as _
@@ -23,16 +25,154 @@ from django.contrib.auth.forms import SetPasswordForm
 from django.contrib.messages.views import SuccessMessageMixin
 from django.urls import reverse_lazy
 
-from .models import Client, Patient, Company, UserProfile
+from .models import Client, Patient, Company, UserProfile, EmailVerificationToken
 from .serializers import ClientSerializer, PatientSerializer
-from .forms import AdminSetPasswordForm, ClientForm, PatientForm, CompanyForm, SetupForm, EmployeeForm, EditEmployeeForm, ChangePinForm
+from .forms import AdminSetPasswordForm, ClientForm, PatientForm, CompanyForm, CompanySettingsForm, SetupForm, RegistrationForm, EmployeeForm, EditEmployeeForm, ChangePinForm
 from .utils import get_server_ip
 from datetime import date, timedelta
 from clinical.models import Appointment
+import requests as http_requests
+import logging
 
 from django.contrib import messages
 
 from .license import check_license, save_license, generate_offline_key
+
+
+# --- PUBLIC LANDING PAGE (SaaS download page, no auth required) ---
+def landing(request):
+    zip_path = os.path.join(settings.BASE_DIR, 'static', 'downloads', 'VetCoreSoft-Setup.zip')
+    return render(request, "core/landing.html", {
+        'zip_available': os.path.exists(zip_path),
+    })
+
+
+# --- SAAS REGISTRATION (public, SaaS mode only) ---
+def register(request):
+    if getattr(settings, 'DEPLOYMENT_MODE', 'DESKTOP') != 'SAAS':
+        return redirect('login')
+    if request.user.is_authenticated:
+        return redirect('home')
+
+    if request.method == 'POST':
+        form = RegistrationForm(request.POST)
+        if form.is_valid():
+            try:
+                data = form.cleaned_data
+                trial_days = 30
+
+                # 1. Register tenant on Cloud API
+                tenant_id = _register_tenant_on_cloud(
+                    name=data['company_name'],
+                    email=data['company_email'],
+                    tax_id=data.get('tax_id') or None,
+                    phone=data.get('phone') or None,
+                    address=data.get('address') or None,
+                    region=data.get('region') or None,
+                    tenant_type=data['account_type'],
+                )
+
+                # 2. Create local Company
+                company = Company.objects.create(
+                    name=data['company_name'],
+                    tax_id=data.get('tax_id') or 'PENDING',
+                    address=data.get('address', ''),
+                    phone=data.get('phone', ''),
+                    email=data['company_email'],
+                    is_setup_complete=True,
+                    account_type=data['account_type'],
+                    plan='TRIAL',
+                    expiration_date=date.today() + timedelta(days=trial_days),
+                    is_active=True,
+                    cloud_tenant_id=tenant_id,
+                )
+
+                # 3. Create admin user
+                user = User.objects.create_user(
+                    username=data['username'],
+                    email=data['email'],
+                    password=data['password'],
+                )
+                UserProfile.objects.create(
+                    user=user,
+                    company=company,
+                    role='ADMIN',
+                    is_admin=True,
+                    is_owner=True,
+                )
+
+                # Send verification email (non-blocking)
+                _send_verification_email(request, user)
+
+                login(request, user)
+                messages.success(request, _('Welcome to VetCoreSoft! Your 30-day trial has started. Please check your email to verify your account.'))
+                return redirect('home')
+            except Exception as e:
+                logger.error(f'Registration error: {e}')
+                form.add_error(None, _('An error occurred during registration. Please try again.'))
+    else:
+        form = RegistrationForm()
+
+    return render(request, 'core/register.html', {'form': form})
+
+
+def _send_verification_email(request, user):
+    """Generate token and send verification email. Non-blocking on failure."""
+    try:
+        token = secrets.token_urlsafe(48)
+        EmailVerificationToken.objects.update_or_create(
+            user=user,
+            defaults={'token': token},
+        )
+        verify_url = request.build_absolute_uri(f'/verify-email/{token}/')
+        send_mail(
+            subject=_('VetCoreSoft — Verify your email'),
+            message=_('Hi %(username)s,\n\nPlease verify your email by clicking the link below:\n\n%(url)s\n\nThis link expires in 48 hours.\n\n— VetCoreSoft Team') % {
+                'username': user.username,
+                'url': verify_url,
+            },
+            from_email=None,
+            recipient_list=[user.email],
+            fail_silently=True,
+        )
+    except Exception as e:
+        logger.warning('Verification email failed (non-blocking): %s', e)
+
+
+def verify_email(request, token):
+    """Public view — validates email verification token."""
+    try:
+        vt = EmailVerificationToken.objects.select_related('user__profile').get(token=token)
+    except EmailVerificationToken.DoesNotExist:
+        messages.error(request, _('Invalid or expired verification link.'))
+        return redirect('login')
+
+    # Check if token is older than 48 hours
+    age = timezone.now() - vt.created_at
+    if age.total_seconds() > 48 * 3600:
+        vt.delete()
+        messages.error(request, _('This verification link has expired. Please request a new one.'))
+        return redirect('login')
+
+    vt.user.profile.email_verified = True
+    vt.user.profile.save(update_fields=['email_verified'])
+    vt.delete()
+    messages.success(request, _('Your email has been verified successfully!'))
+    if request.user.is_authenticated:
+        return redirect('home')
+    return redirect('login')
+
+
+def resend_verification(request):
+    """Resend verification email for the logged-in user."""
+    if not request.user.is_authenticated:
+        return redirect('login')
+    if hasattr(request.user, 'profile') and request.user.profile.email_verified:
+        messages.info(request, _('Your email is already verified.'))
+        return redirect('home')
+    _send_verification_email(request, request.user)
+    messages.success(request, _('Verification email sent. Please check your inbox.'))
+    return redirect('home')
 
 
 # --- API VIEWSETS (DRF) ---
@@ -90,7 +230,7 @@ def prepare_quick_switch(request):
     company_id = request.user.profile.company.id
     logout(request)
     response = redirect("lockscreen")
-    response.set_cookie("vetcore_workstation", company_id, max_age=43200)
+    response.set_cookie("vetcoresoft_workstation", company_id, max_age=43200)
     return response
 
 
@@ -99,7 +239,7 @@ def lockscreen(request):
     if request.user.is_authenticated:
         return redirect("home")
 
-    company_id = request.COOKIES.get("vetcore_workstation")
+    company_id = request.COOKIES.get("vetcoresoft_workstation")
     if not company_id:
         return redirect("login")
 
@@ -140,8 +280,11 @@ def change_pin(request):
 
 # --- TEMPLATE VIEWS (FRONTEND) ---
 
-@login_required
 def home(request):
+    if not request.user.is_authenticated:
+        if getattr(settings, 'DEPLOYMENT_MODE', 'DESKTOP') == 'SAAS':
+            return render(request, "core/saas_home.html")
+        return redirect('login')
     ip_address = get_server_ip()
     return render(request, "core/home.html", {"server_ip": ip_address})
 
@@ -156,7 +299,7 @@ def download_backup(request):
     db_path = settings.DATABASES["default"]["NAME"]
     if os.path.exists(db_path):
         date_str = timezone.now().strftime("%Y-%m-%d_%H-%M")
-        filename = f"backup_vetcore_{date_str}.sqlite3"
+        filename = f"backup_vetcoresoft_{date_str}.sqlite3"
         return FileResponse(open(db_path, "rb"), as_attachment=True, filename=filename)
     else:
         return HttpResponseNotFound("Database file not found.")
@@ -335,26 +478,16 @@ def company_settings(request):
         is_new = True if not company else False
 
     if request.method == "POST":
-        form = CompanyForm(request.POST, instance=company)
+        form = CompanySettingsForm(request.POST, instance=company)
         if form.is_valid():
-            new_company = form.save(commit=False)
-            if not new_company.expiration_date:
-                new_company.expiration_date = date.today() + timedelta(days=365)
-            new_company.save()
-
-            UserProfile.objects.get_or_create(
-                user=request.user,
-                defaults={
-                    "company": new_company,
-                    "role": "ADMIN"
-                }
-            )
+            form.save()
             return redirect("home")
     else:
-        form = CompanyForm(instance=company)
+        form = CompanySettingsForm(instance=company)
 
     return render(request, "core/company_settings.html", {
         "form": form,
+        "company": company,
         "is_new": is_new
     })
 
@@ -368,13 +501,18 @@ def setup_wizard(request):
         if form.is_valid():
             try:
                 data = form.cleaned_data
+                hw_id = get_hardware_id()
+                trial_days = 30
                 company = Company.objects.create(
                     name=data["company_name"],
                     tax_id=data["tax_id"],
                     address=data["address"],
                     phone=data["phone"],
+                    email=data["company_email"],
+                    hardware_id=hw_id,
+                    is_setup_complete=True,
                     plan="TRIAL",
-                    expiration_date=date.today() + timedelta(days=30),
+                    expiration_date=date.today() + timedelta(days=trial_days),
                     is_active=True
                 )
                 user = User.objects.create_superuser(
@@ -386,8 +524,21 @@ def setup_wizard(request):
                     user=user,
                     company=company,
                     role="ADMIN",
-                    is_admin=True
+                    is_admin=True,
+                    is_owner=True
                 )
+
+                # Register trial license with Cloud API
+                _register_trial_on_cloud(
+                    hw_id=hw_id,
+                    client_name=data["company_name"],
+                    client_email=data["company_email"],
+                    company_name=data["company_name"],
+                    company_email=data["company_email"],
+                    company_tax_id=data["tax_id"],
+                    trial_days=trial_days,
+                )
+
                 login(request, user)
                 return redirect("home")
             except Exception as e:
@@ -396,6 +547,73 @@ def setup_wizard(request):
         form = SetupForm()
 
     return render(request, "core/setup_wizard.html", {"form": form})
+
+
+logger = logging.getLogger(__name__)
+
+
+def _register_trial_on_cloud(hw_id, client_name, client_email, company_name,
+                              company_email, company_tax_id, trial_days=30):
+    """Register a TRIAL license on the Cloud API. Fire-and-forget — failure doesn't block setup."""
+    from .license import AWS_LAMBDA_URL, get_cloud_api_secret
+    # Derive the cloud API base from the license URL
+    base_url = AWS_LAMBDA_URL.rsplit('/', 1)[0]  # e.g. http://cloud_api:8000
+    try:
+        # First get a JWT token
+        token_resp = http_requests.post(
+            f"{base_url}/admin/login",
+            json={"secret": get_cloud_api_secret()},
+            timeout=5
+        )
+        if token_resp.status_code != 200:
+            logger.warning("Could not get cloud API token for trial registration")
+            return
+        token = token_resp.json().get("access_token")
+
+        # Create the trial license
+        http_requests.post(
+            f"{base_url}/license/admin/create",
+            json={
+                "hw_id": hw_id,
+                "client_name": client_name,
+                "client_email": client_email,
+                "company_name": company_name,
+                "company_email": company_email,
+                "company_tax_id": company_tax_id,
+                "plan": "TRIAL",
+                "expiration_date": (date.today() + timedelta(days=trial_days)).isoformat(),
+            },
+            headers={"Authorization": f"Bearer {token}"},
+            timeout=5
+        )
+    except Exception as e:
+        logger.warning("Trial cloud registration failed (non-blocking): %s", e)
+
+
+def _register_tenant_on_cloud(name, email, tax_id=None, phone=None, address=None, region=None, tenant_type='VET'):
+    """Register a Tenant on the Cloud API. Returns tenant_id or None."""
+    from .license import AWS_LAMBDA_URL
+    base_url = AWS_LAMBDA_URL.rsplit('/', 1)[0]
+    try:
+        resp = http_requests.post(
+            f"{base_url}/tenant/register",
+            json={
+                "name": name,
+                "email": email,
+                "tax_id": tax_id,
+                "phone": phone,
+                "address": address,
+                "region": region,
+                "type": tenant_type,
+            },
+            timeout=5
+        )
+        if resp.status_code == 200:
+            return resp.json().get("id")
+        logger.warning("Tenant registration returned %s: %s", resp.status_code, resp.text)
+    except Exception as e:
+        logger.warning("Tenant cloud registration failed (non-blocking): %s", e)
+    return None
 
 
 @login_required

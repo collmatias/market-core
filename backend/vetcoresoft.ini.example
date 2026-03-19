@@ -1,0 +1,13 @@
+; VetCoreSoft Desktop Configuration
+; Copy this file to vetcoresoft.ini and edit values as needed.
+; This file is only used when running outside Docker (.exe or python manage.py).
+
+[cloud]
+; Cloud API base URL (without /check-license path)
+; Production default (when this file is absent): https://api.vetcoresoft.app
+; Pilot example (local network via hosts file):
+; api_url = http://api.vetcoresoft.app
+api_url = https://api.vetcoresoft.app
+
+; Cloud API admin secret (for trial registration)
+; api_secret = vetcoresoft-dev-secret-change-in-prod

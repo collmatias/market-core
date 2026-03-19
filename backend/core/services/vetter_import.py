@@ -1,5 +1,5 @@
 """
-Vetter (FoxPro) → VetCore migration service.
+Vetter (FoxPro) → VetCoreSoft migration service.
 
 Reads .DBF files from a Vetter data directory and imports clients, patients,
 clinical history, products, sales and vaccine records into the current company.
@@ -163,7 +163,7 @@ def _parse_clinica_entries(descrip_text):
 
 class VetterImporter:
     """
-    Imports data from a Vetter (FoxPro) data directory into VetCore.
+    Imports data from a Vetter (FoxPro) data directory into VetCoreSoft.
     """
 
     def __init__(self, data_dir, company):

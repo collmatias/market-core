@@ -2,7 +2,9 @@ from django.shortcuts import redirect
 from django.urls import reverse
 from django.conf import settings
 from django.utils import translation
-from .license import check_license
+from django.contrib import messages
+from django.utils.translation import gettext as _
+from .license import check_license, get_hardware_id
 from .models import Company
 from django.contrib.auth.models import User
 import os
@@ -15,7 +17,7 @@ class LicenseCheckMiddleware:
     def __call__(self, request):
         setup_url = reverse('setup_wizard')
 
-        exempt_prefixes = ['/static/', '/media/', setup_url]
+        exempt_prefixes = ['/static/', '/media/', '/download/', '/register/', '/verify-email/', '/password-reset/', setup_url]
         for prefix in exempt_prefixes:
             if request.path.startswith(prefix):
                 return self.get_response(request)
@@ -39,6 +41,21 @@ class LicenseCheckMiddleware:
                 is_valid, hw_id = check_license()
                 if not is_valid:
                     return redirect('activation')
+
+        # Hardware mismatch detection (warning banner, non-blocking)
+        if request.user.is_authenticated:
+            try:
+                company = request.user.profile.company
+                if company.is_setup_complete and company.hardware_id:
+                    current_hw = get_hardware_id()
+                    if company.hardware_id != current_hw:
+                        messages.warning(
+                            request,
+                            _('Hardware change detected. Your system hardware ID does not match '
+                              'the registered one. Contact support to transfer your license.')
+                        )
+            except Exception:
+                pass
 
         return self.get_response(request)
 

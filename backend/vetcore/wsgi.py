@@ -1,5 +1,5 @@
 """
-WSGI config for vetcore project.
+WSGI config for vetcoresoft project.
 
 It exposes the WSGI callable as a module-level variable named ``application``.
 

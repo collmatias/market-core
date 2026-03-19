@@ -2,6 +2,7 @@ import uuid
 import hashlib
 import os
 import json
+import configparser
 import requests # <--- Necesario para hablar con AWS
 from datetime import datetime, timedelta
 from django.conf import settings
@@ -12,20 +13,37 @@ LICENSE_FILE = os.path.join(settings.BASE_DIR, 'license.key')
 CACHE_FILE = os.path.join(settings.BASE_DIR, 'license_cache.json')
 
 # ENTORNO DE DESARROLLO (Docker / Local)
-# The /check-license legacy endpoint is kept for backward compatibility
 DEBUG_URL = "http://cloud_api:8000/check-license"
 
-# ENTORNO DE PRODUCCIÓN
-# When running as .exe on Windows, uses the production domain.
-# The cloud API exposes /check-license at root for backward compatibility,
-# and the new canonical path is /license/check.
-PRODUCTION_URL = "https://api.vetcore.app/check-license"
+# ENTORNO DE PRODUCCIÓN (default for .exe without config file)
+PRODUCTION_URL = "https://api.vetcoresoft.app/check-license"
 
-# LÓGICA DE SELECCIÓN
+# --- vetcoresoft.ini support for pilot / custom deployments ---
+_config = configparser.ConfigParser()
+_config_path = os.path.join(settings.BASE_DIR, 'vetcoresoft.ini')
+if os.path.exists(_config_path):
+    _config.read(_config_path)
+
+def _ini_get(section, key, fallback=None):
+    return _config.get(section, key, fallback=fallback)
+
+# LÓGICA DE SELECCIÓN: Docker env > vetcoresoft.ini > hardcoded production
 if os.environ.get('AM_I_IN_DOCKER'):
     AWS_LAMBDA_URL = os.environ.get('LICENSE_API_URL', DEBUG_URL)
 else:
-    AWS_LAMBDA_URL = PRODUCTION_URL
+    _cfg_url = _ini_get('cloud', 'api_url')
+    if _cfg_url:
+        AWS_LAMBDA_URL = _cfg_url.rstrip('/') + '/check-license'
+    else:
+        AWS_LAMBDA_URL = PRODUCTION_URL
+
+def get_cloud_api_secret():
+    """Return Cloud API secret. Priority: env var > vetcoresoft.ini > dev fallback."""
+    return (
+        os.environ.get('CLOUD_API_SECRET')
+        or _ini_get('cloud', 'api_secret')
+        or 'vetcoresoft-dev-secret-change-in-prod'
+    )
 
 def get_hardware_id():
     """

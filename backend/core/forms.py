@@ -100,14 +100,16 @@ class PatientForm(forms.ModelForm):
 
 
 class CompanyForm(forms.ModelForm):
+    """Full company form — used only during initial setup or by owner admin."""
     class Meta:
         model = Company
-        fields = ['name', 'tax_id', 'address', 'phone', 'currency', 'language']
+        fields = ['name', 'tax_id', 'address', 'phone', 'email', 'currency', 'language']
         labels = {
             'name': _('Company Name'),
             'tax_id': _('Tax ID'),
             'address': _('Address'),
             'phone': _('Phone'),
+            'email': _('Company Email'),
             'currency': _('Currency'),
             'language': _('Language'),
         }
@@ -116,26 +118,85 @@ class CompanyForm(forms.ModelForm):
             'tax_id': forms.TextInput(attrs={'class': 'form-control'}),
             'address': forms.TextInput(attrs={'class': 'form-control'}),
             'phone': forms.TextInput(attrs={'class': 'form-control'}),
+            'email': forms.EmailInput(attrs={'class': 'form-control'}),
+            'currency': forms.Select(attrs={'class': 'form-select'}),
+            'language': forms.Select(attrs={'class': 'form-select'}),
+        }
+
+
+class CompanySettingsForm(forms.ModelForm):
+    """Post-setup settings form — only editable fields (currency, language)."""
+    class Meta:
+        model = Company
+        fields = ['currency', 'language']
+        labels = {
+            'currency': _('Currency'),
+            'language': _('Language'),
+        }
+        widgets = {
             'currency': forms.Select(attrs={'class': 'form-select'}),
             'language': forms.Select(attrs={'class': 'form-select'}),
         }
 
 
 class SetupForm(forms.Form):
-    username = forms.CharField(label=_("Username"), max_length=150, widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'admin'}))
-    email = forms.EmailField(label=_("Email"), widget=forms.EmailInput(attrs={'class': 'form-control'}))
-    password = forms.CharField(label=_("Password"), widget=forms.PasswordInput(attrs={'class': 'form-control'}))
-    password_confirm = forms.CharField(label=_("Confirm Password"), widget=forms.PasswordInput(attrs={'class': 'form-control'}))
+    # Admin user fields
+    username = forms.CharField(label=_('Username'), max_length=150, widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'admin'}))
+    email = forms.EmailField(label=_('Admin Email'), widget=forms.EmailInput(attrs={'class': 'form-control'}))
+    password = forms.CharField(label=_('Password'), widget=forms.PasswordInput(attrs={'class': 'form-control'}))
+    password_confirm = forms.CharField(label=_('Confirm Password'), widget=forms.PasswordInput(attrs={'class': 'form-control'}))
 
-    company_name = forms.CharField(label=_("Clinic Name"), max_length=100, widget=forms.TextInput(attrs={'class': 'form-control'}))
-    tax_id = forms.CharField(label=_("Tax ID"), max_length=20, widget=forms.TextInput(attrs={'class': 'form-control'}))
-    address = forms.CharField(label=_("Address"), required=False, widget=forms.TextInput(attrs={'class': 'form-control'}))
-    phone = forms.CharField(label=_("Phone"), required=False, widget=forms.TextInput(attrs={'class': 'form-control'}))
+    # Company identity fields (immutable after setup)
+    company_name = forms.CharField(label=_('Clinic Name'), max_length=100, widget=forms.TextInput(attrs={'class': 'form-control'}))
+    tax_id = forms.CharField(label=_('Tax ID'), max_length=20, widget=forms.TextInput(attrs={'class': 'form-control'}))
+    company_email = forms.EmailField(label=_('Clinic Email'), widget=forms.EmailInput(attrs={'class': 'form-control'}))
+    phone = forms.CharField(label=_('Phone'), max_length=50, widget=forms.TextInput(attrs={'class': 'form-control'}))
+    address = forms.CharField(label=_('Address'), required=False, widget=forms.TextInput(attrs={'class': 'form-control'}))
 
     def clean(self):
         cleaned_data = super().clean()
-        if cleaned_data.get("password") != cleaned_data.get("password_confirm"):
-            raise forms.ValidationError(_("Passwords do not match."))
+        if cleaned_data.get('password') != cleaned_data.get('password_confirm'):
+            raise forms.ValidationError(_('Passwords do not match.'))
+        return cleaned_data
+
+
+class RegistrationForm(forms.Form):
+    """SaaS public registration form."""
+    ACCOUNT_TYPE_CHOICES = [
+        ('VET', _('Veterinary Clinic')),
+        ('SUPPLIER', _('Supplier / Distributor')),
+        ('BOTH', _('Both (Vet + Supplier)')),
+    ]
+    # Account
+    username = forms.CharField(label=_('Username'), max_length=150, widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'admin'}))
+    email = forms.EmailField(label=_('Email'), widget=forms.EmailInput(attrs={'class': 'form-control'}))
+    password = forms.CharField(label=_('Password'), min_length=8, widget=forms.PasswordInput(attrs={'class': 'form-control'}))
+    password_confirm = forms.CharField(label=_('Confirm Password'), widget=forms.PasswordInput(attrs={'class': 'form-control'}))
+    # Clinic
+    account_type = forms.ChoiceField(label=_('Account Type'), choices=ACCOUNT_TYPE_CHOICES, widget=forms.Select(attrs={'class': 'form-select'}))
+    company_name = forms.CharField(label=_('Clinic / Business Name'), max_length=100, widget=forms.TextInput(attrs={'class': 'form-control'}))
+    tax_id = forms.CharField(label=_('Tax ID'), max_length=20, required=False, widget=forms.TextInput(attrs={'class': 'form-control'}))
+    company_email = forms.EmailField(label=_('Clinic Email'), widget=forms.EmailInput(attrs={'class': 'form-control'}))
+    phone = forms.CharField(label=_('Phone'), max_length=50, required=False, widget=forms.TextInput(attrs={'class': 'form-control'}))
+    address = forms.CharField(label=_('Address'), required=False, widget=forms.TextInput(attrs={'class': 'form-control'}))
+    region = forms.CharField(label=_('Region'), max_length=100, required=False, widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'AR-CBA'}))
+
+    def clean_username(self):
+        username = self.cleaned_data['username']
+        if User.objects.filter(username=username).exists():
+            raise forms.ValidationError(_('This username is already taken.'))
+        return username
+
+    def clean_email(self):
+        email = self.cleaned_data['email']
+        if User.objects.filter(email=email).exists():
+            raise forms.ValidationError(_('An account with this email already exists.'))
+        return email
+
+    def clean(self):
+        cleaned_data = super().clean()
+        if cleaned_data.get('password') != cleaned_data.get('password_confirm'):
+            raise forms.ValidationError(_('Passwords do not match.'))
         return cleaned_data
 
 

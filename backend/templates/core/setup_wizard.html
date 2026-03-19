@@ -7,7 +7,7 @@
         <div class="col-md-8 col-lg-6">
             <div class="card shadow-lg border-0 rounded-3">
                 <div class="card-header bg-success text-white text-center py-4">
-                    <h2 class="mb-0"><i class="bi bi-rocket-takeoff-fill"></i> {% trans "Welcome to VetCore" %}</h2>
+                    <h2 class="mb-0"><i class="bi bi-rocket-takeoff-fill"></i> {% trans "Welcome to VetCoreSoft" %}</h2>
                     <p class="mb-0 opacity-75">{% trans "Initial System Setup" %}</p>
                 </div>
                 <div class="card-body p-5">
@@ -64,6 +64,10 @@
                         </div>
 
                         <h5 class="text-muted mb-3 border-bottom pb-2 mt-4">🏥 {% trans "Clinic Details" %}</h5>
+                        <div class="alert alert-warning border-0 small mb-3">
+                            <i class="bi bi-lock-fill me-1"></i>
+                            {% trans "These details identify your clinic and cannot be changed after setup." %}
+                        </div>
                         <div class="mb-3">
                             {{ form.company_name.label_tag }}
                             {{ form.company_name }}
@@ -76,6 +80,16 @@
                             <div class="col">
                                 {{ form.phone.label_tag }}
                                 {{ form.phone }}
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col">
+                                {{ form.company_email.label_tag }}
+                                {{ form.company_email }}
+                            </div>
+                            <div class="col">
+                                {{ form.address.label_tag }}
+                                {{ form.address }}
                             </div>
                         </div>
 

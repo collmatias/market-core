@@ -53,7 +53,7 @@ license_cache.json
 keygen.py
 
 # Backups de la base de datos (generados por la app)
-vetcore_backup_*.sqlite3
+vetcoresoft_backup_*.sqlite3
 backups/
 
 # ===========================

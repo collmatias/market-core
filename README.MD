@@ -1,4 +1,4 @@
-# 🐶 VetCore — Veterinary Management Platform
+# 🐶 VetCoreSoftSoft — Veterinary Management Platform
 
 **VetCore** is a comprehensive veterinary clinic management system designed for simplicity, offline resilience, and cloud connectivity.
 
@@ -42,7 +42,7 @@ Built with a hybrid architecture that supports both **Desktop** (Windows .exe wi
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│                    VetCore Platform                          │
+│                    VetCoreSoft Platform                          │
 ├─────────────┬──────────────┬────────────────────────────────┤
 │  Desktop    │  SaaS        │  Cloud API                     │
 │  (SQLite)   │  (PostgreSQL)│  (FastAPI + PostgreSQL)         │
@@ -56,8 +56,8 @@ Built with a hybrid architecture that supports both **Desktop** (Windows .exe wi
 | Service | Container | Port | Description |
 |---------|-----------|------|-------------|
 | `api_desktop` | `vetcore_desktop` | 8000 | Django — Desktop mode (SQLite) |
-| `api_saas` | `vetcore_saas` | 8001 | Django — SaaS mode (PostgreSQL) |
-| `db` | `vetcore_db_saas` | 5432 | PostgreSQL for SaaS app data |
+| `api_saas` | `vetcoresoft_saas` | 8001 | Django — SaaS mode (PostgreSQL) |
+| `db` | `vetcoresoft_db_saas` | 5432 | PostgreSQL for SaaS app data |
 | `cloud_api` | `cloud_api_service` | 5000 | FastAPI — Cloud license/management API |
 | `cloud_db` | — | 5433 | PostgreSQL for cloud API data |
 

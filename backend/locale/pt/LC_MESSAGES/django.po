@@ -833,10 +833,10 @@ msgstr "Configurações do Sistema"
 
 #: templates/core/company_settings.html:20
 msgid ""
-"Welcome to VetCore! Before starting, we need to register your clinic's "
+"Welcome to VetCoreSoft! Before starting, we need to register your clinic's "
 "information."
 msgstr ""
-"Bem-vindo ao VetCore! Antes de começar, precisamos registrar as informações "
+"Bem-vindo ao VetCoreSoft! Antes de começar, precisamos registrar as informações "
 "da sua clínica."
 
 #: templates/core/company_settings.html:27
@@ -1074,8 +1074,8 @@ msgid "Set New Password"
 msgstr "Definir Nova Senha"
 
 #: templates/core/setup_wizard.html:10
-msgid "Welcome to VetCore"
-msgstr "Bem-vindo ao VetCore"
+msgid "Welcome to VetCoreSoft"
+msgstr "Bem-vindo ao VetCoreSoft"
 
 #: templates/core/setup_wizard.html:11
 msgid "Initial System Setup"

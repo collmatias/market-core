@@ -1,0 +1,117 @@
+{% extends 'platform_admin/base_portal.html' %}
+{% load i18n %}
+
+{% block portal_content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h3 class="mb-0"><i class="bi bi-key me-2"></i>{% trans "License Detail" %}</h3>
+    <a href="{% url 'platform_license_list' %}" class="btn btn-outline-secondary btn-sm">
+        <i class="bi bi-arrow-left me-1"></i> {% trans "Back to List" %}
+    </a>
+</div>
+
+<div class="row">
+    {# ─── Info Card ─── #}
+    <div class="col-lg-6 mb-4">
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-primary text-white py-3">
+                <h5 class="mb-0"><i class="bi bi-info-circle me-2"></i>{% trans "License Information" %}</h5>
+            </div>
+            <div class="card-body">
+                <table class="table table-borderless mb-0">
+                    <tr><th class="text-muted" style="width:40%">{% trans "Hardware ID" %}</th><td><code>{{ license.hardware_id }}</code></td></tr>
+                    <tr><th class="text-muted">{% trans "Client Name" %}</th><td>{{ license.client_name }}</td></tr>
+                    <tr><th class="text-muted">{% trans "Client Email" %}</th><td>{{ license.client_email|default:"—" }}</td></tr>
+                    <tr><th class="text-muted">{% trans "Company" %}</th><td>{{ license.company_name|default:"—" }}</td></tr>
+                    <tr><th class="text-muted">{% trans "Company Email" %}</th><td>{{ license.company_email|default:"—" }}</td></tr>
+                    <tr><th class="text-muted">{% trans "Tax ID" %}</th><td>{{ license.company_tax_id|default:"—" }}</td></tr>
+                    <tr>
+                        <th class="text-muted">{% trans "Plan" %}</th>
+                        <td><span class="badge bg-{% if license.plan == 'TRIAL' %}warning text-dark{% elif license.plan == 'PERPETUAL' %}success{% else %}primary{% endif %} fs-6">{{ license.plan|default:"—" }}</span></td>
+                    </tr>
+                    <tr><th class="text-muted">{% trans "Expires" %}</th><td>{{ license.expiration_date|default:"♾️ Perpetual" }}</td></tr>
+                    <tr>
+                        <th class="text-muted">{% trans "Status" %}</th>
+                        <td>
+                            {% if license.is_active %}
+                                <span class="badge bg-success fs-6">{% trans "Active" %}</span>
+                            {% else %}
+                                <span class="badge bg-danger fs-6">{% trans "Inactive" %}</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    <tr><th class="text-muted">{% trans "Notes" %}</th><td>{{ license.notes|default:"—" }}</td></tr>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    {# ─── Edit Card ─── #}
+    <div class="col-lg-6 mb-4">
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-white py-3">
+                <h5 class="mb-0"><i class="bi bi-pencil-square me-2"></i>{% trans "Update License" %}</h5>
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="update">
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">{% trans "Plan" %}</label>
+                        <select name="plan" class="form-select">
+                            <option value="">— {% trans "No change" %} —</option>
+                            <option value="TRIAL" {% if license.plan == 'TRIAL' %}selected{% endif %}>Trial</option>
+                            <option value="MONTHLY" {% if license.plan == 'MONTHLY' %}selected{% endif %}>Monthly</option>
+                            <option value="ANNUAL" {% if license.plan == 'ANNUAL' %}selected{% endif %}>Annual</option>
+                            <option value="PERPETUAL" {% if license.plan == 'PERPETUAL' %}selected{% endif %}>Perpetual</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">{% trans "Expiration Date" %}</label>
+                        <input type="date" name="expiration_date" class="form-control" value="{{ license.expiration_date|default:'' }}">
+                        <div class="form-text">{% trans "Leave empty for perpetual licenses." %}</div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">{% trans "Notes" %}</label>
+                        <textarea name="notes" class="form-control" rows="2">{{ license.notes|default:'' }}</textarea>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-check-lg me-1"></i> {% trans "Save Changes" %}
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        {# ─── Actions ─── #}
+        <div class="card shadow-sm border-0 mt-3">
+            <div class="card-header bg-white py-3">
+                <h5 class="mb-0"><i class="bi bi-lightning me-2"></i>{% trans "Actions" %}</h5>
+            </div>
+            <div class="card-body">
+                <div class="d-flex gap-2 flex-wrap">
+                    {% if license.is_active %}
+                    <form method="post" action="{% url 'platform_license_revoke' hw_id=license.hardware_id %}" class="d-inline">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-outline-danger"
+                                onclick="return confirm('{% trans "Are you sure you want to revoke this license?" %}')">
+                            <i class="bi bi-x-circle me-1"></i> {% trans "Revoke" %}
+                        </button>
+                    </form>
+                    {% endif %}
+
+                    <form method="post" action="{% url 'platform_force_password_reset' hw_id=license.hardware_id %}" class="d-inline">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-outline-warning"
+                                onclick="return confirm('{% trans "Send password reset to this node?" %}')">
+                            <i class="bi bi-key me-1"></i> {% trans "Force Password Reset" %}
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

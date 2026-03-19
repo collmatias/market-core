@@ -1,0 +1,83 @@
+{% extends 'platform_admin/base_portal.html' %}
+{% load i18n %}
+
+{% block portal_content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h3 class="mb-0"><i class="bi bi-plus-circle me-2"></i>{% trans "Create License" %}</h3>
+    <a href="{% url 'platform_license_list' %}" class="btn btn-outline-secondary btn-sm">
+        <i class="bi bi-arrow-left me-1"></i> {% trans "Back to List" %}
+    </a>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-primary text-white py-3">
+                <h5 class="mb-0"><i class="bi bi-key me-2"></i>{% trans "New License" %}</h5>
+            </div>
+            <div class="card-body p-4">
+                <form method="post">
+                    {% csrf_token %}
+
+                    <h6 class="border-bottom pb-2 mb-3"><i class="bi bi-cpu me-2"></i>{% trans "Hardware" %}</h6>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">{% trans "Hardware ID" %} *</label>
+                        <input type="text" name="hw_id" class="form-control" required>
+                        <div class="form-text">{% trans "The unique hardware identifier of the target machine." %}</div>
+                    </div>
+
+                    <h6 class="border-bottom pb-2 mb-3 mt-4"><i class="bi bi-building me-2"></i>{% trans "Company Info" %}</h6>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">{% trans "Client Name" %} *</label>
+                            <input type="text" name="client_name" class="form-control" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">{% trans "Client Email" %}</label>
+                            <input type="email" name="client_email" class="form-control">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">{% trans "Company Name" %}</label>
+                            <input type="text" name="company_name" class="form-control">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">{% trans "Company Email" %}</label>
+                            <input type="email" name="company_email" class="form-control">
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">{% trans "Tax ID" %}</label>
+                        <input type="text" name="company_tax_id" class="form-control">
+                    </div>
+
+                    <h6 class="border-bottom pb-2 mb-3 mt-4"><i class="bi bi-calendar me-2"></i>{% trans "License Details" %}</h6>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">{% trans "Plan" %}</label>
+                            <select name="plan" class="form-select">
+                                <option value="MONTHLY">Monthly</option>
+                                <option value="ANNUAL">Annual</option>
+                                <option value="PERPETUAL">Perpetual</option>
+                                <option value="TRIAL">Trial</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">{% trans "Expiration Date" %}</label>
+                            <input type="date" name="expiration_date" class="form-control">
+                            <div class="form-text">{% trans "Leave empty for perpetual licenses." %}</div>
+                        </div>
+                    </div>
+
+                    <div class="d-grid mt-4">
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            <i class="bi bi-check-lg me-1"></i> {% trans "Create License" %}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

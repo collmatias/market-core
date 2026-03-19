@@ -33,13 +33,27 @@ class Company(models.Model):
     tax_id = models.CharField(max_length=20, unique=True)
     address = models.CharField(max_length=200, blank=True, null=True)
     phone = models.CharField(max_length=50, blank=True, null=True)
+    email = models.EmailField(max_length=255, blank=True, null=True)
+    hardware_id = models.CharField(max_length=100, unique=True, blank=True, null=True)
+    is_setup_complete = models.BooleanField(default=False)
     currency = models.CharField(max_length=3, choices=CURRENCIES, default='ARS')
     language = models.CharField(max_length=5, choices=LANGUAGES, default='es')
+
+    # Account type
+    ACCOUNT_TYPES = [
+        ('VET', _('Veterinary')),
+        ('SUPPLIER', _('Supplier')),
+        ('BOTH', _('Both')),
+    ]
+    account_type = models.CharField(max_length=10, choices=ACCOUNT_TYPES, default='VET')
 
     # SaaS license data
     plan = models.CharField(max_length=20, default='FREE')
     expiration_date = models.DateField()
     is_active = models.BooleanField(default=True)
+
+    # Cloud tenant link (SaaS only)
+    cloud_tenant_id = models.IntegerField(null=True, blank=True, unique=True)
 
     class Meta:
         verbose_name_plural = 'companies'
@@ -75,10 +89,12 @@ class UserProfile(models.Model):
 
     role = models.CharField(max_length=20, choices=ROLES, default='VET')
     is_admin = models.BooleanField(default=False)
+    is_owner = models.BooleanField(default=False)
     license_number = models.CharField(max_length=50, blank=True, null=True)
     phone = models.CharField(max_length=20, blank=True, null=True)
     pin = models.CharField(max_length=4, blank=True, null=True)
     avatar = models.CharField(max_length=50, choices=AVATARS, default='bi-person-fill')
+    email_verified = models.BooleanField(default=False)
 
     def __str__(self):
         return f"{self.user.username} - {self.get_role_display()}"
@@ -86,6 +102,15 @@ class UserProfile(models.Model):
     @property
     def is_clinical(self):
         return self.role == 'VET'
+
+
+class EmailVerificationToken(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='email_token')
+    token = models.CharField(max_length=64, unique=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Verification for {self.user.username}"
 
 
 class Client(models.Model):
