@@ -15,6 +15,7 @@
         </div>
     </div>
 
+    {% if not is_supplier %}
     <div class="alert alert-light border shadow-sm d-flex align-items-center mb-4" role="alert">
         <div class="bg-primary bg-opacity-10 p-2 rounded-circle me-3 text-primary">
             <i class="bi bi-router-fill fs-4"></i>
@@ -26,9 +27,42 @@
             </p>
         </div>
     </div>
+    {% endif %}
 
     <div class="row row-cols-1 row-cols-md-2 row-cols-xl-4 g-3 mb-5">
-        
+
+        {# ═══════════════════════════════════════════════════════ #}
+        {# ═══  SUPPLIER DASHBOARD                        ═══ #}
+        {# ═══════════════════════════════════════════════════════ #}
+        {% if is_supplier %}
+
+        <div class="col">
+            <div class="card h-100 border-0 shadow-sm hover-card border-top border-4 border-primary">
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-2">
+                        <i class="bi bi-box-seam fs-3 text-primary me-2"></i>
+                        <h5 class="card-title fw-bold mb-0">{% trans "My Products" %}</h5>
+                    </div>
+                    <p class="card-text small text-muted">{% trans "Manage your product catalog." %}</p>
+                    <a href="{% url 'supplier_dashboard' %}" class="btn btn-sm btn-primary w-100 stretched-link">{% trans "Manage" %}</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col">
+            <div class="card h-100 border-0 shadow-sm hover-card border-top border-4 border-warning">
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-2">
+                        <i class="bi bi-inbox fs-3 text-warning me-2"></i>
+                        <h5 class="card-title fw-bold mb-0">{% trans "Orders" %}</h5>
+                    </div>
+                    <p class="card-text small text-muted">{% trans "View and manage received orders." %}</p>
+                    <a href="{% url 'order_list' %}" class="btn btn-sm btn-outline-warning text-dark w-100 stretched-link">{% trans "View Orders" %}</a>
+                </div>
+            </div>
+        </div>
+
+        {% if not is_readonly %}
         <div class="col">
             <div class="card h-100 border-0 shadow-sm hover-card border-top border-4 border-success">
                 <div class="card-body">
@@ -41,6 +75,94 @@
                 </div>
             </div>
         </div>
+        {% endif %}
+
+        <div class="col">
+            <div class="card h-100 border-0 shadow-sm hover-card border-top border-4 border-dark">
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-2">
+                        <i class="bi bi-receipt fs-3 text-dark me-2"></i>
+                        <h5 class="card-title fw-bold mb-0">{% trans "History" %}</h5>
+                    </div>
+                    <p class="card-text small text-muted">{% trans "View tickets and sales." %}</p>
+                    <a href="{% url 'sale_list' %}" class="btn btn-sm btn-outline-dark w-100 stretched-link">{% trans "View List" %}</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col">
+            <div class="card h-100 border-0 shadow-sm hover-card border-top border-4 border-info">
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-2">
+                        <i class="bi bi-graph-up-arrow fs-3 text-info me-2"></i>
+                        <h5 class="card-title fw-bold mb-0">{% trans "Cash Report" %}</h5>
+                    </div>
+                    <p class="card-text small text-muted">{% trans "Daily totals." %}</p>
+                    <a href="{% url 'cash_report' %}" class="btn btn-sm btn-outline-info w-100 stretched-link text-dark">{% trans "View Report" %}</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col">
+            <div class="card h-100 border-0 shadow-sm hover-card border-top border-4 border-secondary">
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-2">
+                        <i class="bi bi-boxes fs-3 text-secondary me-2"></i>
+                        <h5 class="card-title fw-bold mb-0">{% trans "Stock" %}</h5>
+                    </div>
+                    <p class="card-text small text-muted">{% trans "Products and prices." %}</p>
+                    <a href="{% url 'product_list' %}" class="btn btn-sm btn-outline-secondary w-100 stretched-link">{% trans "View Stock" %}</a>
+                </div>
+            </div>
+        </div>
+
+        {% if user.profile.role == 'ADMIN' or user.is_superuser %}
+        <div class="col">
+            <div class="card h-100 border-0 shadow-sm hover-card border-top border-4 border-secondary bg-light">
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-2">
+                        <i class="bi bi-cloud-download fs-3 text-dark me-2"></i>
+                        <h5 class="card-title fw-bold mb-0">{% trans "Backup" %}</h5>
+                    </div>
+                    <p class="card-text small text-muted">{% trans "Save database." %}</p>
+                    <a href="{% url 'download_backup' %}" class="btn btn-sm btn-dark w-100 stretched-link">{% trans "Download" %}</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col">
+            <div class="card h-100 border-0 shadow-sm hover-card border-top border-4 border-success bg-success bg-opacity-10">
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-2">
+                        <i class="bi bi-person-vcard fs-3 text-success me-2"></i>
+                        <h5 class="card-title fw-bold mb-0 text-success">{% trans "Team" %}</h5>
+                    </div>
+                    <p class="card-text small text-muted">{% trans "Users, permissions and roles." %}</p>
+                    <a href="{% url 'team_management' %}" class="btn btn-sm btn-success w-100 stretched-link">{% trans "Manage" %}</a>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        {# ═══════════════════════════════════════════════════════ #}
+        {# ═══  VET DASHBOARD (original cards)              ═══ #}
+        {# ═══════════════════════════════════════════════════════ #}
+        {% else %}
+        
+        {% if not is_readonly %}
+        <div class="col">
+            <div class="card h-100 border-0 shadow-sm hover-card border-top border-4 border-success">
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-2">
+                        <i class="bi bi-cart4 fs-3 text-success me-2"></i>
+                        <h5 class="card-title fw-bold mb-0">{% trans "POS" %}</h5>
+                    </div>
+                    <p class="card-text small text-muted">{% trans "Quick new sale." %}</p>
+                    <a href="{% url 'new_sale' %}" class="btn btn-sm btn-success w-100 stretched-link">{% trans "Checkout" %}</a>
+                </div>
+            </div>
+        </div>
+        {% endif %}
 
         <div class="col">
             <div class="card h-100 border-0 shadow-sm hover-card border-top border-4 border-dark">
@@ -107,6 +229,7 @@
             </div>
         </div>
 
+        {% if not is_readonly %}
         <div class="col">
             <div class="card h-100 border-0 shadow-sm hover-card border-top border-4 border-secondary">
                 <div class="card-body">
@@ -119,6 +242,7 @@
                 </div>
             </div>
         </div>
+        {% endif %}
 
         <div class="col">
             <div class="card h-100 border-0 shadow-sm hover-card border-top border-4 border-primary bg-primary bg-opacity-10">
@@ -158,6 +282,8 @@
                 </div>
             </div>
         </div>
+        {% endif %}
+
         {% endif %}
 
     </div>

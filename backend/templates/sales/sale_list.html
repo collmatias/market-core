@@ -4,7 +4,7 @@
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-3">
     <h2>{% trans "Sales History" %}</h2>
-    <a href="{% url 'new_sale' %}" class="btn btn-primary"><i class="bi bi-cart-plus"></i> {% trans "New Sale" %}</a>
+    {% if not is_readonly %}<a href="{% url 'new_sale' %}" class="btn btn-primary"><i class="bi bi-cart-plus"></i> {% trans "New Sale" %}</a>{% endif %}
 </div>
 
 <div class="card shadow-sm">

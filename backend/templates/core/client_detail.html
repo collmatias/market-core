@@ -24,12 +24,14 @@
         </div>
 
         <div class="d-grid gap-2 mb-3">
+            {% if not is_readonly %}
             <a href="{% url 'schedule' %}?client={{ client.id }}" class="btn btn-success">
                 <i class="bi bi-calendar-plus"></i> {% trans "Book Appointment" %}
             </a>
             <a href="{% url 'edit_client' client.id %}" class="btn btn-outline-secondary btn-sm">
                 <i class="bi bi-pencil"></i> {% trans "Edit Details" %}
             </a>
+            {% endif %}
         </div>
 
         <a href="{% url 'client_list' %}" class="btn btn-outline-dark btn-sm w-100">

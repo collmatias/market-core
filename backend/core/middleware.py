@@ -76,3 +76,56 @@ class CompanyLanguageMiddleware:
                 pass
         response = self.get_response(request)
         return response
+
+
+class SaaSReadOnlyMiddleware:
+    """Block write operations for VET accounts on SaaS (cloud data is read-only).
+
+    Marketplace and order paths remain writable (orders live in the cloud).
+    Auth, profile, and system paths remain writable.
+    """
+
+    # Prefixes where writes are ALWAYS allowed (even for readonly VET accounts)
+    WRITABLE_PREFIXES = (
+        '/marketplace/',
+        '/login/', '/logout/',
+        '/register/', '/verify-email/', '/password-reset/',
+        '/profile/', '/switch-user/',
+        '/settings/', '/admin/', '/activate/', '/setup/',
+        '/catalog/',
+        '/platform/',
+    )
+
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        if request.method in ('GET', 'HEAD', 'OPTIONS'):
+            return self.get_response(request)
+
+        if not request.user.is_authenticated:
+            return self.get_response(request)
+
+        try:
+            deployment = getattr(settings, 'DEPLOYMENT_MODE', 'DESKTOP')
+            if deployment != 'SAAS':
+                return self.get_response(request)
+
+            acct = request.user.profile.company.account_type
+            if acct != 'VET':
+                return self.get_response(request)
+        except Exception:
+            return self.get_response(request)
+
+        # VET on SaaS — check if path is writable
+        for prefix in self.WRITABLE_PREFIXES:
+            if request.path.startswith(prefix):
+                return self.get_response(request)
+
+        # Block the write
+        messages.warning(
+            request,
+            _('This action is not available in cloud mode. '
+              'Clinical, inventory, and sales modifications can only be made from your local system.')
+        )
+        return redirect(request.META.get('HTTP_REFERER', '/'))

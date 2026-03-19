@@ -67,12 +67,18 @@ from routers.license import router as license_router  # noqa: E402
 from routers.admin import router as admin_router  # noqa: E402
 from routers.auth import router as auth_router  # noqa: E402
 from routers.tenant import router as tenant_router  # noqa: E402
+from routers.catalog import router as catalog_router  # noqa: E402
+from routers.supplier import router as supplier_router  # noqa: E402
+from routers.orders import router as orders_router  # noqa: E402
 
 app.include_router(health_router)
 app.include_router(license_router)
 app.include_router(admin_router)
 app.include_router(auth_router)
 app.include_router(tenant_router)
+app.include_router(catalog_router)
+app.include_router(supplier_router)
+app.include_router(orders_router)
 
 # --- Legacy backward-compatible endpoint ---
 # Old Desktop clients call POST /check-license directly at root level

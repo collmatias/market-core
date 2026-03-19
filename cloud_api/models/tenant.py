@@ -11,7 +11,6 @@ from core.database import Base
 class TenantType(str, enum.Enum):
     VET = "VET"
     SUPPLIER = "SUPPLIER"
-    BOTH = "BOTH"
 
 
 class Tenant(Base):
@@ -20,8 +19,8 @@ class Tenant(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String(200), nullable=False)
     type = Column(Enum(TenantType), nullable=False, default=TenantType.VET)
-    tax_id = Column(String(30), unique=True, nullable=True)
-    email = Column(String(255), unique=True, nullable=False, index=True)
+    tax_id = Column(String(30), nullable=True)
+    email = Column(String(255), nullable=False, index=True)
     phone = Column(String(50), nullable=True)
     address = Column(String(300), nullable=True)
     region = Column(String(100), nullable=True)  # e.g. "AR-CBA" (country-province)

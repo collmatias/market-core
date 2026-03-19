@@ -31,12 +31,14 @@
                     <i class="bi bi-database me-1"></i> {% trans "Database" %}
                 </a>
             </li>
+            {% if is_vet %}
             <li class="nav-item">
                 <a class="nav-link {% if active_tab == 'import' %}active{% endif %}"
                    data-bs-toggle="tab" href="#tab-import" role="tab">
                     <i class="bi bi-box-arrow-in-down me-1"></i> {% trans "Data Import" %}
                 </a>
             </li>
+            {% endif %}
         </ul>
 
         {# ═══ TAB CONTENT ═══ #}
@@ -56,7 +58,7 @@
 
                                 {# ─── Identity fields (read-only) ─── #}
                                 {% if company %}
-                                <h6 class="mb-3 border-bottom pb-2"><i class="bi bi-lock-fill me-2 text-muted"></i>{% trans "Clinic Identity" %}</h6>
+                                <h6 class="mb-3 border-bottom pb-2"><i class="bi bi-lock-fill me-2 text-muted"></i>{% if is_supplier %}{% trans "Business Identity" %}{% else %}{% trans "Clinic Identity" %}{% endif %}</h6>
                                 <div class="alert alert-light border small mb-3">
                                     <i class="bi bi-info-circle me-1"></i>
                                     {% trans "These fields were set during initial setup and cannot be modified." %}
@@ -170,6 +172,7 @@
             </div>
 
             {# ─── DATA IMPORT TAB ─── #}
+            {% if is_vet %}
             <div class="tab-pane fade {% if active_tab == 'import' %}show active{% endif %}" id="tab-import" role="tabpanel">
                 {% if is_localhost %}
                 <div class="row g-4 justify-content-center">
@@ -209,6 +212,7 @@
                 </div>
                 {% endif %}
             </div>
+            {% endif %}{# /is_vet import tab #}
 
         </div>{# /tab-content #}
     </div>

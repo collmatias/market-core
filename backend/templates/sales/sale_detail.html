@@ -5,7 +5,7 @@
 <div class="d-flex justify-content-between mb-4 no-print">
     <a href="{% url 'sale_list' %}" class="btn btn-secondary"><i class="bi bi-arrow-left"></i> {% trans "Back to History" %}</a>
     <div>
-        <a href="{% url 'new_sale' %}" class="btn btn-success me-2"><i class="bi bi-cart-plus"></i> {% trans "New Sale" %}</a>
+        {% if not is_readonly %}<a href="{% url 'new_sale' %}" class="btn btn-success me-2"><i class="bi bi-cart-plus"></i> {% trans "New Sale" %}</a>{% endif %}
         <button onclick="window.print()" class="btn btn-primary"><i class="bi bi-printer"></i> {% trans "Print Ticket" %}</button>
     </div>
 </div>

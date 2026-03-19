@@ -161,25 +161,19 @@ class SetupForm(forms.Form):
 
 
 class RegistrationForm(forms.Form):
-    """SaaS public registration form."""
-    ACCOUNT_TYPE_CHOICES = [
-        ('VET', _('Veterinary Clinic')),
-        ('SUPPLIER', _('Supplier / Distributor')),
-        ('BOTH', _('Both (Vet + Supplier)')),
-    ]
+    """SaaS public registration form. account_type is set by the URL, not by the user."""
     # Account
     username = forms.CharField(label=_('Username'), max_length=150, widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'admin'}))
     email = forms.EmailField(label=_('Email'), widget=forms.EmailInput(attrs={'class': 'form-control'}))
     password = forms.CharField(label=_('Password'), min_length=8, widget=forms.PasswordInput(attrs={'class': 'form-control'}))
     password_confirm = forms.CharField(label=_('Confirm Password'), widget=forms.PasswordInput(attrs={'class': 'form-control'}))
-    # Clinic
-    account_type = forms.ChoiceField(label=_('Account Type'), choices=ACCOUNT_TYPE_CHOICES, widget=forms.Select(attrs={'class': 'form-select'}))
-    company_name = forms.CharField(label=_('Clinic / Business Name'), max_length=100, widget=forms.TextInput(attrs={'class': 'form-control'}))
+    # Company
+    company_name = forms.CharField(label=_('Company Name'), max_length=100, widget=forms.TextInput(attrs={'class': 'form-control'}))
     tax_id = forms.CharField(label=_('Tax ID'), max_length=20, required=False, widget=forms.TextInput(attrs={'class': 'form-control'}))
-    company_email = forms.EmailField(label=_('Clinic Email'), widget=forms.EmailInput(attrs={'class': 'form-control'}))
+    company_email = forms.EmailField(label=_('Company Email'), widget=forms.EmailInput(attrs={'class': 'form-control'}))
     phone = forms.CharField(label=_('Phone'), max_length=50, required=False, widget=forms.TextInput(attrs={'class': 'form-control'}))
     address = forms.CharField(label=_('Address'), required=False, widget=forms.TextInput(attrs={'class': 'form-control'}))
-    region = forms.CharField(label=_('Region'), max_length=100, required=False, widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'AR-CBA'}))
+    region = forms.CharField(label=_('Region'), max_length=100, required=False, widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': _('e.g. AR-CBA')}))
 
     def clean_username(self):
         username = self.cleaned_data['username']
@@ -188,10 +182,7 @@ class RegistrationForm(forms.Form):
         return username
 
     def clean_email(self):
-        email = self.cleaned_data['email']
-        if User.objects.filter(email=email).exists():
-            raise forms.ValidationError(_('An account with this email already exists.'))
-        return email
+        return self.cleaned_data['email']
 
     def clean(self):
         cleaned_data = super().clean()

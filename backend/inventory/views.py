@@ -3,14 +3,21 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.core.paginator import Paginator
 from django.db.models import Q
+from django.http import JsonResponse
+from django.conf import settings
 from django.utils.translation import gettext as _
 from rest_framework import viewsets
+import json
+import logging
+import requests as http_requests
 
 from core.decorators import admin_required
 
 from .models import Product, StockMovement
 from .serializers import ProductSerializer, StockMovementSerializer
 from .forms import ProductForm, StockMovementForm
+
+logger = logging.getLogger(__name__)
 
 
 # --- API ---
@@ -127,3 +134,100 @@ def product_labels(request):
         ).exclude(barcode="").order_by("description")
 
     return render(request, "inventory/product_labels.html", {"products": products})
+
+
+# --- CLOUD CATALOG INTEGRATION ---
+
+@login_required
+def catalog_lookup(request):
+    """AJAX endpoint: lookup a barcode in the cloud catalog."""
+    barcode = request.GET.get("barcode", "").strip()
+    if not barcode:
+        return JsonResponse({"found": False})
+
+    # First check if it already exists locally
+    local = Product.objects.filter(
+        company=request.user.profile.company, barcode=barcode
+    ).first()
+    if local:
+        return JsonResponse({
+            "found": True,
+            "local": True,
+            "product": {
+                "id": local.id,
+                "description": local.description,
+                "sale_price": float(local.sale_price),
+                "barcode": local.barcode,
+            },
+        })
+
+    # Query cloud catalog
+    try:
+        url = f"{settings.CLOUD_API_URL}/catalog/lookup/{barcode}"
+        resp = http_requests.get(url, timeout=5)
+        if resp.status_code == 200:
+            data = resp.json()
+            return JsonResponse({
+                "found": True,
+                "local": False,
+                "catalog": {
+                    "ean": data.get("ean"),
+                    "description": data.get("description"),
+                    "brand": data.get("brand"),
+                    "category": data.get("category"),
+                    "suggested_price": data.get("suggested_price"),
+                    "image_url": data.get("image_url"),
+                },
+            })
+    except Exception:
+        logger.debug("Cloud catalog lookup failed for %s", barcode)
+
+    return JsonResponse({"found": False})
+
+
+@login_required
+def catalog_import(request):
+    """AJAX POST: create a local product from cloud catalog data."""
+    if request.method != "POST":
+        return JsonResponse({"error": "POST required"}, status=405)
+
+    try:
+        data = json.loads(request.body)
+    except (json.JSONDecodeError, ValueError):
+        return JsonResponse({"error": "Invalid JSON"}, status=400)
+
+    barcode = (data.get("barcode") or "").strip()
+    description = (data.get("description") or "").strip()
+    sale_price = data.get("sale_price")
+
+    if not barcode or not description or sale_price is None:
+        return JsonResponse({"error": "barcode, description and sale_price required"}, status=400)
+
+    company = request.user.profile.company
+
+    # Prevent duplicates
+    existing = Product.objects.filter(company=company, barcode=barcode).first()
+    if existing:
+        return JsonResponse({
+            "id": existing.id,
+            "description": existing.description,
+            "sale_price": float(existing.sale_price),
+            "barcode": existing.barcode,
+            "created": False,
+        })
+
+    product = Product.objects.create(
+        company=company,
+        barcode=barcode,
+        description=description[:200],
+        type="PRODUCT",
+        sale_price=sale_price,
+        cost=data.get("cost", 0),
+    )
+    return JsonResponse({
+        "id": product.id,
+        "description": product.description,
+        "sale_price": float(product.sale_price),
+        "barcode": product.barcode,
+        "created": True,
+    })

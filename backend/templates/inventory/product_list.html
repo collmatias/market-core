@@ -6,8 +6,10 @@
     <h2>{% trans "Inventory" %}</h2>
     <div>
         <a href="{% url 'product_labels' %}" class="btn btn-outline-dark me-2"><i class="bi bi-qr-code"></i> {% trans "Print Labels" %}</a>
+        {% if not is_readonly %}
         <a href="{% url 'register_movement' %}" class="btn btn-warning me-2"><i class="bi bi-box-seam"></i> {% trans "Adjust Stock" %}</a>
         <a href="{% url 'create_product' %}" class="btn btn-primary"><i class="bi bi-plus-circle"></i> {% trans "New Item" %}</a>
+        {% endif %}
     </div>
 </div>
 
@@ -58,6 +60,7 @@
                         {% endif %}
                     </td>
                     <td>
+                    {% if not is_readonly %}
                     {% if user.profile.is_admin or user.is_superuser %}
                         <a href="{% url 'edit_product' p.id %}" class="btn btn-sm btn-outline-primary" title="{% trans 'Edit' %}">
                             <i class="bi bi-pencil-square"></i>
@@ -71,6 +74,7 @@
                         </form>
                     {% else %}
                         <span class="text-muted small"><i class="bi bi-lock-fill"></i> {% trans "Restricted" %}</span>
+                    {% endif %}
                     {% endif %}
                     </td>
                 </tr>

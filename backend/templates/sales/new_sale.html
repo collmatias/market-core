@@ -149,6 +149,65 @@
         return true;
     }
 
+    async function lookupCatalog(code) {
+        try {
+            const resp = await fetch(`/catalog/lookup/?barcode=${encodeURIComponent(code)}`);
+            const data = await resp.json();
+            if (!data.found) return null;
+            if (data.local) {
+                // Already exists locally — add directly
+                PRODUCTS_BY_CODE[data.product.barcode] = {
+                    id: String(data.product.id),
+                    name: data.product.description,
+                    price: data.product.sale_price,
+                };
+                return { local: true, product: data.product };
+            }
+            return { local: false, catalog: data.catalog };
+        } catch (e) {
+            return null;
+        }
+    }
+
+    async function importFromCatalog(catalogData, code) {
+        const desc = catalogData.description + (catalogData.brand ? ` (${catalogData.brand})` : '');
+        const price = prompt(
+            `{% trans "Product found in catalog" %}:\n${desc}\n\n{% trans "Enter sale price:" %}`,
+            catalogData.suggested_price || ''
+        );
+        if (!price || isNaN(parseFloat(price))) return false;
+
+        const resp = await fetch('/catalog/import/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+            },
+            body: JSON.stringify({
+                barcode: code,
+                description: catalogData.description.substring(0, 200),
+                sale_price: parseFloat(price),
+            }),
+        });
+        if (!resp.ok) return false;
+        const product = await resp.json();
+
+        // Add to local cache and cart
+        PRODUCTS_BY_CODE[code] = {
+            id: String(product.id),
+            name: product.description,
+            price: product.sale_price,
+        };
+        const existing = cart.find(item => item.id === String(product.id));
+        if (existing) {
+            existing.quantity++;
+        } else {
+            cart.push({ id: String(product.id), name: product.description, price: product.sale_price, quantity: 1 });
+        }
+        renderCart();
+        return true;
+    }
+
     function addProduct() {
         const input = document.getElementById('search-input');
         const value = input.value.trim();
@@ -183,7 +242,20 @@
             input.value = '';
             input.focus();
         } else {
-            alert("{% trans 'Product not found. Select one from the list or scan a valid code.' %}");
+            // Try cloud catalog for barcode-like input
+            lookupCatalog(value).then(result => {
+                if (result && result.local) {
+                    addProductByCode(value);
+                    input.value = '';
+                    input.focus();
+                } else if (result && !result.local) {
+                    importFromCatalog(result.catalog, value).then(ok => {
+                        if (ok) { input.value = ''; input.focus(); }
+                    });
+                } else {
+                    alert("{% trans 'Product not found. Select one from the list or scan a valid code.' %}");
+                }
+            });
         }
     }
 
@@ -287,8 +359,25 @@
             const prod = PRODUCTS_BY_CODE[decodedText];
             showFeedback(`<i class="bi bi-check-circle-fill"></i> <strong>${prod.name}</strong> {% trans "added to cart" %}`, 'success');
         } else {
-            beepError();
-            showFeedback(`<i class="bi bi-exclamation-triangle-fill"></i> {% trans "Code" %} <strong>${decodedText}</strong> {% trans "not found" %}`, 'warning');
+            // Try cloud catalog
+            showFeedback(`<i class="bi bi-cloud-arrow-down"></i> {% trans "Searching catalog..." %}`, 'info');
+            lookupCatalog(decodedText).then(result => {
+                if (result && result.local) {
+                    addProductByCode(decodedText);
+                    beepSuccess();
+                    showFeedback(`<i class="bi bi-check-circle-fill"></i> <strong>${result.product.description}</strong> {% trans "added to cart" %}`, 'success');
+                } else if (result && !result.local) {
+                    beepSuccess();
+                    const desc = result.catalog.description;
+                    showFeedback(`<i class="bi bi-cloud-check"></i> <strong>${desc}</strong> — {% trans "found in catalog" %}`, 'info');
+                    importFromCatalog(result.catalog, decodedText).then(ok => {
+                        if (ok) showFeedback(`<i class="bi bi-check-circle-fill"></i> {% trans "Product imported and added to cart" %}`, 'success');
+                    });
+                } else {
+                    beepError();
+                    showFeedback(`<i class="bi bi-exclamation-triangle-fill"></i> {% trans "Code" %} <strong>${decodedText}</strong> {% trans "not found" %}`, 'warning');
+                }
+            });
         }
     }
 

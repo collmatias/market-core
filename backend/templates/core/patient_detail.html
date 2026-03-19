@@ -38,6 +38,7 @@
             <a href="{% url 'medical_record' patient.id %}" class="btn btn-primary">
                 <i class="bi bi-file-medical"></i> {% trans "Full Medical Record" %}
             </a>
+            {% if not is_readonly %}
             <a href="{% url 'new_consultation' patient.id %}" class="btn btn-outline-primary">
                 <i class="bi bi-plus-circle"></i> {% trans "New Consultation" %}
             </a>
@@ -47,6 +48,7 @@
             <a href="{% url 'edit_patient' patient.id %}" class="btn btn-outline-secondary btn-sm">
                 <i class="bi bi-pencil"></i> {% trans "Edit Details" %}
             </a>
+            {% endif %}
         </div>
 
         <a href="{% url 'patient_list' %}" class="btn btn-outline-dark btn-sm w-100">
@@ -118,9 +120,11 @@
                         </div>
                         <div class="text-end">
                             <small class="text-muted">{{ h.date|date:"d/m/Y H:i" }}</small><br>
+                            {% if not is_readonly %}
                             <a href="{% url 'edit_consultation' h.id %}" class="btn btn-sm btn-outline-secondary mt-1">
                                 <i class="bi bi-pencil"></i>
                             </a>
+                            {% endif %}
                         </div>
                     </div>
                 </div>

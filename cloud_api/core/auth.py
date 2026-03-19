@@ -45,3 +45,24 @@ def require_admin(credentials: HTTPAuthorizationCredentials = Depends(security))
     if payload.get("role") != "admin":
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Admin access required")
     return payload
+
+
+def require_tenant_token(credentials: HTTPAuthorizationCredentials = Depends(security)):
+    """Dependency that requires a valid tenant JWT. Returns the Tenant object."""
+    if not credentials:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Missing authorization")
+    payload = decode_token(credentials.credentials)
+    tenant_id = payload.get("tenant_id")
+    if not tenant_id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not a tenant token")
+
+    from core.database import SessionLocal
+    from models.tenant import Tenant
+    db = SessionLocal()
+    try:
+        tenant = db.query(Tenant).filter(Tenant.id == tenant_id).first()
+        if not tenant or not tenant.is_active:
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Tenant not found or inactive")
+        return tenant
+    finally:
+        db.close()

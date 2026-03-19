@@ -49,10 +49,26 @@ def landing(request):
 
 # --- SAAS REGISTRATION (public, SaaS mode only) ---
 def register(request):
+    """Landing page: choose account type (VET or SUPPLIER)."""
     if getattr(settings, 'DEPLOYMENT_MODE', 'DESKTOP') != 'SAAS':
         return redirect('login')
     if request.user.is_authenticated:
         return redirect('home')
+    return render(request, 'core/register_choose.html')
+
+
+def register_typed(request, account_type):
+    """Registration form for a specific account type."""
+    if getattr(settings, 'DEPLOYMENT_MODE', 'DESKTOP') != 'SAAS':
+        return redirect('login')
+    if request.user.is_authenticated:
+        return redirect('home')
+
+    account_type = account_type.upper()
+    if account_type not in ('VET', 'SUPPLIER'):
+        return redirect('register')
+
+    is_vet = account_type == 'VET'
 
     if request.method == 'POST':
         form = RegistrationForm(request.POST)
@@ -62,14 +78,14 @@ def register(request):
                 trial_days = 30
 
                 # 1. Register tenant on Cloud API
-                tenant_id = _register_tenant_on_cloud(
+                tenant_id, tenant_token = _register_tenant_on_cloud(
                     name=data['company_name'],
                     email=data['company_email'],
                     tax_id=data.get('tax_id') or None,
                     phone=data.get('phone') or None,
                     address=data.get('address') or None,
                     region=data.get('region') or None,
-                    tenant_type=data['account_type'],
+                    tenant_type=account_type,
                 )
 
                 # 2. Create local Company
@@ -80,11 +96,12 @@ def register(request):
                     phone=data.get('phone', ''),
                     email=data['company_email'],
                     is_setup_complete=True,
-                    account_type=data['account_type'],
+                    account_type=account_type,
                     plan='TRIAL',
                     expiration_date=date.today() + timedelta(days=trial_days),
                     is_active=True,
                     cloud_tenant_id=tenant_id,
+                    cloud_tenant_token=tenant_token or '',
                 )
 
                 # 3. Create admin user
@@ -113,7 +130,18 @@ def register(request):
     else:
         form = RegistrationForm()
 
-    return render(request, 'core/register.html', {'form': form})
+    ctx = {
+        'form': form,
+        'account_type': account_type,
+        'is_vet': is_vet,
+        'type_icon': '🏥' if is_vet else '📦',
+        'type_label': _('Veterinary Clinic') if is_vet else _('Supplier / Distributor'),
+        'company_label': _('Clinic Name') if is_vet else _('Company Name'),
+        'company_email_label': _('Clinic Email') if is_vet else _('Company Email'),
+        'step2_title': _('Your Clinic') if is_vet else _('Your Company'),
+        'step2_subtitle': _('Tell us about your clinic') if is_vet else _('Tell us about your company'),
+    }
+    return render(request, 'core/register.html', ctx)
 
 
 def _send_verification_email(request, user):
@@ -591,7 +619,7 @@ def _register_trial_on_cloud(hw_id, client_name, client_email, company_name,
 
 
 def _register_tenant_on_cloud(name, email, tax_id=None, phone=None, address=None, region=None, tenant_type='VET'):
-    """Register a Tenant on the Cloud API. Returns tenant_id or None."""
+    """Register a Tenant on the Cloud API. Returns (tenant_id, token) or (None, None)."""
     from .license import AWS_LAMBDA_URL
     base_url = AWS_LAMBDA_URL.rsplit('/', 1)[0]
     try:
@@ -609,11 +637,12 @@ def _register_tenant_on_cloud(name, email, tax_id=None, phone=None, address=None
             timeout=5
         )
         if resp.status_code == 200:
-            return resp.json().get("id")
+            data = resp.json()
+            return data.get("id"), data.get("token")
         logger.warning("Tenant registration returned %s: %s", resp.status_code, resp.text)
     except Exception as e:
         logger.warning("Tenant cloud registration failed (non-blocking): %s", e)
-    return None
+    return None, None
 
 
 @login_required

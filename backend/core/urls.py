@@ -2,11 +2,13 @@ from django.urls import path
 from django.contrib.auth import views as auth_views
 
 from . import views
+from . import marketplace_views
 
 urlpatterns = [
     # --- PUBLIC ---
     path('download/', views.landing, name='landing'),
     path('register/', views.register, name='register'),
+    path('register/<str:account_type>/', views.register_typed, name='register_typed'),
     path('verify-email/<str:token>/', views.verify_email, name='verify_email'),
     path('resend-verification/', views.resend_verification, name='resend_verification'),
 
@@ -69,4 +71,15 @@ urlpatterns = [
     path('team/edit/<int:id>/', views.edit_employee, name='edit_employee'),
     path('team/status/<int:id>/', views.toggle_employee_status, name='toggle_employee_status'),
     path('team/password/<int:id>/', views.reset_employee_password, name='reset_employee_password'),
+
+    # --- MARKETPLACE ---
+    path('marketplace/', marketplace_views.marketplace_search, name='marketplace_search'),
+    path('marketplace/supplier/', marketplace_views.supplier_dashboard, name='supplier_dashboard'),
+    path('marketplace/supplier/add/', marketplace_views.supplier_product_add, name='supplier_product_add'),
+    path('marketplace/supplier/edit/<int:product_id>/', marketplace_views.supplier_product_edit, name='supplier_product_edit'),
+    path('marketplace/supplier/delete/<int:product_id>/', marketplace_views.supplier_product_delete, name='supplier_product_delete'),
+    path('marketplace/orders/', marketplace_views.order_list, name='order_list'),
+    path('marketplace/orders/<int:order_id>/', marketplace_views.order_detail, name='order_detail'),
+    path('marketplace/orders/<int:order_id>/<str:action>/', marketplace_views.order_action, name='order_action'),
+    path('marketplace/orders/<int:order_id>/quote/', marketplace_views.order_quote, name='order_quote'),
 ]

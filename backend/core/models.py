@@ -43,7 +43,6 @@ class Company(models.Model):
     ACCOUNT_TYPES = [
         ('VET', _('Veterinary')),
         ('SUPPLIER', _('Supplier')),
-        ('BOTH', _('Both')),
     ]
     account_type = models.CharField(max_length=10, choices=ACCOUNT_TYPES, default='VET')
 
@@ -54,6 +53,7 @@ class Company(models.Model):
 
     # Cloud tenant link (SaaS only)
     cloud_tenant_id = models.IntegerField(null=True, blank=True, unique=True)
+    cloud_tenant_token = models.TextField(null=True, blank=True)
 
     class Meta:
         verbose_name_plural = 'companies'

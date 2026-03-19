@@ -1,0 +1,131 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h3><i class="bi bi-receipt"></i> {% trans "Order" %} #{{ order.id }}</h3>
+            <a href="{% url 'order_list' %}" class="btn btn-outline-secondary btn-sm">
+                <i class="bi bi-arrow-left"></i> {% trans "Back" %}
+            </a>
+        </div>
+
+        <!-- Status -->
+        <div class="card shadow-sm mb-3">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <strong>{% trans "Status" %}:</strong>
+                        {% if order.status == 'DRAFT' %}<span class="badge bg-secondary fs-6">{% trans "Draft" %}</span>
+                        {% elif order.status == 'PLACED' %}<span class="badge bg-primary fs-6">{% trans "Placed" %}</span>
+                        {% elif order.status == 'QUOTED' %}<span class="badge bg-info fs-6">{% trans "Quoted" %}</span>
+                        {% elif order.status == 'ACCEPTED' %}<span class="badge bg-success fs-6">{% trans "Accepted" %}</span>
+                        {% elif order.status == 'SHIPPED' %}<span class="badge bg-warning text-dark fs-6">{% trans "Shipped" %}</span>
+                        {% elif order.status == 'DELIVERED' %}<span class="badge bg-dark fs-6">{% trans "Delivered" %}</span>
+                        {% elif order.status == 'CANCELLED' %}<span class="badge bg-danger fs-6">{% trans "Cancelled" %}</span>
+                        {% endif %}
+                    </div>
+                    <div class="text-end">
+                        <strong>{% trans "Total" %}:</strong> <span class="fs-5">${{ order.total }}</span>
+                        {% if order.quoted_total %}
+                        <br><small class="text-muted">{% trans "Quoted" %}: ${{ order.quoted_total }}</small>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Items -->
+        <div class="card shadow-sm mb-3">
+            <div class="card-header"><strong>{% trans "Items" %}</strong></div>
+            <div class="table-responsive">
+                <table class="table table-sm mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>{% trans "Product" %}</th>
+                            <th class="text-center">{% trans "Qty" %}</th>
+                            <th class="text-end">{% trans "Unit Price" %}</th>
+                            {% if order.quoted_total %}
+                            <th class="text-end">{% trans "Quoted" %}</th>
+                            {% endif %}
+                            <th class="text-end">{% trans "Subtotal" %}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in order.items %}
+                        <tr>
+                            <td>{{ item.description }}</td>
+                            <td class="text-center">{{ item.quantity }}</td>
+                            <td class="text-end">${{ item.unit_price }}</td>
+                            {% if order.quoted_total %}
+                            <td class="text-end">{{ item.quoted_price|default:"-" }}</td>
+                            {% endif %}
+                            <td class="text-end fw-bold">${{ item.unit_price|floatformat:2 }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        {% if order.notes %}
+        <div class="card shadow-sm mb-3">
+            <div class="card-header"><strong>{% trans "Notes" %}</strong></div>
+            <div class="card-body">{{ order.notes }}</div>
+        </div>
+        {% endif %}
+
+        {% if order.supplier_notes %}
+        <div class="card shadow-sm mb-3">
+            <div class="card-header"><strong>{% trans "Supplier Notes" %}</strong></div>
+            <div class="card-body">{{ order.supplier_notes }}</div>
+        </div>
+        {% endif %}
+
+        <!-- Actions -->
+        {% if order.status != 'DELIVERED' and order.status != 'CANCELLED' %}
+        <div class="card shadow-sm">
+            <div class="card-header"><strong>{% trans "Actions" %}</strong></div>
+            <div class="card-body d-flex gap-2 flex-wrap">
+                {% if is_buyer %}
+                    {% if order.status == 'DRAFT' %}
+                    <form method="post" action="{% url 'order_action' order.id 'place' %}">{% csrf_token %}
+                        <button class="btn btn-primary"><i class="bi bi-send"></i> {% trans "Place Order" %}</button>
+                    </form>
+                    {% elif order.status == 'QUOTED' %}
+                    <form method="post" action="{% url 'order_action' order.id 'accept' %}">{% csrf_token %}
+                        <button class="btn btn-success"><i class="bi bi-check-lg"></i> {% trans "Accept Quote" %}</button>
+                    </form>
+                    {% elif order.status == 'SHIPPED' %}
+                    <form method="post" action="{% url 'order_action' order.id 'deliver' %}">{% csrf_token %}
+                        <button class="btn btn-dark"><i class="bi bi-box-seam"></i> {% trans "Confirm Delivery" %}</button>
+                    </form>
+                    {% endif %}
+                {% endif %}
+
+                {% if is_supplier %}
+                    {% if order.status == 'PLACED' %}
+                    <form method="post" action="{% url 'order_quote' order.id %}" class="d-flex gap-2">
+                        {% csrf_token %}
+                        <input type="number" name="quoted_total" class="form-control" step="0.01" placeholder="{% trans 'Total quote' %}" style="width: 150px;" required>
+                        <input type="text" name="supplier_notes" class="form-control" placeholder="{% trans 'Notes' %}" style="width: 200px;">
+                        <button class="btn btn-info text-white"><i class="bi bi-cash"></i> {% trans "Send Quote" %}</button>
+                    </form>
+                    {% elif order.status == 'ACCEPTED' %}
+                    <form method="post" action="{% url 'order_action' order.id 'ship' %}">{% csrf_token %}
+                        <button class="btn btn-warning"><i class="bi bi-truck"></i> {% trans "Mark as Shipped" %}</button>
+                    </form>
+                    {% endif %}
+                {% endif %}
+
+                <form method="post" action="{% url 'order_action' order.id 'cancel' %}" onsubmit="return confirm('{% trans 'Are you sure you want to cancel this order?' %}')">
+                    {% csrf_token %}
+                    <button class="btn btn-outline-danger"><i class="bi bi-x-lg"></i> {% trans "Cancel Order" %}</button>
+                </form>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

@@ -41,6 +41,7 @@ class StockMovement(models.Model):
     type = models.CharField(max_length=10, choices=TYPES)
     quantity = models.IntegerField()
     user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+    note = models.CharField(max_length=200, blank=True, default='')
 
     def save(self, *args, **kwargs):
         if not self.pk:

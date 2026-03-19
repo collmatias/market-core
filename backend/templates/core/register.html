@@ -45,6 +45,10 @@
             display: inline-block; background: #198754; color: #fff;
             padding: .25rem .75rem; border-radius: 50px; font-size: .8rem; font-weight: 600;
         }
+        .type-badge {
+            display: inline-block; background: rgba(255,255,255,.15);
+            padding: .25rem .75rem; border-radius: 50px; font-size: .8rem;
+        }
     </style>
 </head>
 <body>
@@ -54,7 +58,7 @@
 <div class="register-wrapper">
     <div class="register-card">
         <div class="register-header">
-            <div class="logo">🐶</div>
+            <div class="logo">{{ type_icon }}</div>
             <h3 class="fw-bold mb-1">VetCoreSoft</h3>
             <p class="mb-2 opacity-75" id="stepTitle">{% trans "Create your account" %}</p>
             <div class="step-indicator">
@@ -62,6 +66,7 @@
                 <div class="step-dot" id="dot2"></div>
             </div>
             <span class="trial-badge"><i class="bi bi-gift me-1"></i>{% trans "30 days free" %}</span>
+            <span class="type-badge ms-2">{{ type_label }}</span>
         </div>
 
         <div class="register-body">
@@ -109,22 +114,17 @@
                     </div>
                 </div>
 
-                <!-- STEP 2: Clinic -->
+                <!-- STEP 2: Company details -->
                 <div class="step-section" id="step2">
-                    <h5 class="fw-bold mb-3"><i class="bi bi-building me-2"></i>{% trans "Your Clinic" %}</h5>
+                    <h5 class="fw-bold mb-3"><i class="bi bi-building me-2"></i>{{ step2_title }}</h5>
 
                     <div class="mb-3">
-                        <label class="form-label small fw-bold">{% trans "Account Type" %} *</label>
-                        {{ form.account_type }}
-                        {% if form.account_type.errors %}<div class="text-danger small mt-1">{{ form.account_type.errors.0 }}</div>{% endif %}
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label small fw-bold">{% trans "Clinic / Business Name" %} *</label>
+                        <label class="form-label small fw-bold">{{ company_label }} *</label>
                         {{ form.company_name }}
                         {% if form.company_name.errors %}<div class="text-danger small mt-1">{{ form.company_name.errors.0 }}</div>{% endif %}
                     </div>
                     <div class="mb-3">
-                        <label class="form-label small fw-bold">{% trans "Clinic Email" %} *</label>
+                        <label class="form-label small fw-bold">{{ company_email_label }} *</label>
                         {{ form.company_email }}
                         {% if form.company_email.errors %}<div class="text-danger small mt-1">{{ form.company_email.errors.0 }}</div>{% endif %}
                     </div>
@@ -163,8 +163,11 @@
 
         <div class="card-footer text-center bg-light py-3 border-0">
             <span class="small text-muted">
-                {% trans "Already have an account?" %}
-                <a href="{% url 'login' %}">{% trans "Sign In" %}</a>
+                <a href="{% url 'register' %}" class="me-3">
+                    <i class="bi bi-arrow-left"></i> {% trans "Change account type" %}
+                </a>
+                &middot;
+                <a href="{% url 'login' %}" class="ms-3">{% trans "Sign In" %}</a>
             </span>
         </div>
     </div>
@@ -174,7 +177,7 @@
 <script>
 const titles = {
     1: "{% trans 'Create your account' %}",
-    2: "{% trans 'Tell us about your clinic' %}"
+    2: "{{ step2_subtitle }}"
 };
 function goToStep(n) {
     // Client-side validation for step 1

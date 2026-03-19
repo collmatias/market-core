@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-03-19 01:08-0300\n"
+"POT-Creation-Date: 2026-03-19 10:49-0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -229,14 +229,6 @@ msgstr "Email del Administrador"
 msgid "Password"
 msgstr "Contraseña"
 
-#: core/forms.py:150
-msgid "Clinic Name"
-msgstr "Nombre de la Clínica"
-
-#: core/forms.py:152 core/forms.py:179 templates/core/register.html:127
-msgid "Clinic Email"
-msgstr "Email de la Clínica"
-
 #: core/forms.py:166 templates/sales/sale_detail.html:20
 msgid "Veterinary Clinic"
 msgstr "Clínica Veterinaria"
@@ -244,10 +236,6 @@ msgstr "Clínica Veterinaria"
 #: core/forms.py:167
 msgid "Supplier / Distributor"
 msgstr "Proveedor / Distribuidor"
-
-#: core/forms.py:168
-msgid "Both (Vet + Supplier)"
-msgstr "Ambos (Vet + Proveedor)"
 
 #: core/forms.py:176 templates/core/register.html:117
 msgid "Account Type"
@@ -368,10 +356,6 @@ msgstr "Veterinaria"
 #: core/models.py:45
 msgid "Supplier"
 msgstr "Proveedor"
-
-#: core/models.py:46
-msgid "Both"
-msgstr "Ambos"
 
 #: core/models.py:67
 msgid "Veterinarian"
@@ -579,27 +563,27 @@ msgstr "Tipo de Movimiento"
 msgid "Quantity"
 msgstr "Cantidad"
 
-#: inventory/views.py:61
+#: inventory/views.py:68
 msgid "Product created successfully."
 msgstr "Producto creado exitosamente."
 
-#: inventory/views.py:76
+#: inventory/views.py:83
 msgid "Product updated."
 msgstr "Producto actualizado."
 
-#: inventory/views.py:90
+#: inventory/views.py:97
 msgid "Product deleted."
 msgstr "Producto eliminado."
 
-#: inventory/views.py:103
+#: inventory/views.py:110
 msgid "Operation denied. Only administrators can withdraw stock."
 msgstr "Operación denegada. Solo los administradores pueden retirar stock."
 
-#: inventory/views.py:107
+#: inventory/views.py:114
 msgid "Stock movement recorded."
 msgstr "Movimiento de stock registrado."
 
-#: inventory/views.py:112
+#: inventory/views.py:119
 msgid "Incoming Stock"
 msgstr "Ingreso de Stock"
 
@@ -1097,6 +1081,60 @@ msgstr "Datos de la Empresa"
 msgid "Clinic Identity"
 msgstr "Identidad de la Clínica"
 
+msgid "Business Identity"
+msgstr "Identidad de la Empresa"
+
+msgid "Choose your account type"
+msgstr "Elegí tu tipo de cuenta"
+
+msgid "Manage patients, clinical records, schedule, inventory and billing."
+msgstr "Gestioná pacientes, historias clínicas, agenda, inventario y facturación."
+
+msgid "Publish your product catalog, receive orders and manage sales to clinics."
+msgstr "Publicá tu catálogo de productos, recibí pedidos y gestioná ventas a clínicas."
+
+msgid "Register as Clinic"
+msgstr "Registrarme como Clínica"
+
+msgid "Register as Supplier"
+msgstr "Registrarme como Proveedor"
+
+msgid "Change account type"
+msgstr "Cambiar tipo de cuenta"
+
+msgid "Your Clinic"
+msgstr "Tu Clínica"
+
+msgid "Your Company"
+msgstr "Tu Empresa"
+
+msgid "Clinic Name"
+msgstr "Nombre de la Clínica"
+
+msgid "Clinic Email"
+msgstr "Email de la Clínica"
+
+msgid "Tell us about your clinic"
+msgstr "Contanos sobre tu clínica"
+
+msgid "Tell us about your company"
+msgstr "Contanos sobre tu empresa"
+
+msgid "e.g. AR-CBA"
+msgstr "ej. AR-CBA"
+
+msgid "Supplier Management"
+msgstr "Gestión de Proveedor"
+
+msgid "Manage your product catalog."
+msgstr "Administrá tu catálogo de productos."
+
+msgid "View and manage received orders."
+msgstr "Consultá y gestioná los pedidos recibidos."
+
+msgid "View Orders"
+msgstr "Ver Pedidos"
+
 #: templates/core/company_settings.html:62
 msgid "These fields were set during initial setup and cannot be modified."
 msgstr "Estos campos se establecieron durante la configuración inicial y no pueden modificarse."
@@ -1481,17 +1519,11 @@ msgstr "Tu Cuenta"
 msgid "Continue"
 msgstr "Continuar"
 
-#: templates/core/register.html:114
-msgid "Your Clinic"
-msgstr "Tu Clínica"
 
 #: templates/core/register.html:166
 msgid "Already have an account?"
 msgstr "¿Ya tenés una cuenta?"
 
-#: templates/core/register.html:177
-msgid "Tell us about your clinic"
-msgstr "Contanos sobre tu clínica"
 
 #: templates/core/register.html:211
 msgid "Creating..."
@@ -1626,7 +1658,6 @@ msgstr "Diseñado por veterinarios, para veterinarios. Sin suscripciones, sin de
 
 #: templates/core/saas_home.html:176
 #, python-format
-#| msgid "Works Offline"
 msgid "Works 100%% Offline"
 msgstr "Funciona 100%% Sin Internet"
 
@@ -1952,7 +1983,7 @@ msgstr "Nuevo Artículo"
 msgid "Search by name or barcode..."
 msgstr "Buscar por nombre o código de barras..."
 
-#: templates/inventory/product_list.html:28 templates/sales/new_sale.html:291
+#: templates/inventory/product_list.html:28 templates/sales/new_sale.html:378
 msgid "Code"
 msgstr "Código"
 
@@ -2458,23 +2489,45 @@ msgstr "Subtotal"
 msgid "Checkout & Finalize"
 msgstr "Cobrar y Finalizar"
 
-#: templates/sales/new_sale.html:186
+#: templates/sales/new_sale.html:175
+#, fuzzy
+#| msgid "Product updated."
+msgid "Product found in catalog"
+msgstr "Producto encontrado en catálogo"
+
+#: templates/sales/new_sale.html:175
+msgid "Enter sale price:"
+msgstr "Ingresá precio de venta:"
+
+#: templates/sales/new_sale.html:256
 msgid "Product not found. Select one from the list or scan a valid code."
 msgstr "Producto no encontrado. Seleccione uno de la lista o escanee un código válido."
 
-#: templates/sales/new_sale.html:232
+#: templates/sales/new_sale.html:304
 msgid "The cart is empty."
 msgstr "El carrito está vacío."
 
-#: templates/sales/new_sale.html:288
+#: templates/sales/new_sale.html:360 templates/sales/new_sale.html:368
 msgid "added to cart"
 msgstr "agregado al carrito"
 
-#: templates/sales/new_sale.html:291
+#: templates/sales/new_sale.html:363
+msgid "Searching catalog..."
+msgstr "Buscando en catálogo..."
+
+#: templates/sales/new_sale.html:372
+msgid "found in catalog"
+msgstr "encontrado en catálogo"
+
+#: templates/sales/new_sale.html:374
+msgid "Product imported and added to cart"
+msgstr "Producto importado y agregado al carrito"
+
+#: templates/sales/new_sale.html:378
 msgid "not found"
 msgstr "no encontrado"
 
-#: templates/sales/new_sale.html:328
+#: templates/sales/new_sale.html:417
 msgid "Could not access camera. HTTPS is required on mobile devices."
 msgstr "No se pudo acceder a la cámara. Se requiere HTTPS en dispositivos móviles."
 
@@ -2513,6 +2566,18 @@ msgstr "Historial de Ventas"
 #: templates/sales/sale_list.html:44
 msgid "No sales recorded yet."
 msgstr "Aún no hay ventas registradas."
+
+#: templates/base.html
+msgid "Cloud view (read-only)"
+msgstr "Vista en la nube (solo lectura)"
+
+#: templates/base.html
+msgid "You are viewing data synced from your local clinic. Clinical, inventory, and sales data cannot be modified here. You can browse the Marketplace and place orders."
+msgstr "Estás viendo datos sincronizados desde tu clínica local. Los datos clínicos, de inventario y ventas no se pueden modificar aquí. Podés navegar el Marketplace y realizar pedidos."
+
+#: core/middleware.py
+msgid "This action is not available in cloud mode. Clinical, inventory, and sales modifications can only be made from your local system."
+msgstr "Esta acción no está disponible en modo nube. Las modificaciones clínicas, de inventario y ventas solo se pueden hacer desde tu sistema local."
 
 #~ msgid "Download Desktop Version"
 #~ msgstr "Descargar Versión de Escritorio"

@@ -1,0 +1,102 @@
+{% load i18n %}
+<!DOCTYPE html>
+<html lang="{{ LANGUAGE_CODE|default:'es' }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% trans "Create Account" %} — VetCoreSoft</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <style>
+        :root { --vc-dark: #0a1628; }
+        body {
+            background: linear-gradient(135deg, #0d6efd 0%, #0dcaf0 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        .vc-nav { background: rgba(10,22,40,.95); backdrop-filter: blur(8px); padding: .75rem 0; }
+        .vc-nav .brand { color: #fff; font-size: 1.4rem; font-weight: 700; text-decoration: none; }
+        .choose-wrapper {
+            flex: 1; display: flex; align-items: center;
+            justify-content: center; padding: 2rem 1rem;
+        }
+        .choose-card {
+            width: 100%; max-width: 720px; border-radius: 16px;
+            box-shadow: 0 12px 40px rgba(0,0,0,.25); border: none; overflow: hidden;
+        }
+        .choose-header {
+            background: var(--vc-dark); color: #fff;
+            padding: 2.5rem 2rem 2rem; text-align: center;
+        }
+        .choose-body { padding: 2.5rem 2rem; background: #fff; }
+        .type-card {
+            border: 2px solid #e9ecef; border-radius: 16px;
+            padding: 2rem 1.5rem; text-align: center;
+            transition: all .25s ease; cursor: pointer;
+            text-decoration: none; color: inherit; display: block; height: 100%;
+        }
+        .type-card:hover {
+            border-color: #0d6efd; transform: translateY(-4px);
+            box-shadow: 0 8px 24px rgba(13,110,253,.18);
+        }
+        .type-card .icon { font-size: 3.5rem; margin-bottom: 1rem; display: block; }
+        .type-card h4 { font-weight: 700; margin-bottom: .5rem; }
+        .type-card p { color: #6c757d; font-size: .9rem; margin-bottom: 1rem; }
+        .type-card .btn { pointer-events: none; }
+        .trial-badge {
+            display: inline-block; background: #198754; color: #fff;
+            padding: .25rem .75rem; border-radius: 50px; font-size: .8rem; font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+
+{% include "core/_public_navbar.html" with current_page="register" %}
+
+<div class="choose-wrapper">
+    <div class="choose-card">
+        <div class="choose-header">
+            <div style="font-size: 2.5rem;">🐶</div>
+            <h3 class="fw-bold mb-1">VetCoreSoft</h3>
+            <p class="mb-2 opacity-75">{% trans "Choose your account type" %}</p>
+            <span class="trial-badge"><i class="bi bi-gift me-1"></i>{% trans "30 days free" %}</span>
+        </div>
+
+        <div class="choose-body">
+            <div class="row g-4">
+                <div class="col-md-6">
+                    <a href="{% url 'register_typed' 'vet' %}" class="type-card">
+                        <span class="icon">🏥</span>
+                        <h4>{% trans "Veterinary Clinic" %}</h4>
+                        <p>{% trans "Manage patients, clinical records, schedule, inventory and billing." %}</p>
+                        <span class="btn btn-primary btn-sm px-4">
+                            {% trans "Register as Clinic" %} <i class="bi bi-arrow-right ms-1"></i>
+                        </span>
+                    </a>
+                </div>
+                <div class="col-md-6">
+                    <a href="{% url 'register_typed' 'supplier' %}" class="type-card">
+                        <span class="icon">📦</span>
+                        <h4>{% trans "Supplier / Distributor" %}</h4>
+                        <p>{% trans "Publish your product catalog, receive orders and manage sales to clinics." %}</p>
+                        <span class="btn btn-outline-primary btn-sm px-4">
+                            {% trans "Register as Supplier" %} <i class="bi bi-arrow-right ms-1"></i>
+                        </span>
+                    </a>
+                </div>
+            </div>
+
+            <div class="text-center mt-4 pt-3 border-top">
+                <span class="small text-muted">
+                    {% trans "Already have an account?" %}
+                    <a href="{% url 'login' %}">{% trans "Sign In" %}</a>
+                </span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

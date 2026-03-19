@@ -83,7 +83,7 @@ Build a hybrid (offline-first) veterinary management platform combining desktop 
 - [x] Public registration page (`/register/`) with 2-step wizard (account + clinic)
 - [x] Cloud API: `POST /tenant/register` — creates Tenant with type, returns tenant_id
 - [x] Tenant ↔ Company link (`cloud_tenant_id` stored in Company model)
-- [x] Account type selection at registration: Veterinary, Supplier, or Both
+- [x] Account type selection at registration: Veterinary or Supplier (separate environments)
 - [x] `account_type` field on Company model + cloud Tenant.type
 - [x] Email verification (EmailVerificationToken model, verification link sent on registration)
 - [x] `verify-email/<token>/` endpoint — validates token, marks user email as verified
@@ -98,41 +98,61 @@ Build a hybrid (offline-first) veterinary management platform combining desktop 
 ### SaaS Onboarding
 - [x] Registration auto-creates Company + User + UserProfile (ADMIN/owner)
 - [x] Auto-login after registration → redirects to dashboard
-- [ ] If type = BOTH: combined menu (vet features + supplier portal tab) — deferred to FASE 5
+- [x] VET and SUPPLIER are fully separate environments (same email can register both profiles)
 
 ---
 
-## 📅 FASE 4 — Master Catalog + Barcode Lookup
+## ✅ FASE 4 — Master Catalog + Barcode Lookup (DONE)
+> 2026-03-19
 
 ### Cloud Catalog
-- [ ] `MasterProduct` model: EAN, description, category, brand, suggested_price, image_url, source
-- [ ] Seed from free APIs: Open Food Facts, UPC Database
-- [ ] `GET /catalog/search?q=` — search by name or EAN
-- [ ] `GET /catalog/lookup/{barcode}` — barcode → product info
+- [x] `MasterProduct` model: EAN, description, category, brand, suggested_price, image_url, source
+- [x] Seed from free APIs: Open Food Facts (`seed_catalog.py --categories`)
+- [x] `GET /catalog/search?q=` — search by name, brand, or EAN
+- [x] `GET /catalog/lookup/{barcode}` — barcode → product info
+- [x] `POST /catalog/products` — admin create/upsert
 
-### Desktop Integration
-- [ ] POS/Inventory scan: if product not found locally → query cloud catalog
-- [ ] Auto-create local product from catalog match (user edits price/cost)
-- [ ] Periodic sync: Desktop downloads master catalog for offline use
+### Desktop/SaaS Integration
+- [x] `GET /catalog/lookup/?barcode=` — Django proxy to cloud catalog
+- [x] `POST /catalog/import/` — auto-create local product from catalog match
+- [x] POS scan: if product not found locally → async cloud catalog query
+- [x] Scanner feedback: "Searching catalog..." → import prompt with price input
+- [x] Manual barcode input also falls back to cloud catalog
+- [x] Alembic migration for master_products table
 
 ---
 
-## 📅 FASE 5 — Suppliers + Marketplace + Orders
+## ✅ FASE 5 — Suppliers + Marketplace + Orders (DONE)
+> 2026-03-19
 
 ### Supplier Model
-- [ ] Supplier = Tenant with type SUPPLIER or BOTH
-- [ ] `SupplierProduct`: supplier FK, master_product FK (nullable), SKU, description, price, stock
+- [x] Supplier = Tenant with type SUPPLIER
+- [x] `SupplierProduct`: tenant FK, master_product FK (nullable), SKU, EAN, description, price, stock
+- [x] Tenant JWT authentication (`POST /tenant/token`)
+- [x] `cloud_tenant_token` stored on Django Company model
 
 ### Supplier Portal (within SaaS)
-- [ ] Dashboard with metrics (orders received, products listed)
-- [ ] Product CRUD with barcode scan → master catalog matching
-- [ ] Geographic zone: provinces/states where supplier operates
+- [x] Dashboard with product listing (`/marketplace/supplier/`)
+- [x] Product CRUD: add, edit, deactivate
+- [x] Cloud API: `GET/POST/PATCH/DELETE /supplier/products`
+
+### Marketplace (for Vets)
+- [x] Browse suppliers: `GET /supplier/search?q=&region=`
+- [x] Search page with region filtering (`/marketplace/`)
+- [x] View supplier product catalogs
 
 ### Order System
-- [ ] `Order` + `OrderItem` with state machine:
-  `DRAFT → PLACED → QUOTED → ACCEPTED → PAYMENT_AGREED → SHIPPED → DELIVERED → CANCELLED`
-- [ ] Flow: Vet browses suppliers in zone → builds order → supplier quotes → vet accepts → payment → ship → deliver → stock updated
-- [ ] Notifications (email + in-app) for state changes
+- [x] `Order` + `OrderItem` models with state machine:
+  `DRAFT → PLACED → QUOTED → ACCEPTED → SHIPPED → DELIVERED → CANCELLED`
+- [x] Cloud API: full order lifecycle endpoints
+  - `POST /orders/` (create), `GET /orders/my` (list)
+  - `/place`, `/quote`, `/accept`, `/ship`, `/deliver`, `/cancel`
+- [x] Django views: order list, detail, state transitions
+- [x] Buyer can: create, place, accept quote, confirm delivery, cancel
+- [x] Supplier can: view received orders, quote, ship, cancel
+- [x] Navigation: Marketplace dropdown in base.html (browse, orders, my products)
+- [x] 4 marketplace templates: search, supplier dashboard, product form, order list, order detail
+- [x] Alembic migration for supplier_products + orders + order_items
 
 ---
 

@@ -72,6 +72,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'core.middleware.LicenseCheckMiddleware',
+    'core.middleware.SaaSReadOnlyMiddleware',
 ]
 
 ROOT_URLCONF = 'vetcore.urls'
@@ -88,6 +89,7 @@ TEMPLATES = [
                 'django.contrib.messages.context_processors.messages',
                 'core.context_processors.currency_context',
                 'core.context_processors.server_context',
+                'core.context_processors.account_context',
             ],
         },
     },

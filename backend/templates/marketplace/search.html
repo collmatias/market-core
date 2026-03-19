@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block content %}
+<h3 class="mb-4"><i class="bi bi-search"></i> {% trans "Marketplace" %}</h3>
+
+<form method="get" class="row g-2 mb-4">
+    <div class="col-md-6">
+        <input type="text" name="q" class="form-control" placeholder="{% trans 'Search products by name, brand or barcode...' %}" value="{{ query }}">
+    </div>
+    <div class="col-md-3">
+        <input type="text" name="region" class="form-control" placeholder="{% trans 'Region (e.g. AR-CBA)' %}" value="{{ region|default:'' }}">
+    </div>
+    <div class="col-md-3">
+        <button type="submit" class="btn btn-primary w-100"><i class="bi bi-search"></i> {% trans "Search" %}</button>
+    </div>
+</form>
+
+{% if results %}
+<div class="table-responsive">
+    <table class="table table-hover">
+        <thead class="table-light">
+            <tr>
+                <th>{% trans "Product" %}</th>
+                <th>{% trans "Brand" %}</th>
+                <th>{% trans "Supplier" %}</th>
+                <th class="text-end">{% trans "Price" %}</th>
+                <th class="text-center">{% trans "Stock" %}</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for p in results %}
+            <tr>
+                <td>
+                    <strong>{{ p.description }}</strong>
+                    {% if p.ean %}<br><small class="text-muted">EAN: {{ p.ean }}</small>{% endif %}
+                </td>
+                <td>{{ p.brand|default:"-" }}</td>
+                <td><small class="text-muted">ID: {{ p.tenant_id }}</small></td>
+                <td class="text-end fw-bold">${{ p.unit_price }}</td>
+                <td class="text-center">
+                    {% if p.stock_available > 0 %}
+                    <span class="badge bg-success">{{ p.stock_available }}</span>
+                    {% else %}
+                    <span class="badge bg-secondary">{% trans "Out of stock" %}</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% elif query %}
+<div class="text-center py-5 text-muted">
+    <i class="bi bi-search" style="font-size: 3rem;"></i>
+    <p class="mt-3">{% trans "No products found for your search." %}</p>
+</div>
+{% else %}
+<div class="text-center py-5 text-muted">
+    <i class="bi bi-bag" style="font-size: 3rem;"></i>
+    <p class="mt-3">{% trans "Search for products from suppliers in the marketplace." %}</p>
+</div>
+{% endif %}
+{% endblock %}

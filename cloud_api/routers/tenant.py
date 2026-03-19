@@ -8,6 +8,7 @@ from pydantic import BaseModel, EmailStr
 from sqlalchemy.orm import Session
 
 from core.deps import get_db, require_admin
+from core.auth import create_access_token
 from models.tenant import Tenant, TenantType
 
 router = APIRouter(prefix="/tenant", tags=["Tenant"])
@@ -68,7 +69,37 @@ def register_tenant(req: TenantRegisterRequest, db: Session = Depends(get_db)):
     db.add(tenant)
     db.commit()
     db.refresh(tenant)
-    return tenant
+
+    # Issue a tenant JWT token
+    token = create_access_token(
+        subject=str(tenant.id),
+        extra={"tenant_id": tenant.id, "role": "tenant"},
+    )
+    return {**TenantOut.model_validate(tenant).model_dump(), "token": token}
+
+
+class TenantTokenRequest(BaseModel):
+    email: str
+    api_secret: str
+
+
+@router.post("/token", summary="Get a tenant JWT token")
+def get_tenant_token(req: TenantTokenRequest, db: Session = Depends(get_db)):
+    """Issue a tenant JWT for API access. Requires the shared API secret."""
+    from core.config import get_settings
+    settings = get_settings()
+    if req.api_secret != settings.api_secret:
+        raise HTTPException(status_code=403, detail="Invalid API secret")
+
+    tenant = db.query(Tenant).filter(Tenant.email == req.email, Tenant.is_active == True).first()
+    if not tenant:
+        raise HTTPException(status_code=404, detail="Tenant not found")
+
+    token = create_access_token(
+        subject=str(tenant.id),
+        extra={"tenant_id": tenant.id, "role": "tenant"},
+    )
+    return {"token": token, "tenant_id": tenant.id}
 
 
 # --- Admin endpoints (JWT required) ---

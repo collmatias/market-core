@@ -114,6 +114,8 @@
 <script>
 document.addEventListener('DOMContentLoaded', function() {
 
+    const IS_READONLY = {{ is_readonly|yesno:"true,false" }};
+
     function getCookie(name) {
         let val = null;
         document.cookie.split(';').forEach(c => {
@@ -208,8 +210,8 @@ document.addEventListener('DOMContentLoaded', function() {
             right: 'dayGridMonth,timeGridWeek,timeGridDay,listWeek'
         },
         navLinks: true,
-        editable: true,
-        selectable: true,
+        editable: !IS_READONLY,
+        selectable: !IS_READONLY,
         nowIndicator: true,
         slotMinTime: '07:00:00',
         slotMaxTime: '22:00:00',
@@ -226,6 +228,7 @@ document.addEventListener('DOMContentLoaded', function() {
         },
 
         dateClick: function(info) {
+            if (IS_READONLY) return;
             clearModal();
             titulo.innerHTML = '<i class="bi bi-calendar-plus"></i> {% trans "New Appointment" %}';
             
@@ -253,14 +256,35 @@ document.addEventListener('DOMContentLoaded', function() {
             fStatus.value = props.status;
             fNotes.value = props.notes || '';
 
-            if (props.status !== 'CANCELLED') {
-                btnCancel.classList.remove('d-none');
+            if (IS_READONLY) {
+                btnSave.classList.add('d-none');
+                btnCancel.classList.add('d-none');
+                fPatient.disabled = true;
+                fProf.disabled = true;
+                fStart.disabled = true;
+                fEnd.disabled = true;
+                fReason.disabled = true;
+                fStatus.disabled = true;
+                fNotes.disabled = true;
+            } else {
+                btnSave.classList.remove('d-none');
+                fPatient.disabled = false;
+                fProf.disabled = false;
+                fStart.disabled = false;
+                fEnd.disabled = false;
+                fReason.disabled = false;
+                fStatus.disabled = false;
+                fNotes.disabled = false;
+                if (props.status !== 'CANCELLED') {
+                    btnCancel.classList.remove('d-none');
+                }
             }
 
             modal.show();
         },
 
         eventDrop: function(info) {
+            if (IS_READONLY) { info.revert(); return; }
             const ev = info.event;
             const body = {
                 patient: ev.extendedProps.patient_id,
@@ -278,6 +302,7 @@ document.addEventListener('DOMContentLoaded', function() {
         },
 
         eventResize: function(info) {
+            if (IS_READONLY) { info.revert(); return; }
             const ev = info.event;
             const body = {
                 patient: ev.extendedProps.patient_id,
