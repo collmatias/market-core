@@ -69,26 +69,13 @@
         </div>
 
         <div class="col">
-            <div class="card h-100 border-0 shadow-sm hover-card border-top border-4 border-danger">
-                <div class="card-body">
-                    <div class="d-flex align-items-center mb-2">
-                        <i class="bi bi-heart-pulse fs-3 text-danger me-2"></i>
-                        <h5 class="card-title fw-bold mb-0">{% trans "Patients" %}</h5>
-                    </div>
-                    <p class="card-text small text-muted">{% trans "Medical records." %}</p>
-                    <a href="{% url 'patient_list' %}" class="btn btn-sm btn-outline-danger w-100 stretched-link">{% trans "Manage" %}</a>
-                </div>
-            </div>
-        </div>
-
-        <div class="col">
             <div class="card h-100 border-0 shadow-sm hover-card border-top border-4 border-primary">
                 <div class="card-body">
                     <div class="d-flex align-items-center mb-2">
                         <i class="bi bi-people fs-3 text-primary me-2"></i>
                         <h5 class="card-title fw-bold mb-0">{% trans "Clients" %}</h5>
                     </div>
-                    <p class="card-text small text-muted">{% trans "Owners and contacts." %}</p>
+                    <p class="card-text small text-muted">{% trans "Customers and contacts." %}</p>
                     <a href="{% url 'client_list' %}" class="btn btn-sm btn-outline-primary w-100 stretched-link">{% trans "Directory" %}</a>
                 </div>
             </div>
@@ -116,19 +103,6 @@
                     </div>
                     <p class="card-text small text-muted">{% trans "Load supplier invoices." %}</p>
                     <a href="{% url 'register_movement' %}" class="btn btn-sm btn-outline-secondary w-100 stretched-link">{% trans "Register" %}</a>
-                </div>
-            </div>
-        </div>
-
-        <div class="col">
-            <div class="card h-100 border-0 shadow-sm hover-card border-top border-4 border-primary bg-primary bg-opacity-10">
-                <div class="card-body">
-                    <div class="d-flex align-items-center mb-2">
-                        <i class="bi bi-calendar-event fs-3 text-primary me-2"></i>
-                        <h5 class="card-title fw-bold mb-0 text-primary">{% trans "Schedule" %}</h5>
-                    </div>
-                    <p class="card-text small text-muted">{% trans "Appointments and calendar." %}</p>
-                    <a href="{% url 'schedule' %}" class="btn btn-sm btn-primary w-100 stretched-link">{% trans "View Schedule" %}</a>
                 </div>
             </div>
         </div>
@@ -166,8 +140,8 @@
 
 {% else %}
     <div class="px-4 py-5 my-5 text-center">
-        <h1 class="display-4 fw-bold text-primary mb-3">🐶 VetCore</h1>
-        <p class="lead text-muted mb-4">{% trans "Comprehensive Veterinary Management System" %}</p>
+        <h1 class="display-4 fw-bold text-primary mb-3">🏪 MarketCoreSoft</h1>
+        <p class="lead text-muted mb-4">{% trans "Business & Inventory Management System" %}</p>
         <div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
             <a href="{% url 'login' %}" class="btn btn-primary btn-lg px-5 shadow-sm">{% trans "Sign In" %}</a>
         </div>

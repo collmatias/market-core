@@ -2,9 +2,39 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.4.0] - 2026-03-20
+### Changed
+- **Project Rebranding:** VetCore → MarketCoreSoft
+  - Renamed Django project module from `vetcore` to `marketcore`
+  - Updated all branding, templates, and documentation
+- **Removed Clinical Module:**
+  - Deleted `clinical` app entirely (models, views, urls, templates, signals, forms, admin)
+  - Removed `Patient` model and all related views, forms, serializers, URLs, templates
+  - Removed veterinary-specific features: medical records, consultations, attachments, appointments/schedule
+  - Removed `clinical_required` decorator
+- **Removed Vetter Import:**
+  - Deleted `vetter_import.py` service and related views/templates
+  - Removed import hub and Vetter-specific URLs
+- **Adapted User Roles:**
+  - Changed roles from `VET`/`ADMIN` to `CASHIER`/`ADMIN`
+  - Removed `license_number` field from `UserProfile`
+  - Updated all forms and templates to reflect new role structure
+- **Cloud API:**
+  - Changed tenant types from `VET`/`SUPPLIER`/`BOTH` to `RETAIL`/`WHOLESALE`/`BOTH`
+  - Rebranded API name and logging
+- **Updated Configuration:**
+  - Docker containers renamed (`marketcore_desktop`, `marketcore_saas`, `marketcore_db_saas`)
+  - Environment variables renamed (`VETCORE_MODE` → `MARKETCORE_MODE`)
+  - License URLs updated for new domain
+  - Removed Vetter volume mount from Docker Compose
+- **Documentation:**
+  - Rewrote README.MD for retail/business focus
+  - Rewrote ROADMAP.md with retail-oriented phases
+  - Updated CHANGELOG
+
 ## [0.3.0] - 2026-03-18
 ### Added
-- **Cloud API — Modular Architecture (FASE 1):**
+- **Cloud API — Modular Architecture:**
   - Refactored from monolithic 3-endpoint app to modular structure (core/, models/, routers/)
   - JWT admin authentication (`POST /admin/login` → token)
   - License management endpoints: check, create/renew, revoke, list (JWT-protected)
@@ -16,82 +46,49 @@ All notable changes to this project will be documented in this file.
   - Swagger/OpenAPI docs at `/docs`
 - **Database Migrations:**
   - Alembic setup with autogenerate support
-  - Initial migration: licenses (with updated_at), releases, tenants tables
+  - Initial migration: licenses, releases, tenants tables
 - **Models:**
   - `License`: hardware_id, client_name, expiration_date, is_active, timestamps
-  - `Release`: version, download_url, changelog, is_active (ready for auto-update)
-  - `Tenant`: name, type (VET/SUPPLIER/BOTH), tax_id, contact info, plan, region
+  - `Release`: version, download_url, changelog, is_active
+  - `Tenant`: name, type, tax_id, contact info, plan, region
 - **Docker:**
   - cloud_api volume mount for hot-reload development
   - JWT_SECRET, DEBUG, CORS_ORIGINS, RATE_LIMIT_DEFAULT env vars
 - **Config:**
   - Centralized settings via pydantic-settings (`core/config.py`)
-  - Updated PRODUCTION_URL to `api.vetcore.app`
 
 ## [0.2.0] - 2026-03-17
 ### Added
-- **Clinical Module:**
-  - Medical records with consultations and attachments (file upload)
-  - Vaccine tracking per patient
-  - Appointment scheduling with calendar/agenda view (drag-and-drop)
 - **Point of Sale (POS):**
   - Cart-based sales workflow
   - Barcode scanner support (camera via html5-qrcode + USB reader)
-  - Payment method tracking
-  - Sale detail view with print option
+  - Payment method tracking, sale detail view with print option
 - **Cash Register Reports:**
-  - Daily/shift-based cash closing
-  - Breakdown by payment method
-  - Date and shift filters
+  - Daily/shift-based cash closing with payment method breakdown
 - **Team Management:**
-  - Multi-user with roles (Veterinarian, Administrative)
-  - Employee CRUD, activate/deactivate, password reset
-  - PIN-based quick user switching
-  - Lockscreen with kiosk mode
-  - User avatars
+  - Multi-user with roles, employee CRUD, activate/deactivate, password reset
+  - PIN-based quick user switching, lockscreen, user avatars
 - **Settings Hub:**
-  - Redesigned `/settings/` page with tabbed layout (Company, Database, Data Import)
-  - Company configuration: name, tax ID, currency (11 currencies), language
-  - Backup: download SQLite database with auto-safety copies
-  - Restore: upload backup with server folder browser
-  - `@localhost_required` decorator for sensitive endpoints
-- **Vetter Data Import:**
-  - Import from FoxPro .DBF files (clients, patients, records, vaccines, products, sales)
-  - Table selection with checkboxes and dependency enforcement
-  - Record count analysis before import
-  - Automatic backup before import starts
+  - Company configuration (name, tax ID, currency, language)
+  - Backup/restore SQLite databases
 - **Internationalization (i18n):**
-  - Full English translation of codebase (models, views, templates)
-  - Django i18n with `{% trans %}` tags throughout all templates
-  - Language support: Spanish (es), English (en), Portuguese (pt)
-  - Per-company language setting
+  - Spanish, English, Portuguese with per-company language setting
 - **Search & Pagination:**
-  - Server-side search on client list and patient list
-  - Paginated results with search persistence
+  - Server-side search on client list, paginated results
 - **Inventory Enhancements:**
-  - QR label printing for products
-  - Barcode field on Product model
+  - QR label printing for products, barcode field on Product model
 - **License System:**
-  - Offline license validation (Hardware ID-based perpetual key)
-  - Online subscription validation via Cloud API
-  - 3-day offline grace period
-  - Hybrid mode: seamless switch between offline and online
+  - Offline + online license validation with 3-day grace period
 
 ### Changed
-- **Architecture:** Complete refactoring to hybrid Desktop (SQLite) + SaaS (PostgreSQL) architecture
-- **Docker Compose:** 5-service setup (api_desktop, api_saas, db, cloud_api, cloud_db)
-- **Models:** Added multi-tenant Company model, UserProfile with roles/PIN/avatar
-- **Templates:** Migrated all views from Spanish to English with i18n support
+- **Architecture:** Hybrid Desktop (SQLite) + SaaS (PostgreSQL) architecture
+- **Docker Compose:** 5-service setup
 
 ## [0.1.0] - 2026-01-30
 ### Added
 - **Infrastructure:** Docker + Docker Compose setup (Django + PostgreSQL)
-- **Core:** Client and Patient (Pet) management with CRUD
-- **Inventory:** Products & Services module
-  - Low stock visual alerts
-  - Product vs Service differentiation
-  - Stock movement tracking (In/Out)
+- **Core:** Client management with CRUD
+- **Inventory:** Products & Services module with stock movement tracking
 - **Frontend:** Django Templates with Bootstrap 5
-- **Dashboard:** Home panel with quick access shortcuts and local IP detection
-- **Hybrid:** Logic in `settings.py` to detect Docker (Dev) vs Windows Native (Prod with SQLite)
+- **Dashboard:** Home panel with quick access shortcuts
 - **API:** Basic REST endpoints with Django Rest Framework (DRF)

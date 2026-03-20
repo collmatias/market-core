@@ -23,22 +23,12 @@ urlpatterns = [
     path('settings/', views.company_settings, name='company_settings'),
     path('settings/backup/', views.download_backup, name='download_backup'),
     path('settings/backup/restore/', views.restore_backup, name='restore_backup'),
-    path('settings/import/', views.import_hub, name='import_hub'),
-    path('settings/import/vetter/', views.vetter_import, name='vetter_import'),
-    path('settings/import/vetter/browse/', views.browse_server_dirs, name='browse_server_dirs'),
-    path('settings/import/vetter/analyze/', views.vetter_analyze, name='vetter_analyze'),
 
     # --- CLIENTS ---
     path('clients/', views.client_list, name='client_list'),
     path('clients/new/', views.create_client, name='create_client'),
     path('clients/<int:client_id>/', views.client_detail, name='client_detail'),
     path('clients/<int:client_id>/edit/', views.edit_client, name='edit_client'),
-
-    # --- PATIENTS ---
-    path('patients/', views.patient_list, name='patient_list'),
-    path('patients/new/', views.create_patient, name='create_patient'),
-    path('patients/<int:patient_id>/', views.patient_detail, name='patient_detail'),
-    path('patients/<int:patient_id>/edit/', views.edit_patient, name='edit_patient'),
 
     # --- TEAM ---
     path('team/', views.team_management, name='team_management'),

@@ -1,28 +1,25 @@
-# 🐶 VetCore — Veterinary Management Platform
+# 🏪 MarketCoreSoft — Business & Inventory Management Platform
 
-**VetCore** is a comprehensive veterinary clinic management system designed for simplicity, offline resilience, and cloud connectivity.
+**MarketCoreSoft** is a comprehensive business management system for retail stores, supermarkets, butcher shops, warehouses, and similar businesses. Designed for simplicity, offline resilience, and cloud connectivity.
 
 Built with a hybrid architecture that supports both **Desktop** (Windows .exe with local SQLite) and **SaaS** (cloud PostgreSQL multi-tenant) deployment modes.
 
 ## 🚀 Features
 
 ### Core
-- **Client & Patient Management** — Full CRUD with server-side search and pagination
-- **Clinical Records** — Medical history, consultations, attachments, vaccine tracking
-- **Appointment Scheduling** — Calendar/agenda with drag-and-drop, appointment states
+- **Client Management** — Full CRUD with server-side search and pagination
 - **POS / Point of Sale** — Cart-based sales with barcode scanner (camera + USB reader)
 - **Inventory** — Products & services, stock movements, restock alerts, QR label printing
 - **Cash Register Reports** — Daily/shift-based cash closing with payment method breakdown
 
 ### Team & Security
-- **Multi-user** — Role-based access (Veterinarian, Administrative), team management
+- **Multi-user** — Role-based access (Cashier, Administrative), team management
 - **Quick Switch** — PIN-based fast user switching and lockscreen
 - **Admin Controls** — Employee management, password reset, activate/deactivate users
 
 ### Settings & Data
 - **Company Configuration** — Name, tax ID, currency (11 currencies), language (es/en/pt)
 - **Backup & Restore** — Download/upload SQLite backups with safety copies
-- **Data Migration** — Import from Vetter (FoxPro) with table selection and record preview
 - **Internationalization** — Spanish, English, Portuguese with per-company language setting
 
 ### Licensing
@@ -42,12 +39,12 @@ Built with a hybrid architecture that supports both **Desktop** (Windows .exe wi
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│                    VetCore Platform                          │
+│                  MarketCoreSoft Platform                     │
 ├─────────────┬──────────────┬────────────────────────────────┤
 │  Desktop    │  SaaS        │  Cloud API                     │
 │  (SQLite)   │  (PostgreSQL)│  (FastAPI + PostgreSQL)         │
 │  Port 8000  │  Port 8001   │  Port 5000                     │
-│  Offline    │  Multi-tenant│  Licenses, Updates, AI (future) │
+│  Offline    │  Multi-tenant│  Licenses, Updates (future)     │
 └─────────────┴──────────────┴────────────────────────────────┘
 ```
 
@@ -55,9 +52,9 @@ Built with a hybrid architecture that supports both **Desktop** (Windows .exe wi
 
 | Service | Container | Port | Description |
 |---------|-----------|------|-------------|
-| `api_desktop` | `vetcore_desktop` | 8000 | Django — Desktop mode (SQLite) |
-| `api_saas` | `vetcore_saas` | 8001 | Django — SaaS mode (PostgreSQL) |
-| `db` | `vetcore_db_saas` | 5432 | PostgreSQL for SaaS app data |
+| `api_desktop` | `marketcore_desktop` | 8000 | Django — Desktop mode (SQLite) |
+| `api_saas` | `marketcore_saas` | 8001 | Django — SaaS mode (PostgreSQL) |
+| `db` | `marketcore_db_saas` | 5432 | PostgreSQL for SaaS app data |
 | `cloud_api` | `cloud_api_service` | 5000 | FastAPI — Cloud license/management API |
 | `cloud_db` | — | 5433 | PostgreSQL for cloud API data |
 
@@ -74,7 +71,6 @@ Built with a hybrid architecture that supports both **Desktop** (Windows .exe wi
 | Auth | Session-based (Django) + JWT (Cloud API) |
 | i18n | Django i18n (es/en/pt) |
 | Infrastructure | Docker & Docker Compose |
-| Data Import | dbfread (FoxPro .DBF files) |
 
 ## 💻 Getting Started
 
@@ -84,8 +80,8 @@ Built with a hybrid architecture that supports both **Desktop** (Windows .exe wi
 ### Quick Start
 ```bash
 # Clone the repository
-git clone https://github.com/collmatias/vetcore.git
-cd vetcore
+git clone https://github.com/collmatias/market-core.git
+cd market-core
 
 # Start all services
 docker compose up --build
@@ -130,18 +126,16 @@ POST /admin/login                   Get JWT token (exchange API_SECRET)
 
 ## 📁 Project Structure
 ```
-vetcore/
+market-core/
 ├── backend/                    # Django application
-│   ├── core/                   # Company, Client, Patient, Auth, Settings
-│   │   ├── services/           # Vetter import service
-│   │   ├── models.py           # Company, UserProfile, Client, Patient
+│   ├── core/                   # Company, Client, Auth, Settings
+│   │   ├── models.py           # Company, UserProfile, Client
 │   │   └── views.py            # All core views + backup/restore
-│   ├── clinical/               # Medical records, appointments, attachments
 │   ├── inventory/              # Products, stock movements, labels
 │   ├── sales/                  # POS, sales, cash reports
 │   ├── templates/              # Django templates (Bootstrap 5)
 │   ├── locale/                 # i18n translations (es, en, pt)
-│   └── vetcore/                # Django project settings
+│   └── marketcore/             # Django project settings
 ├── cloud_api/                  # FastAPI cloud service
 │   ├── core/                   # Config, auth (JWT), database, deps
 │   ├── models/                 # License, Release, Tenant
@@ -157,26 +151,26 @@ vetcore/
 ### ✅ Completed
 - [x] Hybrid architecture (Desktop SQLite + SaaS PostgreSQL)
 - [x] Multi-tenant with Company model
-- [x] Client & Patient management with search
-- [x] Clinical records, consultations, attachments
-- [x] Appointment scheduling with calendar
+- [x] Client management with search and pagination
 - [x] POS with barcode scanner (camera + USB)
 - [x] Inventory with stock alerts and QR labels
 - [x] Cash register reports
 - [x] Team management with roles and PIN lock
 - [x] License system (offline + online)
 - [x] Backup/restore with auto-safety copies
-- [x] Vetter (FoxPro) data import with table selection
 - [x] i18n support (es/en/pt)
-- [x] Cloud API with modular architecture (FASE 1)
+- [x] Cloud API with modular architecture
 - [x] JWT admin auth + license CRUD
 - [x] Alembic migrations for cloud DB
 
 ### 🚧 In Progress / Next
+- [ ] Supplier management and purchase orders
+- [ ] Advanced sales reports and analytics
 - [ ] Auto-update system (Release model ready)
 - [ ] Master product catalog with barcode lookup
-- [ ] Supplier marketplace and order management
-- [ ] AI assistant (clinical diagnosis + invoice OCR)
+- [ ] Invoice/billing module
+- [ ] Multi-branch support
+- [ ] AI assistant (invoice OCR)
 - [ ] Offline-first sync engine
 - [ ] Cloud backup (encrypted)
 - [ ] SaaS registration and onboarding

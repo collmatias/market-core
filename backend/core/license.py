@@ -7,7 +7,7 @@ from datetime import datetime, timedelta
 from django.conf import settings
 
 # --- CONFIGURACIÓN ---
-SECRET_SALT = "VETCORE_PROTECTED_BY_MATIAS_2026_X99"
+SECRET_SALT = "MARKETCORE_PROTECTED_2026_X99"
 LICENSE_FILE = os.path.join(settings.BASE_DIR, 'license.key')
 CACHE_FILE = os.path.join(settings.BASE_DIR, 'license_cache.json')
 
@@ -19,7 +19,7 @@ DEBUG_URL = "http://cloud_api:8000/check-license"
 # When running as .exe on Windows, uses the production domain.
 # The cloud API exposes /check-license at root for backward compatibility,
 # and the new canonical path is /license/check.
-PRODUCTION_URL = "https://api.vetcore.app/check-license"
+PRODUCTION_URL = "https://api.marketcoresoft.com/check-license"
 
 # LÓGICA DE SELECCIÓN
 if os.environ.get('AM_I_IN_DOCKER'):
@@ -34,9 +34,9 @@ def get_hardware_id():
     - En DEV (Docker): Usa un ID fijo para no tener que reactivar a cada rato.
     """
     
-    # Si existe la variable VETCORE_MODE (que solo pusimos en el docker-compose),
+    # Si existe la variable MARKETCORE_MODE (que solo pusimos en el docker-compose),
     # asumimos que es entorno de desarrollo.
-    if os.environ.get('VETCORE_MODE'):
+    if os.environ.get('MARKETCORE_MODE'):
         # Retornamos un ID fijo cualquiera (ej: puros nueves)
         return "999999999999"
     

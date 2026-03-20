@@ -23,12 +23,11 @@ from django.contrib.auth.forms import SetPasswordForm
 from django.contrib.messages.views import SuccessMessageMixin
 from django.urls import reverse_lazy
 
-from .models import Client, Patient, Company, UserProfile
-from .serializers import ClientSerializer, PatientSerializer
-from .forms import AdminSetPasswordForm, ClientForm, PatientForm, CompanyForm, SetupForm, EmployeeForm, EditEmployeeForm, ChangePinForm
+from .models import Client, Company, UserProfile
+from .serializers import ClientSerializer
+from .forms import AdminSetPasswordForm, ClientForm, CompanyForm, SetupForm, EmployeeForm, EditEmployeeForm, ChangePinForm
 from .utils import get_server_ip
 from datetime import date, timedelta
-from clinical.models import Appointment
 
 from django.contrib import messages
 
@@ -41,15 +40,6 @@ class ClientViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         return Client.objects.filter(
-            company=self.request.user.profile.company
-        ).order_by("-id")
-
-
-class PatientViewSet(viewsets.ModelViewSet):
-    serializer_class = PatientSerializer
-
-    def get_queryset(self):
-        return Patient.objects.filter(
             company=self.request.user.profile.company
         ).order_by("-id")
 
@@ -90,7 +80,7 @@ def prepare_quick_switch(request):
     company_id = request.user.profile.company.id
     logout(request)
     response = redirect("lockscreen")
-    response.set_cookie("vetcore_workstation", company_id, max_age=43200)
+    response.set_cookie("marketcore_workstation", company_id, max_age=43200)
     return response
 
 
@@ -99,7 +89,7 @@ def lockscreen(request):
     if request.user.is_authenticated:
         return redirect("home")
 
-    company_id = request.COOKIES.get("vetcore_workstation")
+    company_id = request.COOKIES.get("marketcore_workstation")
     if not company_id:
         return redirect("login")
 
@@ -156,7 +146,7 @@ def download_backup(request):
     db_path = settings.DATABASES["default"]["NAME"]
     if os.path.exists(db_path):
         date_str = timezone.now().strftime("%Y-%m-%d_%H-%M")
-        filename = f"backup_vetcore_{date_str}.sqlite3"
+        filename = f"backup_marketcore_{date_str}.sqlite3"
         return FileResponse(open(db_path, "rb"), as_attachment=True, filename=filename)
     else:
         return HttpResponseNotFound("Database file not found.")
@@ -212,85 +202,11 @@ def edit_client(request, client_id):
 @login_required
 def client_detail(request, client_id):
     client = get_object_or_404(Client, pk=client_id, company=request.user.profile.company)
-    pets = client.pets.all()
-    upcoming_appointments = Appointment.objects.filter(
-        patient__owner=client
-    ).exclude(status__in=["CANCELLED", "COMPLETED"]).order_by("start_time").select_related("patient", "professional__user")
-    past_appointments = Appointment.objects.filter(
-        patient__owner=client, status__in=["COMPLETED", "CANCELLED"]
-    ).order_by("-start_time").select_related("patient", "professional__user")[:20]
+    purchases = client.purchases.all().order_by('-date')[:20]
 
     return render(request, "core/client_detail.html", {
         "client": client,
-        "pets": pets,
-        "upcoming_appointments": upcoming_appointments,
-        "past_appointments": past_appointments,
-    })
-
-
-# --- PATIENTS ---
-@login_required
-def patient_list(request):
-    patients_qs = Patient.objects.for_company(request.user).select_related("owner")
-    q = request.GET.get("q", "").strip()
-    if q:
-        patients_qs = patients_qs.filter(
-            Q(name__icontains=q) |
-            Q(breed__icontains=q) |
-            Q(owner__first_name__icontains=q) |
-            Q(owner__last_name__icontains=q)
-        )
-    patients_qs = patients_qs.order_by("name")
-    paginator = Paginator(patients_qs, 25)
-    page = request.GET.get("page")
-    patients = paginator.get_page(page)
-    return render(request, "core/patient_list.html", {"patients": patients, "q": q})
-
-
-@login_required
-def create_patient(request):
-    if request.method == "POST":
-        form = PatientForm(request.POST)
-        if form.is_valid():
-            patient = form.save(commit=False)
-            patient.company = request.user.profile.company
-            patient.save()
-            messages.success(request, _("Patient %(name)s registered successfully.") % {"name": patient.name})
-            return redirect("patient_list")
-    else:
-        form = PatientForm()
-    return render(request, "core/patient_form.html", {"form": form})
-
-
-@login_required
-def edit_patient(request, patient_id):
-    patient = get_object_or_404(Patient, pk=patient_id)
-    if request.method == "POST":
-        form = PatientForm(request.POST, request.FILES, instance=patient)
-        if form.is_valid():
-            form.save()
-            return redirect("patient_list")
-    else:
-        form = PatientForm(instance=patient)
-    return render(request, "core/patient_form.html", {"form": form, "is_edit": True})
-
-
-@login_required
-def patient_detail(request, patient_id):
-    patient = get_object_or_404(Patient, pk=patient_id)
-    history = patient.medical_history.all().order_by("-date")[:10]
-    upcoming_appointments = patient.appointments.exclude(
-        status__in=["CANCELLED", "COMPLETED"]
-    ).order_by("start_time").select_related("professional__user")
-    past_appointments = patient.appointments.filter(
-        status__in=["COMPLETED", "CANCELLED"]
-    ).order_by("-start_time").select_related("professional__user")[:20]
-
-    return render(request, "core/patient_detail.html", {
-        "patient": patient,
-        "history": history,
-        "upcoming_appointments": upcoming_appointments,
-        "past_appointments": past_appointments,
+        "purchases": purchases,
     })
 
 
@@ -424,7 +340,6 @@ def team_management(request):
                     company=current_company,
                     role=data["role"],
                     is_admin=data.get("is_admin", False),
-                    license_number=data["license_number"],
                     pin=data.get("pin"),
                     avatar=data.get("avatar", "bi-person-fill")
                 )
@@ -458,7 +373,6 @@ def edit_employee(request, id):
             form.save()
             profile.role = form.cleaned_data["role"]
             profile.is_admin = form.cleaned_data.get("is_admin", False)
-            profile.license_number = form.cleaned_data["license_number"]
             profile.avatar = form.cleaned_data["avatar"]
             new_pin = form.cleaned_data.get("pin")
             if new_pin:
@@ -470,7 +384,6 @@ def edit_employee(request, id):
         form = EditEmployeeForm(instance=employee, initial={
             "role": profile.role,
             "is_admin": profile.is_admin,
-            "license_number": profile.license_number,
             "avatar": profile.avatar
         })
 
@@ -497,109 +410,6 @@ def toggle_employee_status(request, id):
     msg_func = messages.success if employee.is_active else messages.warning
     msg_func(request, _("User %(name)s has been %(status)s.") % {"name": employee.username, "status": status})
     return redirect("team_management")
-
-
-# --- IMPORT HUB ---
-@login_required
-@admin_required
-@localhost_required
-def import_hub(request):
-    return render(request, "core/import_hub.html")
-
-
-# --- VETTER IMPORT ---
-@login_required
-@admin_required
-@localhost_required
-def vetter_import(request):
-    result = None
-    log = None
-    error = None
-    data_dir = ''
-
-    if request.method == "POST":
-        data_dir = request.POST.get("data_dir", "").strip()
-
-        if not os.path.isabs(data_dir):
-            error = _("Please provide an absolute path (starting with /).")
-        else:
-            from core.services.vetter_import import VetterImporter
-
-            importer = VetterImporter(data_dir, request.user.profile.company)
-            valid, msg = importer.validate()
-            if not valid:
-                error = msg
-            else:
-                try:
-                    # Auto-backup before import
-                    db_path = settings.DATABASES["default"]["NAME"]
-                    if "sqlite3" in settings.DATABASES["default"]["ENGINE"] and os.path.exists(db_path):
-                        date_str = timezone.now().strftime("%Y%m%d_%H%M%S")
-                        safety_path = f"{db_path}.pre_import_{date_str}"
-                        shutil.copy2(db_path, safety_path)
-
-                    selected_tables = request.POST.getlist("tables")
-                    result, log = importer.run(tables=selected_tables if selected_tables else None)
-                except Exception as e:
-                    error = str(e)
-
-    return render(request, "core/vetter_import.html", {
-        "result": result,
-        "log": log,
-        "error": error,
-        "data_dir": data_dir,
-    })
-
-
-@login_required
-@admin_required
-@localhost_required
-def vetter_analyze(request):
-    """Return record counts per Vetter table as JSON."""
-    from django.http import JsonResponse
-    from core.services.vetter_import import VetterImporter
-
-    data_dir = request.GET.get("path", "").strip()
-    if not data_dir or not os.path.isabs(data_dir):
-        return JsonResponse({"error": "Invalid path"}, status=400)
-
-    importer = VetterImporter(data_dir, request.user.profile.company)
-    valid, msg = importer.validate()
-    if not valid:
-        return JsonResponse({"error": msg}, status=400)
-
-    counts = importer.analyze()
-    return JsonResponse({"counts": counts})
-
-
-@login_required
-@admin_required
-@localhost_required
-def browse_server_dirs(request):
-    """AJAX endpoint: returns subdirectories of a given path on the server."""
-    parent = request.GET.get("path", "/").strip()
-    parent = os.path.realpath(parent)
-
-    if not os.path.isabs(parent) or not os.path.isdir(parent):
-        return JsonResponse({"error": "Invalid directory"}, status=400)
-
-    dirs = []
-    has_dbf = False
-    try:
-        for entry in sorted(os.scandir(parent), key=lambda e: e.name.lower()):
-            if entry.is_dir(follow_symlinks=False) and not entry.name.startswith('.'):
-                dirs.append(entry.name)
-            elif entry.name.upper().endswith('.DBF'):
-                has_dbf = True
-    except PermissionError:
-        return JsonResponse({"error": "Permission denied"}, status=403)
-
-    return JsonResponse({
-        "path": parent,
-        "parent": os.path.dirname(parent) if parent != "/" else None,
-        "dirs": dirs,
-        "has_dbf": has_dbf,
-    })
 
 
 # --- RESTORE BACKUP ---

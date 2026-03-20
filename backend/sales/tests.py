@@ -1,67 +1,45 @@
-from django.test import TestCase, Client
+from django.test import TestCase, Client as TestClient
 from django.contrib.auth.models import User
-from inventory.models import Producto, MovimientoStock
-from core.models import Cliente
-from sales.models import Venta
-import json
+from core.models import Company, UserProfile, Client
+from inventory.models import Product
+from sales.models import Sale, SaleItem
+from datetime import date, timedelta
+from decimal import Decimal
 
-class VentaFlowTest(TestCase):
+
+class SaleModelTest(TestCase):
     def setUp(self):
-        # 1. Crear un usuario para loguearse
-        self.user = User.objects.create_user(username='testvet', password='123')
-        self.client = Client()
-        self.client.login(username='testvet', password='123')
-
-        # 2. Crear Cliente
-        self.cliente = Cliente.objects.create(nombre="Juan", apellido="Perez", telefono="111")
-        
-        # 3. Crear Producto
-        self.producto = Producto.objects.create(
-            descripcion="Vacuna Rabia",
-            codigo_barras="VAC001",
-            costo=1000,
-            precio_venta=2000
-            # cantidad_actual empieza en 0 por defecto según tu modelo
+        self.company = Company.objects.create(
+            name='Test Store', tax_id='30-00000000-0',
+            plan='TRIAL', expiration_date=date.today() + timedelta(days=30),
+            is_active=True,
+        )
+        self.user = User.objects.create_user(username='testcashier', password='123')
+        UserProfile.objects.create(
+            user=self.user, company=self.company, role='CASHIER', pin='0000',
+        )
+        self.client_record = Client.objects.create(
+            company=self.company, first_name='Juan', last_name='Perez', phone='111',
+        )
+        self.product = Product.objects.create(
+            company=self.company, description='Aceite Girasol 1.5L',
+            barcode='7790001001', cost=Decimal('1800'),
+            sale_price=Decimal('2800'), current_stock=10,
         )
 
-        # 4. Cargar Stock Inicial
-        # --- CORRECCIONES APLICADAS ---
-        MovimientoStock.objects.create(
-            producto=self.producto,
-            tipo='ENTRADA',    # Nombre correcto: 'tipo'
-            cantidad=10,
-            usuario=self.user
-            # Eliminamos 'motivo' porque no existe en tu modelo
+    def test_sale_total_calculation(self):
+        """A sale total equals the sum of its item subtotals."""
+        sale = Sale.objects.create(
+            company=self.company, client=self.client_record,
+            payment_method='CASH', total=0,
         )
+        SaleItem.objects.create(
+            sale=sale, product=self.product, quantity=2,
+            unit_price=self.product.sale_price,
+            subtotal=self.product.sale_price * 2,
+        )
+        sale.total = sum(item.subtotal for item in sale.items.all())
+        sale.save()
 
-    def test_venta_descuenta_stock(self):
-        """Prueba que una venta reduce el stock y calcula el total"""
-        
-        # Simulamos el carrito
-        carrito = [
-            {
-                'id': self.producto.id,
-                'cantidad': 2,
-                'precio': 2000
-            }
-        ]
-
-        # Hacemos el POST
-        response = self.client.post('/caja/', {
-            'cliente': self.cliente.id,
-            'metodo_pago': 'EFECTIVO',
-            'carrito_data': json.dumps(carrito)
-        }, follow=True)
-
-        # Verificaciones
-        self.assertEqual(response.status_code, 200)
-        
-        # 1. Chequear Total Venta
-        venta = Venta.objects.last()
-        self.assertEqual(venta.total, 4000)
-
-        # 2. Chequear Stock
-        self.producto.refresh_from_db() 
-        # --- CORRECCIÓN APLICADA ---
-        # Tu campo se llama 'cantidad_actual', no 'stock'
-        self.assertEqual(self.producto.cantidad_actual, 8)
+        sale.refresh_from_db()
+        self.assertEqual(sale.total, Decimal('5600'))

@@ -1,5 +1,5 @@
 """
-VetCore Cloud API — FastAPI application.
+MarketCoreSoft Cloud API — FastAPI application.
 
 Modular architecture with routers for each domain:
   /           — health check
@@ -23,7 +23,7 @@ logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
 )
-logger = logging.getLogger("vetcore.cloud")
+logger = logging.getLogger("marketcore.cloud")
 
 # --- Rate limiter ---
 settings = get_settings()

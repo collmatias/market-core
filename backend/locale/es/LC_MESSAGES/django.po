@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-03-17 13:42-0300\n"
+"POT-Creation-Date: 2026-03-20 17:55-0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,101 +17,23 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=3; plural=n == 1 ? 0 : n != 0 && n % 1000000 == 0 ? 1 : 2;\n"
 
-#: clinical/forms.py:12 templates/clinical/new_consultation.html:24
-#: templates/core/client_detail.html:89 templates/core/client_detail.html:136
-#: templates/core/patient_detail.html:69
-#: templates/core/patient_detail.html:145 templates/sales/sale_list.html:16
-msgid "Date"
-msgstr "Fecha"
-
-#: clinical/forms.py:13 clinical/forms.py:62
-#: templates/clinical/new_consultation.html:28
-#: templates/clinical/schedule.html:77 templates/core/client_detail.html:91
-#: templates/core/client_detail.html:138 templates/core/patient_detail.html:70
-#: templates/core/patient_detail.html:146
-msgid "Reason"
-msgstr "Motivo"
-
-#: clinical/forms.py:14 core/forms.py:90
-#: templates/clinical/new_consultation.html:35
-msgid "Weight (kg)"
-msgstr "Peso (kg)"
-
-#: clinical/forms.py:15
-msgid "Anamnesis / Notes"
-msgstr "Anamnesis / Notas"
-
-#: clinical/forms.py:16 templates/clinical/medical_record.html:70
-#: templates/clinical/new_consultation.html:50
-msgid "Diagnosis"
-msgstr "Diagnóstico"
-
-#: clinical/forms.py:17
-msgid "Treatment / Instructions"
-msgstr "Tratamiento / Indicaciones"
-
-#: clinical/forms.py:18 templates/clinical/new_consultation.html:39
-msgid "Next Visit"
-msgstr "Próxima Visita"
-
-#: clinical/forms.py:46 inventory/forms.py:12
-#: templates/inventory/product_list.html:29
-#: templates/sales/sale_detail.html:41
-msgid "Description"
-msgstr "Descripción"
-
-#: clinical/forms.py:58 templates/clinical/schedule.html:46
-#: templates/core/patient_list.html:22
-msgid "Patient"
-msgstr "Paciente"
-
-#: clinical/forms.py:59 templates/clinical/schedule.html:56
-#: templates/core/client_detail.html:92 templates/core/client_detail.html:139
-#: templates/core/patient_detail.html:71
-#: templates/core/patient_detail.html:147
-msgid "Professional"
-msgstr "Profesional"
-
-#: clinical/forms.py:60
-msgid "Start Time"
-msgstr "Hora de Inicio"
-
-#: clinical/forms.py:61
-msgid "End Time"
-msgstr "Hora de Fin"
-
-#: clinical/forms.py:63 templates/clinical/schedule.html:82
-#: templates/core/client_detail.html:93 templates/core/client_detail.html:140
-#: templates/core/patient_detail.html:72
-#: templates/core/patient_detail.html:148
-#: templates/core/team_management.html:49
-msgid "Status"
-msgstr "Estado"
-
-#: clinical/forms.py:64 templates/clinical/schedule.html:92
-msgid "Notes"
-msgstr "Notas"
-
 #: core/decorators.py:16
-msgid "Access restricted: Only veterinary staff can modify health records."
-msgstr ""
-"Acceso restringido: Solo el personal veterinario puede modificar registros "
-"de salud."
-
-#: core/decorators.py:30
 msgid "Access restricted: Only administrators can perform this action."
-msgstr ""
-"Acceso restringido: Solo los administradores pueden realizar esta acción."
+msgstr "Acceso restringido: Solo los administradores pueden realizar esta acción."
+
+#: core/decorators.py:31
+msgid "This operation can only be performed from the server machine."
+msgstr "Esta operación solo puede realizarse desde la máquina servidor."
 
 #: core/forms.py:9
 msgid "New Password"
 msgstr "Nueva Contraseña"
 
-#: core/forms.py:13 core/forms.py:128
+#: core/forms.py:13 core/forms.py:106
 msgid "Confirm Password"
 msgstr "Confirmar Contraseña"
 
-#: core/forms.py:22 core/forms.py:138
+#: core/forms.py:22 core/forms.py:116
 msgid "Passwords do not match."
 msgstr "Las contraseñas no coinciden."
 
@@ -139,101 +61,68 @@ msgstr "Nombre"
 msgid "Last Name"
 msgstr "Apellido"
 
-#: core/forms.py:67 core/forms.py:110 core/forms.py:133
-#: templates/core/client_list.html:23
+#: core/forms.py:67 core/forms.py:88 core/forms.py:111
+#: templates/core/client_list.html:35
 msgid "Phone"
 msgstr "Teléfono"
 
-#: core/forms.py:68 core/forms.py:126 templates/core/client_list.html:24
+#: core/forms.py:68 core/forms.py:104 templates/core/client_list.html:36
 msgid "Email"
 msgstr "Email"
 
-#: core/forms.py:69 core/forms.py:109 core/forms.py:132
+#: core/forms.py:69 core/forms.py:87 core/forms.py:110
 msgid "Address"
 msgstr "Dirección"
 
-#: core/forms.py:85 templates/clinical/medical_record.html:15
-#: templates/core/patient_detail.html:18 templates/core/patient_list.html:24
-msgid "Owner"
-msgstr "Dueño"
-
-#: core/forms.py:86 templates/core/client_list.html:22
-msgid "Name"
-msgstr "Nombre"
-
-#: core/forms.py:87 templates/core/patient_list.html:23
-msgid "Species"
-msgstr "Especie"
-
-#: core/forms.py:88
-msgid "Breed"
-msgstr "Raza"
-
-#: core/forms.py:89
-msgid "Birth Date"
-msgstr "Fecha de Nacimiento"
-
-#: core/forms.py:107
+#: core/forms.py:85
 msgid "Company Name"
 msgstr "Nombre de la Empresa"
 
-#: core/forms.py:108 core/forms.py:131
+#: core/forms.py:86 core/forms.py:109
 msgid "Tax ID"
 msgstr "CUIT/RUT"
 
-#: core/forms.py:111 templates/core/company_settings.html:40
+#: core/forms.py:89 templates/core/company_settings.html:81
 msgid "Currency"
 msgstr "Moneda"
 
-#: core/forms.py:112 templates/core/company_settings.html:57
+#: core/forms.py:90 templates/core/company_settings.html:95
 msgid "Language"
 msgstr "Idioma"
 
-#: core/forms.py:125 templates/core/team_management.html:45
+#: core/forms.py:103 templates/core/team_management.html:45
 #: templates/registration/login.html:53 templates/registration/login.html:54
 msgid "Username"
 msgstr "Nombre de Usuario"
 
-#: core/forms.py:127 core/forms.py:146 templates/registration/login.html:58
+#: core/forms.py:105 core/forms.py:123 templates/registration/login.html:58
 #: templates/registration/login.html:59
 msgid "Password"
 msgstr "Contraseña"
 
-#: core/forms.py:130
-msgid "Clinic Name"
-msgstr "Nombre de la Clínica"
+#: core/forms.py:108
+msgid "Business Name"
+msgstr "Nombre del Negocio"
 
-#: core/forms.py:144
+#: core/forms.py:122
 msgid "Is Administrator?"
 msgstr "¿Es Administrador?"
 
-#: core/forms.py:145 core/forms.py:170
-msgid "License Number"
-msgstr "Matrícula"
-
-#: core/forms.py:147
+#: core/forms.py:124
 msgid "Quick PIN (4 digits)"
 msgstr "PIN Rápido (4 dígitos)"
 
-#: core/forms.py:148 core/forms.py:172
+#: core/forms.py:125 core/forms.py:142
 msgid "Profile Icon"
 msgstr "Ícono de Perfil"
 
-#: core/forms.py:163
-msgid "License number is required for veterinarians."
-msgstr "La matrícula es obligatoria para veterinarios."
-
-#: core/forms.py:169
+#: core/forms.py:140
 msgid "Administrator permissions"
 msgstr "Permisos de administrador"
 
-#: core/forms.py:171
+#: core/forms.py:141
 msgid "Quick Access PIN (4 digits)"
 msgstr "PIN de Acceso Rápido (4 dígitos)"
-
-#: core/forms.py:188
-msgid "License number is required."
-msgstr "La matrícula es obligatoria."
 
 #: core/models.py:13
 msgid "Argentine Peso ($)"
@@ -279,103 +168,107 @@ msgstr "Sol Peruano (S/)"
 msgid "Bolivian Boliviano (Bs)"
 msgstr "Boliviano (Bs)"
 
-#: core/models.py:27 vetcore/settings.py:146
+#: core/models.py:27 marketcore/settings.py:146
 msgid "Spanish"
 msgstr "Español"
 
-#: core/models.py:28 vetcore/settings.py:147
+#: core/models.py:28 marketcore/settings.py:147
 msgid "English"
 msgstr "Inglés"
 
-#: core/models.py:29 vetcore/settings.py:148
+#: core/models.py:29 marketcore/settings.py:148
 msgid "Portuguese"
 msgstr "Portugués"
 
 #: core/models.py:53
-msgid "Veterinarian"
-msgstr "Veterinario"
+msgid "Cashier"
+msgstr "Cajero"
 
 #: core/models.py:54
 msgid "Administrative"
 msgstr "Administrativo"
 
-#: core/models.py:107
-msgid "Dog"
-msgstr "Perro"
-
-#: core/models.py:108
-msgid "Cat"
-msgstr "Gato"
-
-#: core/models.py:109
-msgid "Other"
-msgstr "Otro"
-
-#: core/views.py:65 core/views.py:385
+#: core/views.py:57 core/views.py:321
 msgid "Access denied. Administrator permissions required."
 msgstr "Acceso denegado. Se requieren permisos de administrador."
 
-#: core/views.py:116
+#: core/views.py:108
 msgid "Incorrect or unconfigured PIN."
 msgstr "PIN incorrecto o no configurado."
 
-#: core/views.py:118
+#: core/views.py:110
 msgid "Invalid user."
 msgstr "Usuario inválido."
 
-#: core/views.py:181
+#: core/views.py:182
 #, python-format
 msgid "Client %(first)s %(last)s registered successfully."
 msgstr "Cliente %(first)s %(last)s registrado exitosamente."
 
-#: core/views.py:238
-#, python-format
-msgid "Patient %(name)s registered successfully."
-msgstr "Paciente %(name)s registrado exitosamente."
-
-#: core/views.py:299
+#: core/views.py:235
 msgid "Invalid key. Please verify your code or internet connection."
 msgstr "Clave inválida. Verificá tu código o conexión a internet."
 
-#: core/views.py:411
+#: core/views.py:346
 #, python-format
 msgid "Employee %(name)s created successfully."
 msgstr "Empleado %(name)s creado exitosamente."
 
-#: core/views.py:414
+#: core/views.py:349
 #, python-format
 msgid "Error creating user: %(error)s"
 msgstr "Error al crear usuario: %(error)s"
 
-#: core/views.py:429
+#: core/views.py:364
 msgid "Access denied."
 msgstr "Acceso denegado."
 
-#: core/views.py:447
+#: core/views.py:381
 #, python-format
 msgid "%(name)s data updated."
 msgstr "Datos de %(name)s actualizados."
 
-#: core/views.py:470
+#: core/views.py:403
 msgid "You cannot deactivate your own admin account."
 msgstr "No podés desactivar tu propia cuenta de administrador."
 
-#: core/views.py:476
+#: core/views.py:409
 msgid "activated"
 msgstr "activado"
 
-#: core/views.py:476
+#: core/views.py:409
 msgid "deactivated"
 msgstr "desactivado"
 
-#: core/views.py:478
+#: core/views.py:411
 #, python-format
 msgid "User %(name)s has been %(status)s."
 msgstr "Usuario %(name)s ha sido %(status)s."
 
+#: core/views.py:422
+msgid "Restore only available in Local Client Mode (SQLite)."
+msgstr "Restauración solo disponible en modo Cliente Local (SQLite)."
+
+#: core/views.py:430
+msgid "Invalid file. Please upload a .sqlite3 backup file."
+msgstr "Archivo inválido. Por favor subí un archivo de respaldo .sqlite3."
+
+#: core/views.py:434
+msgid "File too large (max 500 MB)."
+msgstr "Archivo demasiado grande (máx. 500 MB)."
+
+#: core/views.py:441
+msgid "The file is not a valid SQLite database."
+msgstr "El archivo no es una base de datos SQLite válida."
+
 #: inventory/forms.py:11
 msgid "Barcode"
 msgstr "Código de Barras"
+
+#: inventory/forms.py:12 templates/inventory/product_list.html:29
+#: templates/sales/sale_detail.html:41
+msgid "Description"
+msgstr "Descripción"
 
 #: inventory/forms.py:13 templates/inventory/product_list.html:30
 msgid "Type"
@@ -445,273 +338,73 @@ msgid "Error processing sale: %(error)s"
 msgstr "Error al procesar la venta: %(error)s"
 
 #: templates/base.html:7
-msgid "Veterinary Management"
-msgstr "Gestión Veterinaria"
+msgid "Business Management"
+msgstr "Gestión Comercial"
 
-#: templates/base.html:33 templates/core/home.html:89
+#: templates/base.html:33 templates/core/home.html:76
 msgid "Clients"
 msgstr "Clientes"
 
-#: templates/base.html:36 templates/core/home.html:76
-msgid "Patients"
-msgstr "Pacientes"
-
-#: templates/base.html:40 templates/core/home.html:128
-msgid "Schedule"
-msgstr "Agenda"
-
-#: templates/base.html:46 templates/inventory/product_list.html:6
+#: templates/base.html:38 templates/inventory/product_list.html:6
 msgid "Inventory"
 msgstr "Inventario"
 
-#: templates/base.html:49
+#: templates/base.html:41
 msgid "View Products"
 msgstr "Ver Productos"
 
-#: templates/base.html:50
+#: templates/base.html:42
 msgid "Move Stock"
 msgstr "Mover Stock"
 
-#: templates/base.html:56
+#: templates/base.html:48
 msgid "Sales"
 msgstr "Ventas"
 
-#: templates/base.html:59
+#: templates/base.html:51
 msgid "POS (New Sale)"
 msgstr "POS (Nueva Venta)"
 
-#: templates/base.html:60 templates/core/home.html:50
+#: templates/base.html:52 templates/core/home.html:50
 msgid "History"
 msgstr "Historial"
 
-#: templates/base.html:62 templates/core/home.html:63
+#: templates/base.html:54 templates/core/home.html:63
 #: templates/sales/cash_report.html:7
 msgid "Cash Report"
 msgstr "Reporte de Caja"
 
-#: templates/base.html:68 templates/core/home.html:154
+#: templates/base.html:60 templates/core/home.html:128
 msgid "Team"
 msgstr "Equipo"
 
-#: templates/base.html:78
+#: templates/base.html:70
 msgid "Switch User"
 msgstr "Cambiar Usuario"
 
-#: templates/base.html:79
+#: templates/base.html:71
 msgid "Switch"
 msgstr "Cambiar"
 
-#: templates/base.html:96 templates/core/change_password.html:11
+#: templates/base.html:88 templates/core/change_password.html:11
 msgid "Change Password"
 msgstr "Cambiar Contraseña"
 
-#: templates/base.html:101 templates/core/change_pin.html:11
+#: templates/base.html:93 templates/core/change_pin.html:11
 msgid "Change My PIN"
 msgstr "Cambiar Mi PIN"
 
-#: templates/base.html:108
+#: templates/base.html:100 templates/core/company_settings.html:17
 msgid "Settings"
 msgstr "Configuración"
 
-#: templates/base.html:113
-msgid "Database Backup"
-msgstr "Respaldo de Base de Datos"
-
-#: templates/base.html:122
+#: templates/base.html:109
 msgid "Sign Out"
 msgstr "Cerrar Sesión"
 
-#: templates/base.html:129 templates/core/home.html:172
+#: templates/base.html:116 templates/core/home.html:146
 msgid "Sign In"
 msgstr "Ingresar"
-
-#: templates/clinical/medical_record.html:16
-msgid "Age"
-msgstr "Edad"
-
-#: templates/clinical/medical_record.html:17
-msgid "Current Weight"
-msgstr "Peso Actual"
-
-#: templates/clinical/medical_record.html:23
-#: templates/clinical/new_consultation.html:13
-#: templates/core/patient_detail.html:42
-msgid "New Consultation"
-msgstr "Nueva Consulta"
-
-#: templates/clinical/medical_record.html:26
-#: templates/core/client_detail.html:28 templates/core/client_list.html:38
-#: templates/core/patient_detail.html:45 templates/core/patient_list.html:46
-msgid "Book Appointment"
-msgstr "Agendar Turno"
-
-#: templates/clinical/medical_record.html:28
-#: templates/core/edit_employee.html:11 templates/core/reset_password.html:13
-#: templates/inventory/product_labels.html:57
-msgid "Back"
-msgstr "Volver"
-
-#: templates/clinical/medical_record.html:34
-msgid "Appointments"
-msgstr "Turnos"
-
-#: templates/clinical/medical_record.html:50
-#: templates/core/client_detail.html:64 templates/core/patient_list.html:43
-msgid "Medical Record"
-msgstr "Historia Clínica"
-
-#: templates/clinical/medical_record.html:62
-msgid "Edit this consultation"
-msgstr "Editar esta consulta"
-
-#: templates/clinical/medical_record.html:74
-msgid "Treatment"
-msgstr "Tratamiento"
-
-#: templates/clinical/medical_record.html:78
-msgid "Observations"
-msgstr "Observaciones"
-
-#: templates/clinical/medical_record.html:85
-msgid "Attachments"
-msgstr "Adjuntos"
-
-#: templates/clinical/medical_record.html:96
-msgid "Recorded weight"
-msgstr "Peso registrado"
-
-#: templates/clinical/medical_record.html:102
-msgid "No medical records for this patient. Start a new consultation."
-msgstr ""
-"No hay registros médicos para este paciente. Iniciá una nueva consulta."
-
-#: templates/clinical/new_consultation.html:11
-msgid "Edit Consultation"
-msgstr "Editar Consulta"
-
-#: templates/clinical/new_consultation.html:45
-msgid "Anamnesis / Observations"
-msgstr "Anamnesis / Observaciones"
-
-#: templates/clinical/new_consultation.html:55
-msgid "Treatment / Prescription"
-msgstr "Tratamiento / Receta"
-
-#: templates/clinical/new_consultation.html:60
-msgid "Attach File (Optional)"
-msgstr "Adjuntar Archivo (Opcional)"
-
-#: templates/clinical/new_consultation.html:71
-msgid "Save Consultation"
-msgstr "Guardar Consulta"
-
-#: templates/clinical/new_consultation.html:72
-#: templates/core/change_password.html:49 templates/core/change_pin.html:52
-#: templates/core/client_form.html:32 templates/core/patient_form.html:32
-#: templates/inventory/movement_form.html:18
-#: templates/inventory/product_form.html:20
-msgid "Cancel"
-msgstr "Cancelar"
-
-#: templates/clinical/schedule.html:23
-msgid "Appointment Schedule"
-msgstr "Agenda de Turnos"
-
-#: templates/clinical/schedule.html:25 templates/clinical/schedule.html:84
-#: templates/clinical/schedule.html:299
-msgid "Pending"
-msgstr "Pendiente"
-
-#: templates/clinical/schedule.html:26 templates/clinical/schedule.html:85
-#: templates/clinical/schedule.html:299
-msgid "Confirmed"
-msgstr "Confirmado"
-
-#: templates/clinical/schedule.html:27 templates/clinical/schedule.html:86
-#: templates/clinical/schedule.html:299
-msgid "Cancelled"
-msgstr "Cancelado"
-
-#: templates/clinical/schedule.html:28 templates/clinical/schedule.html:87
-#: templates/clinical/schedule.html:299
-msgid "Completed"
-msgstr "Atendido"
-
-#: templates/clinical/schedule.html:38 templates/clinical/schedule.html:230
-msgid "New Appointment"
-msgstr "Nuevo Turno"
-
-#: templates/clinical/schedule.html:48 templates/clinical/schedule.html:58
-msgid "Select"
-msgstr "Seleccionar"
-
-#: templates/clinical/schedule.html:60
-msgid "Lic."
-msgstr "Mat."
-
-#: templates/clinical/schedule.html:67
-msgid "Start"
-msgstr "Inicio"
-
-#: templates/clinical/schedule.html:71
-msgid "End"
-msgstr "Fin"
-
-#: templates/clinical/schedule.html:78
-msgid "E.g.: Vaccination, Checkup, Surgery"
-msgstr "Ej: Vacunación, Control, Cirugía"
-
-#: templates/clinical/schedule.html:93
-msgid "Additional notes (optional)"
-msgstr "Notas adicionales (opcional)"
-
-#: templates/clinical/schedule.html:99 templates/sales/new_sale.html:21
-msgid "Close"
-msgstr "Cerrar"
-
-#: templates/clinical/schedule.html:101
-msgid "Cancel Appointment"
-msgstr "Cancelar Turno"
-
-#: templates/clinical/schedule.html:104
-#: templates/inventory/product_form.html:19
-msgid "Save"
-msgstr "Guardar"
-
-#: templates/clinical/schedule.html:246
-msgid "Edit Appointment"
-msgstr "Editar Turno"
-
-#: templates/clinical/schedule.html:320
-msgid "Do you want to create a Medical Record entry for this consultation?"
-msgstr "¿Deseas crear un registro en la Historia Clínica para esta consulta?"
-
-#: templates/clinical/schedule.html:321
-msgid ""
-"Accept: A record will be created in the patient file with the appointment "
-"reason and notes."
-msgstr ""
-"Aceptar: Se creará un registro en la ficha del paciente con el motivo y las "
-"notas del turno."
-
-#: templates/clinical/schedule.html:322
-msgid "Cancel: Only marks as Completed without creating a record."
-msgstr "Cancelar: Solo marca como Atendido sin crear registro."
-
-#: templates/clinical/schedule.html:330
-msgid ""
-"Medical record created. Do you want to complete the consultation details "
-"now?"
-msgstr ""
-"Registro médico creado. ¿Deseas completar los detalles de la consulta ahora?"
-
-#: templates/clinical/schedule.html:362
-msgid "Connection error with the server."
-msgstr "Error de conexión con el servidor."
-
-#: templates/clinical/schedule.html:369
-msgid "Are you sure you want to cancel this appointment?"
-msgstr "¿Estás seguro de que deseas cancelar este turno?"
 
 #: templates/core/activation.html:7 templates/core/activation.html:19
 msgid "Activation Required"
@@ -734,68 +427,74 @@ msgid "ACTIVATE SYSTEM"
 msgstr "ACTIVAR SISTEMA"
 
 #: templates/core/change_password.html:17
-msgid ""
-"For security reasons, enter your current password before setting a new one. "
-"The new password must not be too similar to your personal information."
-msgstr ""
-"Por seguridad, ingresá tu contraseña actual antes de establecer una nueva. "
-"La nueva contraseña no debe ser similar a tu información personal."
+msgid "For security reasons, enter your current password before setting a new one. The new password must not be too similar to your personal information."
+msgstr "Por seguridad, ingresá tu contraseña actual antes de establecer una nueva. La nueva contraseña no debe ser similar a tu información personal."
 
 #: templates/core/change_password.html:47
 msgid "Update Password"
 msgstr "Actualizar Contraseña"
 
+#: templates/core/change_password.html:49 templates/core/change_pin.html:52
+#: templates/core/client_form.html:32 templates/core/restore_backup.html:75
+#: templates/inventory/movement_form.html:18
+#: templates/inventory/product_form.html:20
+msgid "Cancel"
+msgstr "Cancelar"
+
 #: templates/core/change_pin.html:21
-msgid ""
-"Choose an easy-to-remember 4-digit numeric PIN for quick access at the "
-"workstation."
-msgstr ""
-"Elegí un PIN numérico de 4 dígitos fácil de recordar para acceso rápido en "
-"la estación de trabajo."
+msgid "Choose an easy-to-remember 4-digit numeric PIN for quick access at the workstation."
+msgstr "Elegí un PIN numérico de 4 dígitos fácil de recordar para acceso rápido en la estación de trabajo."
 
 #: templates/core/change_pin.html:50
 msgid "Update PIN"
 msgstr "Actualizar PIN"
 
-#: templates/core/client_detail.html:21 templates/core/patient_detail.html:32
+#: templates/core/client_detail.html:21
 msgid "Registered"
 msgstr "Registrado"
 
-#: templates/core/client_detail.html:31 templates/core/patient_detail.html:48
-#: templates/core/patient_list.html:49
+#: templates/core/client_detail.html:28 templates/sales/sale_detail.html:8
+#: templates/sales/sale_list.html:7
+msgid "New Sale"
+msgstr "Nueva Venta"
+
+#: templates/core/client_detail.html:31
 msgid "Edit Details"
 msgstr "Editar Datos"
 
-#: templates/core/client_detail.html:36 templates/core/patient_detail.html:53
+#: templates/core/client_detail.html:36
 msgid "Back to list"
 msgstr "Volver a la lista"
 
 #: templates/core/client_detail.html:44
-msgid "Pets"
-msgstr "Mascotas"
+msgid "Purchase History"
+msgstr "Historial de Ventas"
 
-#: templates/core/client_detail.html:74
-msgid "This client has no registered pets."
-msgstr "Este cliente no tiene mascotas registradas."
+#: templates/core/client_detail.html:52 templates/sales/sale_list.html:16
+msgid "Date"
+msgstr "Fecha"
 
-#: templates/core/client_detail.html:81 templates/core/patient_detail.html:61
-msgid "Upcoming Appointments"
-msgstr "Próximos Turnos"
+#: templates/core/client_detail.html:53 templates/sales/cash_report.html:94
+#: templates/sales/sale_detail.html:42 templates/sales/sale_list.html:19
+msgid "Total"
+msgstr "Total"
 
-#: templates/core/client_detail.html:90 templates/core/client_detail.html:137
-msgid "Pet"
-msgstr "Mascota"
+#: templates/core/client_detail.html:54 templates/sales/sale_detail.html:34
+#: templates/sales/sale_list.html:18
+msgid "Payment"
+msgstr "Pago"
 
-#: templates/core/client_detail.html:122 templates/core/patient_detail.html:96
-msgid "No upcoming appointments."
-msgstr "No hay turnos próximos."
+#: templates/core/client_detail.html:55 templates/core/client_list.html:37
+#: templates/core/team_management.html:49
+#: templates/inventory/product_list.html:33 templates/sales/sale_list.html:20
+msgid "Actions"
+msgstr "Acciones"
 
-#: templates/core/client_detail.html:130
-#: templates/core/patient_detail.html:139
-msgid "Appointment History"
-msgstr "Historial de Turnos"
+#: templates/core/client_detail.html:76
+msgid "No purchases yet."
+msgstr "Sin compras aún."
 
-#: templates/core/client_form.html:11 templates/core/client_list.html:41
+#: templates/core/client_form.html:11 templates/core/client_list.html:50
 msgid "Edit Client"
 msgstr "Editar Cliente"
 
@@ -815,74 +514,134 @@ msgstr "Lista de Clientes"
 msgid "Search by name, phone or email..."
 msgstr "Buscar por nombre, teléfono o email..."
 
-#: templates/core/client_list.html:25 templates/core/patient_list.html:26
-#: templates/core/team_management.html:50
-#: templates/inventory/product_list.html:33 templates/sales/sale_list.html:20
-msgid "Actions"
-msgstr "Acciones"
+#: templates/core/client_list.html:15
+msgid "Clear"
+msgstr "Limpiar"
 
-#: templates/core/client_list.html:49
+#: templates/core/client_list.html:17 templates/inventory/product_list.html:18
+msgid "Search"
+msgstr "Buscar"
+
+#: templates/core/client_list.html:24
+#, python-format
+msgid "%(total)s results for \"%(query)s\""
+msgstr "%(total)s resultados para \"%(query)s\""
+
+#: templates/core/client_list.html:34
+msgid "Name"
+msgstr "Nombre"
+
+#: templates/core/client_list.html:59
+msgid "No clients match your search."
+msgstr "Ningún cliente coincide con tu búsqueda."
+
+#: templates/core/client_list.html:59
 msgid "No clients registered."
 msgstr "No hay clientes registrados."
 
-#: templates/core/company_settings.html:11
+#: templates/core/company_settings.html:25
+msgid "Company"
+msgstr "Empresa"
+
+#: templates/core/company_settings.html:31
+msgid "Database"
+msgstr "Base de Datos"
+
+#: templates/core/company_settings.html:37
+msgid "Data Import"
+msgstr "Importar Datos"
+
+#: templates/core/company_settings.html:53
 msgid "Initial Setup"
 msgstr "Configuración Inicial"
 
-#: templates/core/company_settings.html:13
-msgid "System Settings"
-msgstr "Configuración del Sistema"
-
-#: templates/core/company_settings.html:20
-msgid ""
-"Welcome to VetCore! Before starting, we need to register your clinic's "
-"information."
-msgstr ""
-"¡Bienvenido a VetCore! Antes de empezar, necesitamos registrar la "
-"información de tu clínica."
-
-#: templates/core/company_settings.html:27
+#: templates/core/company_settings.html:55
 msgid "Company Details"
 msgstr "Datos de la Empresa"
 
-#: templates/core/company_settings.html:48
-msgid "The selected currency will apply to all prices, sales and reports."
-msgstr ""
-"La moneda seleccionada se aplicará a todos los precios, ventas y reportes."
+#: templates/core/company_settings.html:62
+msgid "Welcome to MarketCoreSoft! Before starting, we need to register your business information."
+msgstr "¡Bienvenido a MarketCoreSoft! Antes de empezar, necesitamos registrar la información de tu negocio."
 
-#: templates/core/company_settings.html:53
+#: templates/core/company_settings.html:91
 msgid "Preview"
 msgstr "Vista Previa"
 
-#: templates/core/company_settings.html:65
-msgid "The selected language will apply to the entire application interface."
-msgstr ""
-"El idioma seleccionado se aplicará a toda la interfaz de la aplicación."
-
-#: templates/core/company_settings.html:71
+#: templates/core/company_settings.html:106
 msgid "Get Started"
 msgstr "Comenzar"
 
-#: templates/core/company_settings.html:71
-#: templates/core/edit_employee.html:85
+#: templates/core/company_settings.html:106
+#: templates/core/edit_employee.html:81
 msgid "Save Changes"
 msgstr "Guardar Cambios"
+
+#: templates/core/company_settings.html:123
+msgid "Download Backup"
+msgstr "Descargar Respaldo"
+
+#: templates/core/company_settings.html:125
+msgid "Download a copy of the current database (.sqlite3) to your computer."
+msgstr "Descargá una copia de la base de datos actual (.sqlite3) a tu computadora."
+
+#: templates/core/company_settings.html:128 templates/core/home.html:118
+msgid "Download"
+msgstr "Descargar"
+
+#: templates/core/company_settings.html:138
+#: templates/core/restore_backup.html:72
+msgid "Restore Backup"
+msgstr "Restaurar Respaldo"
+
+#: templates/core/company_settings.html:140
+msgid "Replace the current database with a previously downloaded backup."
+msgstr "Reemplazá la base de datos actual con un respaldo descargado previamente."
+
+#: templates/core/company_settings.html:143
+msgid "Restore"
+msgstr "Restaurar"
+
+#: templates/core/company_settings.html:153
+msgid "Database restore is only available from the server machine."
+msgstr "La restauración de base de datos solo está disponible desde la máquina servidor."
+
+#: templates/core/company_settings.html:166
+msgid "External System"
+msgstr "Sistema Externo"
+
+#: templates/core/company_settings.html:168
+msgid "Import clients, products and sales from an external system."
+msgstr "Importar clientes, productos y ventas desde un sistema externo."
+
+#: templates/core/company_settings.html:171
+#: templates/core/company_settings.html:185
+msgid "Coming Soon"
+msgstr "Próximamente"
+
+#: templates/core/company_settings.html:182
+msgid "Import data from Excel or CSV spreadsheets."
+msgstr "Importar datos desde planillas Excel o CSV."
+
+#: templates/core/company_settings.html:194
+msgid "Data import is only available from the server machine."
+msgstr "La importación de datos solo está disponible desde la máquina servidor."
 
 #: templates/core/edit_employee.html:10
 msgid "Edit Employee"
 msgstr "Editar Empleado"
 
+#: templates/core/edit_employee.html:11 templates/core/reset_password.html:13
+#: templates/inventory/product_labels.html:57
+msgid "Back"
+msgstr "Volver"
+
 #: templates/core/edit_employee.html:20
 msgid "Editing profile"
 msgstr "Editando perfil"
 
-#: templates/core/edit_employee.html:81
-msgid ""
-"Enabling this option grants full access to modify prices, manually adjust "
-"stock and manage the team."
-msgstr ""
-"Habilitar esta opción otorga acceso completo para modificar precios, ajustar"
-" stock manualmente y administrar el equipo."
+#: templates/core/edit_employee.html:77
+msgid "Enabling this option grants full access to modify prices, manually adjust stock and manage the team."
+msgstr "Habilitar esta opción otorga acceso completo para modificar precios, ajustar stock manualmente y administrar el equipo."
 
 #: templates/core/home.html:10
 msgid "Hello"
@@ -925,72 +684,56 @@ msgid "View Report"
 msgstr "Ver Reporte"
 
 #: templates/core/home.html:78
-msgid "Medical records."
-msgstr "Historias clínicas."
-
-#: templates/core/home.html:79 templates/core/home.html:157
-msgid "Manage"
-msgstr "Administrar"
-
-#: templates/core/home.html:91
-msgid "Owners and contacts."
+msgid "Customers and contacts."
 msgstr "Dueños y contactos."
 
-#: templates/core/home.html:92
+#: templates/core/home.html:79
 msgid "Directory"
 msgstr "Directorio"
 
-#: templates/core/home.html:102
+#: templates/core/home.html:89
 msgid "Stock"
 msgstr "Stock"
 
-#: templates/core/home.html:104
+#: templates/core/home.html:91
 msgid "Products and prices."
 msgstr "Productos y precios."
 
-#: templates/core/home.html:105
+#: templates/core/home.html:92
 msgid "View Stock"
 msgstr "Ver Stock"
 
-#: templates/core/home.html:115
+#: templates/core/home.html:102
 msgid "Incoming"
 msgstr "Ingreso"
 
-#: templates/core/home.html:117
+#: templates/core/home.html:104
 msgid "Load supplier invoices."
 msgstr "Cargar facturas de proveedores."
 
-#: templates/core/home.html:118
+#: templates/core/home.html:105
 msgid "Register"
 msgstr "Registrar"
 
-#: templates/core/home.html:130
-msgid "Appointments and calendar."
-msgstr "Turnos y calendario."
-
-#: templates/core/home.html:131
-msgid "View Schedule"
-msgstr "Ver Agenda"
-
-#: templates/core/home.html:141
+#: templates/core/home.html:115
 msgid "Backup"
 msgstr "Respaldo"
 
-#: templates/core/home.html:143
+#: templates/core/home.html:117
 msgid "Save database."
 msgstr "Guardar base de datos."
 
-#: templates/core/home.html:144
-msgid "Download"
-msgstr "Descargar"
-
-#: templates/core/home.html:156
+#: templates/core/home.html:130
 msgid "Users, permissions and roles."
 msgstr "Usuarios, permisos y roles."
 
-#: templates/core/home.html:170
-msgid "Comprehensive Veterinary Management System"
-msgstr "Sistema Integral de Gestión Veterinaria"
+#: templates/core/home.html:131
+msgid "Manage"
+msgstr "Administrar"
+
+#: templates/core/home.html:144
+msgid "Business & Inventory Management System"
+msgstr "Sistema de Gestión de Inventario y Ventas"
 
 #: templates/core/lockscreen.html:6
 msgid "Quick Login"
@@ -1012,54 +755,6 @@ msgstr "Inicio Completo (Contraseña)"
 msgid "User"
 msgstr "Usuario"
 
-#: templates/core/patient_detail.html:39
-msgid "Full Medical Record"
-msgstr "Historia Clínica Completa"
-
-#: templates/core/patient_detail.html:103
-msgid "Latest Consultations"
-msgstr "Últimas Consultas"
-
-#: templates/core/patient_detail.html:104
-msgid "View all"
-msgstr "Ver todo"
-
-#: templates/core/patient_detail.html:117 templates/core/patient_list.html:25
-msgid "Weight"
-msgstr "Peso"
-
-#: templates/core/patient_detail.html:131
-msgid "No clinical records yet."
-msgstr "Aún no hay registros clínicos."
-
-#: templates/core/patient_form.html:11
-msgid "Edit Patient"
-msgstr "Editar Paciente"
-
-#: templates/core/patient_form.html:13
-msgid "New Patient"
-msgstr "Nuevo Paciente"
-
-#: templates/core/patient_form.html:31
-msgid "Save Patient"
-msgstr "Guardar Paciente"
-
-#: templates/core/patient_list.html:6
-msgid "Patient List"
-msgstr "Lista de Pacientes"
-
-#: templates/core/patient_list.html:7
-msgid "New Pet"
-msgstr "Nueva Mascota"
-
-#: templates/core/patient_list.html:13
-msgid "Search by name, species, breed or owner..."
-msgstr "Buscar por nombre, especie, raza o dueño..."
-
-#: templates/core/patient_list.html:56
-msgid "No patients registered."
-msgstr "No hay pacientes registrados."
-
 #: templates/core/reset_password.html:11
 msgid "New Password for"
 msgstr "Nueva Contraseña para"
@@ -1076,9 +771,53 @@ msgstr "La contraseña anterior dejará de funcionar inmediatamente."
 msgid "Set New Password"
 msgstr "Establecer Nueva Contraseña"
 
+#: templates/core/restore_backup.html:12
+msgid "Restore Database"
+msgstr "Restaurar Base de Datos"
+
+#: templates/core/restore_backup.html:18
+msgid "Replace the current database with a previous backup"
+msgstr "Reemplazar la base de datos actual con un respaldo anterior"
+
+#: templates/core/restore_backup.html:26
+msgid "Database restored successfully!"
+msgstr "¡Base de datos restaurada exitosamente!"
+
+#: templates/core/restore_backup.html:27
+msgid "A safety copy of the previous database was saved. Please log in again."
+msgstr "Se guardó una copia de seguridad de la base anterior. Por favor iniciá sesión nuevamente."
+
+#: templates/core/restore_backup.html:32
+msgid "Go to Login"
+msgstr "Ir al Login"
+
+#: templates/core/restore_backup.html:39
+msgid "WARNING — Destructive operation"
+msgstr "ADVERTENCIA — Operación destructiva"
+
+#: templates/core/restore_backup.html:41
+msgid "This will completely replace the current database. All current data (clients, sales, products, etc.) will be lost and replaced with the backup contents."
+msgstr "Esto reemplazará completamente la base de datos actual. Todos los datos actuales (clientes, ventas, productos, etc.) se perderán y serán reemplazados por el contenido del respaldo."
+
+#: templates/core/restore_backup.html:50
+msgid "Backup file (.sqlite3)"
+msgstr "Archivo de respaldo (.sqlite3)"
+
+#: templates/core/restore_backup.html:55
+msgid "Select a .sqlite3 file previously downloaded from MarketCoreSoft's backup."
+msgstr "Seleccioná un archivo .sqlite3 descargado previamente desde el respaldo de MarketCoreSoft."
+
+#: templates/core/restore_backup.html:64
+msgid "I understand that ALL current data will be permanently replaced."
+msgstr "Entiendo que TODOS los datos actuales serán reemplazados permanentemente."
+
+#: templates/core/restore_backup.html:100
+msgid "Restoring... please wait"
+msgstr "Restaurando... por favor esperá"
+
 #: templates/core/setup_wizard.html:10
-msgid "Welcome to VetCore"
-msgstr "Bienvenido a VetCore"
+msgid "Welcome to MarketCoreSoft"
+msgstr "Bienvenido a MarketCoreSoft"
 
 #: templates/core/setup_wizard.html:11
 msgid "Initial System Setup"
@@ -1101,8 +840,8 @@ msgid "Administrator Details"
 msgstr "Datos del Administrador"
 
 #: templates/core/setup_wizard.html:66
-msgid "Clinic Details"
-msgstr "Datos de la Clínica"
+msgid "Business Details"
+msgstr "Datos del Negocio"
 
 #: templates/core/setup_wizard.html:84
 msgid "Install and Start"
@@ -1133,50 +872,50 @@ msgid "Role"
 msgstr "Rol"
 
 #: templates/core/team_management.html:48
-msgid "License"
-msgstr "Licencia"
+msgid "Status"
+msgstr "Estado"
 
-#: templates/core/team_management.html:66
+#: templates/core/team_management.html:65
 msgid "Has admin permissions"
 msgstr "Tiene permisos de administrador"
 
-#: templates/core/team_management.html:73
+#: templates/core/team_management.html:65
+msgid "ADMIN"
+msgstr "ADMIN"
+
+#: templates/core/team_management.html:70
 msgid "Active"
 msgstr "Activo"
 
-#: templates/core/team_management.html:75
+#: templates/core/team_management.html:72
 msgid "Inactive"
 msgstr "Inactivo"
 
-#: templates/core/team_management.html:80
+#: templates/core/team_management.html:77
 msgid "Edit details"
 msgstr "Editar datos"
 
-#: templates/core/team_management.html:84
+#: templates/core/team_management.html:81
 msgid "Force password change"
 msgstr "Forzar cambio de contraseña"
 
-#: templates/core/team_management.html:89
-msgid ""
-"Are you sure you want to deactivate this user? They will lose access "
-"immediately."
-msgstr ""
-"¿Estás seguro de que deseas desactivar este usuario? Perderá el acceso "
-"inmediatamente."
+#: templates/core/team_management.html:86
+msgid "Are you sure you want to deactivate this user? They will lose access immediately."
+msgstr "¿Estás seguro de que deseas desactivar este usuario? Perderá el acceso inmediatamente."
 
-#: templates/core/team_management.html:91
+#: templates/core/team_management.html:88
 msgid "Revoke access"
 msgstr "Revocar acceso"
 
-#: templates/core/team_management.html:96
+#: templates/core/team_management.html:93
 msgid "Do you want to reactivate this user?"
 msgstr "¿Deseas reactivar este usuario?"
 
-#: templates/core/team_management.html:98
+#: templates/core/team_management.html:95
 msgid "Restore access"
 msgstr "Restaurar acceso"
 
-#: templates/core/team_management.html:107
+#: templates/core/team_management.html:104
 msgid "No employees registered."
 msgstr "No hay empleados registrados."
 
@@ -1185,12 +924,8 @@ msgid "Stock Movement"
 msgstr "Movimiento de Stock"
 
 #: templates/inventory/movement_form.html:11
-msgid ""
-"Use this for loading purchase invoices or manual adjustments. Sales will be "
-"deducted automatically from the POS."
-msgstr ""
-"Usá esto para cargar facturas de compra o ajustes manuales. Las ventas se "
-"descontarán automáticamente desde el POS."
+msgid "Use this for loading purchase invoices or manual adjustments. Sales will be deducted automatically from the POS."
+msgstr "Usá esto para cargar facturas de compra o ajustes manuales. Las ventas se descontarán automáticamente desde el POS."
 
 #: templates/inventory/movement_form.html:17
 msgid "Record Movement"
@@ -1199,6 +934,10 @@ msgstr "Registrar Movimiento"
 #: templates/inventory/product_form.html:8
 msgid "New Product / Service"
 msgstr "Nuevo Producto / Servicio"
+
+#: templates/inventory/product_form.html:19
+msgid "Save"
+msgstr "Guardar"
 
 #: templates/inventory/product_labels.html:6
 #: templates/inventory/product_labels.html:60
@@ -1213,18 +952,19 @@ msgstr "Mostrar precio"
 msgid "Print / Save PDF"
 msgstr "Imprimir / Guardar PDF"
 
-#: templates/inventory/product_labels.html:90
+#: templates/inventory/product_labels.html:82
+msgid "NO CODE"
+msgstr "SIN CÓDIGO"
+
+#: templates/inventory/product_labels.html:91
 msgid "No products with barcode"
 msgstr "No hay productos con código de barras"
 
-#: templates/inventory/product_labels.html:91
-msgid ""
-"Assign barcodes to your products from the inventory to generate labels."
-msgstr ""
-"Asigna códigos de barras a tus productos desde el inventario para generar "
-"etiquetas."
-
 #: templates/inventory/product_labels.html:92
+msgid "Assign barcodes to your products from the inventory to generate labels."
+msgstr "Asigna códigos de barras a tus productos desde el inventario para generar etiquetas."
+
+#: templates/inventory/product_labels.html:93
 msgid "Go to Inventory"
 msgstr "Ir al Inventario"
 
@@ -1244,10 +984,6 @@ msgstr "Nuevo Artículo"
 msgid "Search by name or barcode..."
 msgstr "Buscar por nombre o código de barras..."
 
-#: templates/inventory/product_list.html:18
-msgid "Search"
-msgstr "Buscar"
-
 #: templates/inventory/product_list.html:28 templates/sales/new_sale.html:291
 msgid "Code"
 msgstr "Código"
@@ -1259,6 +995,10 @@ msgstr "Stock Actual"
 #: templates/inventory/product_list.html:43
 msgid "Service"
 msgstr "Servicio"
+
+#: templates/inventory/product_list.html:51
+msgid "N/A"
+msgstr "N/A"
 
 #: templates/inventory/product_list.html:62
 msgid "Edit"
@@ -1285,8 +1025,8 @@ msgid "Login"
 msgstr "Iniciar Sesión"
 
 #: templates/registration/login.html:39
-msgid "Veterinary Management System"
-msgstr "Sistema de Gestión Veterinaria"
+msgid "Business Management System"
+msgstr "Sistema de Gestión Comercial"
 
 #: templates/registration/login.html:48
 msgid "Invalid username or password."
@@ -1377,11 +1117,6 @@ msgstr "Cliente"
 msgid "Method"
 msgstr "Método"
 
-#: templates/sales/cash_report.html:94 templates/sales/sale_detail.html:42
-#: templates/sales/sale_list.html:19
-msgid "Total"
-msgstr "Total"
-
 #: templates/sales/cash_report.html:95
 msgid "Action"
 msgstr "Acción"
@@ -1411,6 +1146,10 @@ msgstr "Escanear"
 msgid "Camera active — Scan the code"
 msgstr "Cámara activa — Escaneá el código"
 
+#: templates/sales/new_sale.html:21
+msgid "Close"
+msgstr "Cerrar"
+
 #: templates/sales/new_sale.html:29
 msgid "Type name or code..."
 msgstr "Escribí nombre o código..."
@@ -1420,12 +1159,8 @@ msgid "Add"
 msgstr "Agregar"
 
 #: templates/sales/new_sale.html:40
-msgid ""
-"Type the name, use the Scan button to read codes with the camera, or connect"
-" a USB barcode reader."
-msgstr ""
-"Escribí el nombre, usá el botón Escanear para leer códigos con la cámara, o "
-"conectá un lector de código de barras USB."
+msgid "Type the name, use the Scan button to read codes with the camera, or connect a USB barcode reader."
+msgstr "Escribí el nombre, usá el botón Escanear para leer códigos con la cámara, o conectá un lector de código de barras USB."
 
 #: templates/sales/new_sale.html:49
 msgid "Current Sale"
@@ -1469,9 +1204,7 @@ msgstr "Cobrar y Finalizar"
 
 #: templates/sales/new_sale.html:186
 msgid "Product not found. Select one from the list or scan a valid code."
-msgstr ""
-"Producto no encontrado. Seleccioná uno de la lista o escaneá un código "
-"válido."
+msgstr "Producto no encontrado. Seleccioná uno de la lista o escaneá un código válido."
 
 #: templates/sales/new_sale.html:232
 msgid "The cart is empty."
@@ -1487,32 +1220,19 @@ msgstr "no encontrado"
 
 #: templates/sales/new_sale.html:328
 msgid "Could not access camera. HTTPS is required on mobile devices."
-msgstr ""
-"No se pudo acceder a la cámara. Se requiere HTTPS en dispositivos móviles."
+msgstr "No se pudo acceder a la cámara. Se requiere HTTPS en dispositivos móviles."
 
 #: templates/sales/sale_detail.html:6
 msgid "Back to History"
 msgstr "Volver al Historial"
 
-#: templates/sales/sale_detail.html:8 templates/sales/sale_list.html:7
-msgid "New Sale"
-msgstr "Nueva Venta"
-
 #: templates/sales/sale_detail.html:9
 msgid "Print Ticket"
 msgstr "Imprimir Ticket"
 
-#: templates/sales/sale_detail.html:20
-msgid "Veterinary Clinic"
-msgstr "Clínica Veterinaria"
-
 #: templates/sales/sale_detail.html:22
 msgid "SALE TICKET"
 msgstr "TICKET DE VENTA"
-
-#: templates/sales/sale_detail.html:34 templates/sales/sale_list.html:18
-msgid "Payment"
-msgstr "Pago"
 
 #: templates/sales/sale_detail.html:56
 msgid "TOTAL:"
@@ -1529,3 +1249,273 @@ msgstr "Historial de Ventas"
 #: templates/sales/sale_list.html:44
 msgid "No sales recorded yet."
 msgstr "Aún no hay ventas registradas."
+
+#~ msgid "Reason"
+#~ msgstr "Motivo"
+
+#~ msgid "Weight (kg)"
+#~ msgstr "Peso (kg)"
+
+#~ msgid "Anamnesis / Notes"
+#~ msgstr "Anamnesis / Notas"
+
+#~ msgid "Diagnosis"
+#~ msgstr "Diagnóstico"
+
+#~ msgid "Treatment / Instructions"
+#~ msgstr "Tratamiento / Indicaciones"
+
+#~ msgid "Next Visit"
+#~ msgstr "Próxima Visita"
+
+#~ msgid "Patient"
+#~ msgstr "Paciente"
+
+#~ msgid "Professional"
+#~ msgstr "Profesional"
+
+#~ msgid "Start Time"
+#~ msgstr "Hora de Inicio"
+
+#~ msgid "End Time"
+#~ msgstr "Hora de Fin"
+
+#~ msgid "Notes"
+#~ msgstr "Notas"
+
+#~ msgid "Access restricted: Only veterinary staff can modify health records."
+#~ msgstr "Acceso restringido: Solo el personal veterinario puede modificar registros de salud."
+
+#~ msgid "Owner"
+#~ msgstr "Dueño"
+
+#~ msgid "Species"
+#~ msgstr "Especie"
+
+#~ msgid "Breed"
+#~ msgstr "Raza"
+
+#~ msgid "Birth Date"
+#~ msgstr "Fecha de Nacimiento"
+
+#~ msgid "Clinic Name"
+#~ msgstr "Nombre de la Clínica"
+
+#~ msgid "License Number"
+#~ msgstr "Matrícula"
+
+#~ msgid "License number is required for veterinarians."
+#~ msgstr "La matrícula es obligatoria para veterinarios."
+
+#~ msgid "License number is required."
+#~ msgstr "La matrícula es obligatoria."
+
+#~ msgid "Veterinarian"
+#~ msgstr "Veterinario"
+
+#~ msgid "Dog"
+#~ msgstr "Perro"
+
+#~ msgid "Cat"
+#~ msgstr "Gato"
+
+#~ msgid "Other"
+#~ msgstr "Otro"
+
+#~ msgid "Patients"
+#~ msgstr "Pacientes"
+
+#~ msgid "Schedule"
+#~ msgstr "Agenda"
+
+#~ msgid "Age"
+#~ msgstr "Edad"
+
+#~ msgid "Current Weight"
+#~ msgstr "Peso Actual"
+
+#~ msgid "New Consultation"
+#~ msgstr "Nueva Consulta"
+
+#~ msgid "Book Appointment"
+#~ msgstr "Agendar Turno"
+
+#~ msgid "Appointments"
+#~ msgstr "Turnos"
+
+#~ msgid "Medical Record"
+#~ msgstr "Historia Clínica"
+
+#~ msgid "Edit this consultation"
+#~ msgstr "Editar esta consulta"
+
+#~ msgid "Treatment"
+#~ msgstr "Tratamiento"
+
+#~ msgid "Observations"
+#~ msgstr "Observaciones"
+
+#~ msgid "Attachments"
+#~ msgstr "Adjuntos"
+
+#~ msgid "Recorded weight"
+#~ msgstr "Peso registrado"
+
+#~ msgid "No medical records for this patient. Start a new consultation."
+#~ msgstr "No hay registros médicos para este paciente. Iniciá una nueva consulta."
+
+#~ msgid "Edit Consultation"
+#~ msgstr "Editar Consulta"
+
+#~ msgid "Anamnesis / Observations"
+#~ msgstr "Anamnesis / Observaciones"
+
+#~ msgid "Treatment / Prescription"
+#~ msgstr "Tratamiento / Receta"
+
+#~ msgid "Attach File (Optional)"
+#~ msgstr "Adjuntar Archivo (Opcional)"
+
+#~ msgid "Save Consultation"
+#~ msgstr "Guardar Consulta"
+
+#~ msgid "Appointment Schedule"
+#~ msgstr "Agenda de Turnos"
+
+#~ msgid "Pending"
+#~ msgstr "Pendiente"
+
+#~ msgid "Confirmed"
+#~ msgstr "Confirmado"
+
+#~ msgid "Cancelled"
+#~ msgstr "Cancelado"
+
+#~ msgid "Completed"
+#~ msgstr "Atendido"
+
+#~ msgid "New Appointment"
+#~ msgstr "Nuevo Turno"
+
+#~ msgid "Select"
+#~ msgstr "Seleccionar"
+
+#~ msgid "Lic."
+#~ msgstr "Mat."
+
+#~ msgid "Start"
+#~ msgstr "Inicio"
+
+#~ msgid "End"
+#~ msgstr "Fin"
+
+#~ msgid "E.g.: Vaccination, Checkup, Surgery"
+#~ msgstr "Ej: Vacunación, Control, Cirugía"
+
+#~ msgid "Additional notes (optional)"
+#~ msgstr "Notas adicionales (opcional)"
+
+#~ msgid "Cancel Appointment"
+#~ msgstr "Cancelar Turno"
+
+#~ msgid "Edit Appointment"
+#~ msgstr "Editar Turno"
+
+#~ msgid "Do you want to create a Medical Record entry for this consultation?"
+#~ msgstr "¿Deseas crear un registro en la Historia Clínica para esta consulta?"
+
+#~ msgid "Accept: A record will be created in the patient file with the appointment reason and notes."
+#~ msgstr "Aceptar: Se creará un registro en la ficha del paciente con el motivo y las notas del turno."
+
+#~ msgid "Cancel: Only marks as Completed without creating a record."
+#~ msgstr "Cancelar: Solo marca como Atendido sin crear registro."
+
+#~ msgid "Medical record created. Do you want to complete the consultation details now?"
+#~ msgstr "Registro médico creado. ¿Deseas completar los detalles de la consulta ahora?"
+
+#~ msgid "Connection error with the server."
+#~ msgstr "Error de conexión con el servidor."
+
+#~ msgid "Are you sure you want to cancel this appointment?"
+#~ msgstr "¿Estás seguro de que deseas cancelar este turno?"
+
+#~ msgid "Pets"
+#~ msgstr "Mascotas"
+
+#~ msgid "This client has no registered pets."
+#~ msgstr "Este cliente no tiene mascotas registradas."
+
+#~ msgid "Upcoming Appointments"
+#~ msgstr "Próximos Turnos"
+
+#~ msgid "Pet"
+#~ msgstr "Mascota"
+
+#~ msgid "No upcoming appointments."
+#~ msgstr "No hay turnos próximos."
+
+#~ msgid "Appointment History"
+#~ msgstr "Historial de Turnos"
+
+#~ msgid "System Settings"
+#~ msgstr "Configuración del Sistema"
+
+#~ msgid "The selected currency will apply to all prices, sales and reports."
+#~ msgstr "La moneda seleccionada se aplicará a todos los precios, ventas y reportes."
+
+#~ msgid "The selected language will apply to the entire application interface."
+#~ msgstr "El idioma seleccionado se aplicará a toda la interfaz de la aplicación."
+
+#~ msgid "Medical records."
+#~ msgstr "Historias clínicas."
+
+#~ msgid "Appointments and calendar."
+#~ msgstr "Turnos y calendario."
+
+#~ msgid "View Schedule"
+#~ msgstr "Ver Agenda"
+
+#~ msgid "Comprehensive Veterinary Management System"
+#~ msgstr "Sistema Integral de Gestión Veterinaria"
+
+#~ msgid "Full Medical Record"
+#~ msgstr "Historia Clínica Completa"
+
+#~ msgid "Latest Consultations"
+#~ msgstr "Últimas Consultas"
+
+#~ msgid "View all"
+#~ msgstr "Ver todo"
+
+#~ msgid "Weight"
+#~ msgstr "Peso"
+
+#~ msgid "No clinical records yet."
+#~ msgstr "Aún no hay registros clínicos."
+
+#~ msgid "Edit Patient"
+#~ msgstr "Editar Paciente"
+
+#~ msgid "New Patient"
+#~ msgstr "Nuevo Paciente"
+
+#~ msgid "Save Patient"
+#~ msgstr "Guardar Paciente"
+
+#~ msgid "Patient List"
+#~ msgstr "Lista de Pacientes"
+
+#~ msgid "New Pet"
+#~ msgstr "Nueva Mascota"
+
+#~ msgid "Search by name, species, breed or owner..."
+#~ msgstr "Buscar por nombre, especie, raza o dueño..."
+
+#~ msgid "No patients registered."
+#~ msgstr "No hay pacientes registrados."
+
+#~ msgid "License"
+#~ msgstr "Licencia"
+
+#~ msgid "Veterinary Clinic"
+#~ msgstr "Clínica Veterinaria"

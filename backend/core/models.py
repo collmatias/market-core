@@ -50,7 +50,7 @@ class Company(models.Model):
 
 class UserProfile(models.Model):
     ROLES = [
-        ('VET', _('Veterinarian')),
+        ('CASHIER', _('Cashier')),
         ('ADMIN', _('Administrative')),
     ]
 
@@ -62,9 +62,6 @@ class UserProfile(models.Model):
         ('bi-robot', '🤖 Robot'),
         ('bi-stars', '✨ Stars'),
         ('bi-heart-pulse-fill', '💖 Heart'),
-        ('bi-capsule', '💊 Capsule'),
-        ('bi-bandaid-fill', '🩹 Bandaid'),
-        ('bi-bug-fill', '🐞 Bug'),
         ('bi-controller', '🎮 Gamer'),
         ('bi-moon-stars-fill', '🌙 Moon'),
         ('bi-cup-hot-fill', '☕ Coffee'),
@@ -73,19 +70,14 @@ class UserProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
     company = models.ForeignKey(Company, on_delete=models.CASCADE)
 
-    role = models.CharField(max_length=20, choices=ROLES, default='VET')
+    role = models.CharField(max_length=20, choices=ROLES, default='CASHIER')
     is_admin = models.BooleanField(default=False)
-    license_number = models.CharField(max_length=50, blank=True, null=True)
     phone = models.CharField(max_length=20, blank=True, null=True)
     pin = models.CharField(max_length=4, blank=True, null=True)
     avatar = models.CharField(max_length=50, choices=AVATARS, default='bi-person-fill')
 
     def __str__(self):
         return f"{self.user.username} - {self.get_role_display()}"
-
-    @property
-    def is_clinical(self):
-        return self.role == 'VET'
 
 
 class Client(models.Model):
@@ -103,34 +95,3 @@ class Client(models.Model):
 
     def __str__(self):
         return f"{self.last_name}, {self.first_name}"
-
-
-class Patient(models.Model):
-    SPECIES = [
-        ('DOG', _('Dog')),
-        ('CAT', _('Cat')),
-        ('HORSE', _('Horse')),
-        ('OTHER', _('Other')),
-    ]
-
-    SEX_CHOICES = [
-        ('M', _('Male')),
-        ('F', _('Female')),
-        ('U', _('Unknown')),
-    ]
-
-    company = models.ForeignKey(Company, on_delete=models.CASCADE)
-    owner = models.ForeignKey(Client, on_delete=models.CASCADE, related_name='pets')
-    name = models.CharField(max_length=100)
-    species = models.CharField(max_length=10, choices=SPECIES)
-    breed = models.CharField(max_length=100, blank=True)
-    sex = models.CharField(max_length=1, choices=SEX_CHOICES, default='U')
-    birth_date = models.DateField(blank=True, null=True)
-    current_weight = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
-    microchip = models.CharField(max_length=50, blank=True)
-    coat = models.CharField(max_length=50, blank=True)
-    is_alive = models.BooleanField(default=True)
-    objects = TenantManager()
-
-    def __str__(self):
-        return f"{self.name} ({self.get_species_display()})"

@@ -1,5 +1,5 @@
 """
-Tenant model — represents a registered organization (vet clinic, supplier, or both).
+Tenant model — represents a registered organization (retail store, wholesale, or both).
 """
 from sqlalchemy import Column, Integer, String, Boolean, DateTime, Enum
 from sqlalchemy.sql import func
@@ -9,8 +9,8 @@ from core.database import Base
 
 
 class TenantType(str, enum.Enum):
-    VET = "VET"
-    SUPPLIER = "SUPPLIER"
+    RETAIL = "RETAIL"
+    WHOLESALE = "WHOLESALE"
     BOTH = "BOTH"
 
 
@@ -19,7 +19,7 @@ class Tenant(Base):
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String(200), nullable=False)
-    type = Column(Enum(TenantType), nullable=False, default=TenantType.VET)
+    type = Column(Enum(TenantType), nullable=False, default=TenantType.RETAIL)
     tax_id = Column(String(30), unique=True, nullable=True)
     email = Column(String(255), unique=True, nullable=False, index=True)
     phone = Column(String(50), nullable=True)

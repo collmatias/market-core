@@ -48,7 +48,7 @@
                     <td>{% currency p.sale_price %}</td>
                     <td class="text-center">
                         {% if p.type == 'SERVICE' %}
-                            <span class="text-muted small">N/A</span>
+                            <span class="text-muted small">{% trans "N/A" %}</span>
                         {% else %}
                             {% if p.needs_restock %}
                                 <span class="badge bg-danger rounded-pill">{{ p.current_stock }}</span>

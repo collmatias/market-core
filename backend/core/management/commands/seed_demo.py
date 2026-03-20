@@ -11,14 +11,13 @@ from django.core.management.base import BaseCommand
 from django.contrib.auth.models import User
 from django.utils import timezone
 
-from core.models import Company, UserProfile, Client, Patient
-from clinical.models import MedicalRecord, Appointment
+from core.models import Company, UserProfile, Client
 from inventory.models import Product, StockMovement
 from sales.models import Sale, SaleItem
 
 
 class Command(BaseCommand):
-    help = 'Wipes the DB and loads realistic demo data for a veterinary clinic'
+    help = 'Wipes the DB and loads realistic demo data for a retail store'
 
     def add_arguments(self, parser):
         parser.add_argument(
@@ -36,18 +35,12 @@ class Command(BaseCommand):
         company = self._create_company()
 
         self.stdout.write('👤 Creating users...')
-        admin_user, vet1, vet2, admin_profile, vet1_profile, vet2_profile = self._create_users(company)
+        admin_user, cashier1, cashier2 = self._create_users(company)
 
-        self.stdout.write('🧑 Creating clients and patients...')
-        clients, patients = self._create_clients_patients(company)
+        self.stdout.write('🧑 Creating clients...')
+        clients = self._create_clients(company)
 
-        self.stdout.write('📋 Creating medical records...')
-        self._create_medical_records(patients)
-
-        self.stdout.write('📅 Creating appointments...')
-        self._create_appointments(company, patients, [vet1_profile, vet2_profile])
-
-        self.stdout.write('📦 Creating products and services...')
+        self.stdout.write('📦 Creating products...')
         products = self._create_products(company)
 
         self.stdout.write('💰 Creating sales...')
@@ -57,10 +50,9 @@ class Command(BaseCommand):
         self.stdout.write(self.style.SUCCESS('─' * 50))
         self.stdout.write(f'   🏢 Company: {company.name}')
         self.stdout.write(f'   👤 Admin: admin / admin1234')
-        self.stdout.write(f'   🩺 Vet 1: drlopez / vet1234')
-        self.stdout.write(f'   🩺 Vet 2: dragomez / vet1234')
+        self.stdout.write(f'   💵 Cashier 1: cajero1 / caja1234')
+        self.stdout.write(f'   💵 Cashier 2: cajero2 / caja1234')
         self.stdout.write(f'   🧑 Clients: {len(clients)}')
-        self.stdout.write(f'   🐾 Patients: {len(patients)}')
         self.stdout.write(f'   📦 Products: {len(products)}')
         self.stdout.write(self.style.SUCCESS('─' * 50))
 
@@ -70,9 +62,6 @@ class Command(BaseCommand):
         Sale.objects.all().delete()
         StockMovement.objects.all().delete()
         Product.objects.all().delete()
-        Appointment.objects.all().delete()
-        MedicalRecord.objects.all().delete()
-        Patient.objects.all().delete()
         Client.objects.all().delete()
         UserProfile.objects.all().delete()
         User.objects.all().delete()
@@ -80,7 +69,7 @@ class Command(BaseCommand):
 
     def _create_company(self):
         return Company.objects.create(
-            name='Veterinaria Huellas',
+            name='Almacén Don Pedro',
             tax_id='30-71234567-9',
             address='Av. Colón 1234, Córdoba',
             phone='351-4567890',
@@ -90,41 +79,36 @@ class Command(BaseCommand):
         )
 
     def _create_users(self, company):
-        # Admin
         admin_user = User.objects.create_superuser(
-            username='admin', email='admin@vetcore.local', password='admin1234',
-            first_name='Matías', last_name='Administrador'
+            username='admin', email='admin@marketcore.local', password='admin1234',
+            first_name='Pedro', last_name='Administrador'
         )
-        admin_profile = UserProfile.objects.create(
+        UserProfile.objects.create(
             user=admin_user, company=company, role='ADMIN',
             is_admin=True, pin='0000', avatar='bi-person-fill'
         )
 
-        # Vet 1
-        vet1 = User.objects.create_user(
-            username='drlopez', email='lopez@vetcore.local', password='vet1234',
+        cashier1 = User.objects.create_user(
+            username='cajero1', email='cajero1@marketcore.local', password='caja1234',
             first_name='Carlos', last_name='López'
         )
-        vet1_profile = UserProfile.objects.create(
-            user=vet1, company=company, role='VET',
-            is_admin=False, license_number='MP-4521', pin='1111',
-            avatar='bi-heart-pulse-fill'
+        UserProfile.objects.create(
+            user=cashier1, company=company, role='CASHIER',
+            is_admin=False, pin='1111', avatar='bi-emoji-smile-fill'
         )
 
-        # Vet 2
-        vet2 = User.objects.create_user(
-            username='dragomez', email='gomez@vetcore.local', password='vet1234',
+        cashier2 = User.objects.create_user(
+            username='cajero2', email='cajero2@marketcore.local', password='caja1234',
             first_name='Lucía', last_name='Gómez'
         )
-        vet2_profile = UserProfile.objects.create(
-            user=vet2, company=company, role='VET',
-            is_admin=False, license_number='MP-7832', pin='2222',
-            avatar='bi-emoji-smile-fill'
+        UserProfile.objects.create(
+            user=cashier2, company=company, role='CASHIER',
+            is_admin=False, pin='2222', avatar='bi-emoji-sunglasses-fill'
         )
 
-        return admin_user, vet1, vet2, admin_profile, vet1_profile, vet2_profile
+        return admin_user, cashier1, cashier2
 
-    def _create_clients_patients(self, company):
+    def _create_clients(self, company):
         clients_data = [
             ('Juan', 'Pérez', '351-6001001', 'juan.perez@email.com', 'Bv. San Juan 450', 'Córdoba', 'Córdoba'),
             ('María', 'González', '351-6002002', 'maria.gon@email.com', 'Av. Vélez Sarsfield 890', 'Córdoba', 'Córdoba'),
@@ -140,28 +124,6 @@ class Command(BaseCommand):
             ('Camila', 'López', '351-6012012', 'clopez@email.com', '', '', ''),
         ]
 
-        pets_data = [
-            # (client_idx, name, species, breed, birth_offset_days, weight, sex, coat)
-            (0, 'Rocky', 'DOG', 'Labrador', 1200, Decimal('32.5'), 'M', 'Dorado'),
-            (0, 'Luna', 'CAT', 'Siamés', 800, Decimal('4.2'), 'F', 'Seal Point'),
-            (1, 'Max', 'DOG', 'Pastor Alemán', 1800, Decimal('38.0'), 'M', 'Negro y fuego'),
-            (1, 'Michi', 'CAT', 'Mestizo', 600, Decimal('5.1'), 'F', 'Atigrado'),
-            (2, 'Toby', 'DOG', 'Beagle', 900, Decimal('12.8'), 'M', 'Tricolor'),
-            (3, 'Firulais', 'DOG', 'Caniche Toy', 2500, Decimal('3.9'), 'M', 'Blanco'),
-            (3, 'Negra', 'CAT', 'Persa', 1500, Decimal('4.8'), 'F', 'Negro'),
-            (4, 'Thor', 'DOG', 'Rottweiler', 700, Decimal('42.0'), 'M', 'Negro y fuego'),
-            (5, 'Coco', 'DOG', 'French Poodle', 1100, Decimal('8.5'), 'M', 'Blanco'),
-            (5, 'Simba', 'CAT', 'Bengalí', 400, Decimal('5.5'), 'M', 'Manchado'),
-            (6, 'Rex', 'DOG', 'Dogo Argentino', 1000, Decimal('40.0'), 'M', 'Blanco'),
-            (7, 'Pelusa', 'CAT', 'Angora', 1300, Decimal('3.7'), 'F', 'Blanco'),
-            (8, 'Bruno', 'DOG', 'Golden Retriever', 500, Decimal('28.0'), 'M', 'Dorado'),
-            (9, 'Kiara', 'DOG', 'Border Collie', 850, Decimal('18.5'), 'F', 'Negro y blanco'),
-            (10, 'Tito', 'DOG', 'Mestizo', 2000, Decimal('15.0'), 'M', 'Marrón'),
-            (10, 'Manchas', 'CAT', 'Mestizo', 700, Decimal('4.0'), 'F', 'Calicó'),
-            (11, 'Lola', 'DOG', 'Bulldog Francés', 650, Decimal('11.2'), 'F', 'Atigrado'),
-            (11, 'Copito', 'OTHER', 'Conejo Enano', 300, Decimal('1.8'), 'M', 'Blanco'),
-        ]
-
         clients = []
         for first_name, last_name, tel, email, address, city, province in clients_data:
             c = Client.objects.create(
@@ -171,137 +133,37 @@ class Command(BaseCommand):
             )
             clients.append(c)
 
-        patients = []
-        today = date.today()
-        for cli_idx, name, species, breed, days, weight, sex, coat in pets_data:
-            p = Patient.objects.create(
-                company=company, owner=clients[cli_idx],
-                name=name, species=species, breed=breed,
-                birth_date=today - timedelta(days=days),
-                current_weight=weight,
-                sex=sex, coat=coat,
-            )
-            patients.append(p)
-
-        return clients, patients
-
-    def _create_medical_records(self, patients):
-        records_data = [
-            ('Vacunación Antirrábica', 'Paciente en buen estado general', 'Rabia: vacuna aplicada', 'Refuerzo anual'),
-            ('Vacunación Quíntuple', 'Sin signos clínicos', 'Vacuna quíntuple aplicada', 'Refuerzo en 21 días'),
-            ('Control general', 'Propietario refiere que come bien', 'Paciente sano', 'Continuar alimentación actual'),
-            ('Vómitos y diarrea', 'Vómitos desde hace 2 días, diarrea líquida', 'Gastroenteritis aguda', 'Dieta blanda 3 días + Metoclopramida 0.5mg/kg'),
-            ('Castración', 'Paciente apto para cirugía, ayuno 12hs', 'Orquiectomía / OVH programada', 'Antibiótico 7 días + collar isabelino'),
-            ('Desparasitación', 'Control rutinario', 'Desparasitación interna aplicada', 'Repetir en 3 meses'),
-            ('Otitis', 'Se rasca la oreja derecha frecuentemente', 'Otitis externa por Malassezia', 'Gotas óticas 2 veces/día x 10 días'),
-            ('Dermatitis', 'Lesiones en piel, prurito intenso', 'Dermatitis alérgica', 'Baños medicados + antihistamínico'),
-            ('Cojera', 'Cojea del miembro anterior izquierdo', 'Esguince leve', 'Reposo 5 días + antiinflamatorio'),
-            ('Limpieza dental', 'Sarro moderado, halitosis', 'Enfermedad periodontal grado II', 'Limpieza ultrasónica realizada'),
-        ]
-
-        now = timezone.now()
-        for patient in patients:
-            n_records = random.randint(1, 4)
-            selection = random.sample(records_data, min(n_records, len(records_data)))
-            for i, (reason, anam, diag, treat) in enumerate(selection):
-                days_ago = random.randint(5, 180)
-                MedicalRecord.objects.create(
-                    patient=patient,
-                    date=now - timedelta(days=days_ago),
-                    reason=reason,
-                    anamnesis=anam,
-                    diagnosis=diag,
-                    treatment=treat,
-                    weight=patient.current_weight,
-                )
-
-    def _create_appointments(self, company, patients, vets):
-        appointment_reasons = [
-            'Vacunación', 'Control post-quirúrgico', 'Desparasitación',
-            'Control general', 'Castración', 'Limpieza dental',
-            'Revisión de piel', 'Control de peso', 'Extracción de sangre',
-        ]
-
-        now = timezone.now()
-        today = now.date()
-
-        # Past appointments (COMPLETED)
-        for i in range(6):
-            pat = random.choice(patients)
-            vet = random.choice(vets)
-            day = today - timedelta(days=random.randint(1, 30))
-            hour = random.choice([9, 10, 11, 14, 15, 16, 17])
-            start = timezone.make_aware(
-                timezone.datetime(day.year, day.month, day.day, hour, 0)
-            )
-            Appointment.objects.create(
-                company=company, patient=pat, professional=vet,
-                start_time=start,
-                end_time=start + timedelta(minutes=30),
-                reason=random.choice(appointment_reasons),
-                status='COMPLETED',
-            )
-
-        # Future appointments (PENDING and CONFIRMED)
-        for i in range(8):
-            pat = random.choice(patients)
-            vet = random.choice(vets)
-            day = today + timedelta(days=random.randint(1, 14))
-            hour = random.choice([9, 10, 11, 14, 15, 16, 17])
-            start = timezone.make_aware(
-                timezone.datetime(day.year, day.month, day.day, hour, 0)
-            )
-            Appointment.objects.create(
-                company=company, patient=pat, professional=vet,
-                start_time=start,
-                end_time=start + timedelta(minutes=30),
-                reason=random.choice(appointment_reasons),
-                status=random.choice(['PENDING', 'CONFIRMED']),
-            )
-
-        # One cancelled appointment
-        pat = random.choice(patients)
-        vet = random.choice(vets)
-        day = today + timedelta(days=2)
-        start = timezone.make_aware(
-            timezone.datetime(day.year, day.month, day.day, 11, 0)
-        )
-        Appointment.objects.create(
-            company=company, patient=pat, professional=vet,
-            start_time=start,
-            end_time=start + timedelta(minutes=30),
-            reason='Vacunación',
-            status='CANCELLED',
-            notes='Cancelled by client',
-        )
+        return clients
 
     def _create_products(self, company):
         products_data = [
             # (description, type, barcode, cost, sale_price, stock, min_stock)
-            ('Vacuna Antirrábica', 'PRODUCT', '7790001001', 3500, 6000, 20, 5),
-            ('Vacuna Quíntuple Canina', 'PRODUCT', '7790001002', 4200, 7500, 15, 5),
-            ('Vacuna Triple Felina', 'PRODUCT', '7790001003', 3800, 6500, 12, 5),
-            ('Antiparasitario Interno (comp.)', 'PRODUCT', '7790002001', 1200, 2500, 50, 10),
-            ('Pipeta Antipulgas Perro Grande', 'PRODUCT', '7790002002', 2800, 5000, 30, 8),
-            ('Pipeta Antipulgas Gato', 'PRODUCT', '7790002003', 2200, 4000, 25, 8),
-            ('Amoxicilina 500mg (caja x20)', 'PRODUCT', '7790003001', 1800, 3200, 18, 5),
-            ('Metoclopramida gotas', 'PRODUCT', '7790003002', 900, 1800, 10, 3),
-            ('Collar Isabelino M', 'PRODUCT', '7790004001', 1500, 3000, 8, 3),
-            ('Collar Isabelino L', 'PRODUCT', '7790004002', 1800, 3500, 6, 3),
-            ('Alimento Balanceado Perro 15kg', 'PRODUCT', '7790005001', 18000, 28000, 10, 3),
-            ('Alimento Balanceado Gato 7.5kg', 'PRODUCT', '7790005002', 14000, 22000, 8, 3),
-            ('Shampoo Medicado 250ml', 'PRODUCT', '7790006001', 2500, 4500, 12, 4),
-            ('Gotas Óticas 20ml', 'PRODUCT', '7790006002', 1100, 2200, 15, 5),
-            ('Suero Fisiológico 500ml', 'PRODUCT', '7790007001', 800, 1500, 20, 5),
+            ('Aceite Girasol 1.5L', 'PRODUCT', '7790001001', 1800, 2800, 40, 10),
+            ('Harina 000 1kg', 'PRODUCT', '7790001002', 600, 1100, 60, 15),
+            ('Azúcar 1kg', 'PRODUCT', '7790001003', 700, 1200, 50, 15),
+            ('Arroz Largo Fino 1kg', 'PRODUCT', '7790002001', 800, 1400, 45, 10),
+            ('Fideos Tallarines 500g', 'PRODUCT', '7790002002', 500, 900, 55, 12),
+            ('Leche Entera 1L', 'PRODUCT', '7790002003', 900, 1500, 30, 10),
+            ('Yerba Mate 1kg', 'PRODUCT', '7790003001', 2500, 4000, 35, 8),
+            ('Café Molido 250g', 'PRODUCT', '7790003002', 2200, 3800, 20, 5),
+            ('Gaseosa Cola 2.25L', 'PRODUCT', '7790004001', 1200, 2200, 25, 8),
+            ('Agua Mineral 1.5L', 'PRODUCT', '7790004002', 500, 900, 40, 10),
+            ('Pan Lactal 500g', 'PRODUCT', '7790005001', 1000, 1800, 20, 5),
+            ('Galletitas Dulces 300g', 'PRODUCT', '7790005002', 800, 1500, 30, 8),
+            ('Jabón en Polvo 800g', 'PRODUCT', '7790006001', 1500, 2800, 18, 5),
+            ('Lavandina 1L', 'PRODUCT', '7790006002', 400, 800, 25, 8),
+            ('Detergente 750ml', 'PRODUCT', '7790007001', 900, 1600, 22, 6),
+            ('Papel Higiénico x4', 'PRODUCT', '7790007002', 1200, 2200, 20, 5),
+            ('Huevos x12', 'PRODUCT', '7790008001', 2500, 4000, 15, 5),
+            ('Queso Cremoso 1kg', 'PRODUCT', '7790008002', 5000, 8500, 8, 3),
+            ('Jamón Cocido 1kg', 'PRODUCT', '7790008003', 6000, 10000, 6, 2),
+            ('Carne Picada 1kg', 'PRODUCT', '7790009001', 4500, 7500, 10, 3),
+            ('Pollo Entero 1kg', 'PRODUCT', '7790009002', 2800, 4500, 12, 4),
+            ('Cerveza Lata 473ml', 'PRODUCT', '7790010001', 800, 1500, 50, 15),
+            ('Vino Tinto 750ml', 'PRODUCT', '7790010002', 2000, 3500, 20, 5),
             # Services
-            ('Consulta General', 'SERVICE', None, 0, 8000, 0, 0),
-            ('Castración Macho (hasta 10kg)', 'SERVICE', None, 0, 25000, 0, 0),
-            ('Castración Hembra (hasta 10kg)', 'SERVICE', None, 0, 35000, 0, 0),
-            ('Limpieza Dental con Ultrasonido', 'SERVICE', None, 0, 18000, 0, 0),
-            ('Cirugía Menor', 'SERVICE', None, 0, 30000, 0, 0),
-            ('Radiografía', 'SERVICE', None, 0, 12000, 0, 0),
-            ('Ecografía Abdominal', 'SERVICE', None, 0, 15000, 0, 0),
-            ('Análisis de Sangre Completo', 'SERVICE', None, 0, 10000, 0, 0),
+            ('Envío a domicilio', 'SERVICE', None, 0, 1500, 0, 0),
+            ('Carga de celular', 'SERVICE', None, 0, 500, 0, 0),
         ]
 
         products = []

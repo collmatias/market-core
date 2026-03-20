@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VetCore - {% trans "Veterinary Management" %}</title>
+    <title>MarketCoreSoft - {% trans "Business Management" %}</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
     
@@ -19,7 +19,7 @@
 
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm mb-4">
         <div class="container">
-            <a class="navbar-brand" href="{% url 'home' %}">🐶 VetCore</a>
+            <a class="navbar-brand" href="{% url 'home' %}">🏪 MarketCoreSoft</a>
             
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
@@ -31,14 +31,6 @@
                     {% if user.is_authenticated %}
                         <li class="nav-item">
                             <a class="nav-link" href="{% url 'client_list' %}">{% trans "Clients" %}</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{% url 'patient_list' %}">{% trans "Patients" %}</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{% url 'schedule' %}">
-                                <i class="bi bi-calendar-event"></i> {% trans "Schedule" %}
-                            </a>
                         </li>
                         
                         <li class="nav-item dropdown">

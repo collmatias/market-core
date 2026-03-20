@@ -17,4 +17,4 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
 
 # Comando por defecto (producción usa gunicorn, dev usa docker-compose override con runserver)
-CMD ["gunicorn", "vetcore.wsgi:application", "--bind", "0.0.0.0:8000", "--workers", "3"]
+CMD ["gunicorn", "marketcore.wsgi:application", "--bind", "0.0.0.0:8000", "--workers", "3"]

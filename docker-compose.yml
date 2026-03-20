@@ -2,13 +2,13 @@ services:
   # --- BASE DE DATOS (Para modo SAAS) ---
   db:
     image: postgres:15-alpine
-    container_name: vetcore_db_saas
+    container_name: marketcore_db_saas
     volumes:
       - postgres_data:/var/lib/postgresql/data
     environment:
-      - POSTGRES_DB=vetcore_db
-      - POSTGRES_USER=vetcore_user
-      - POSTGRES_PASSWORD=vetcore_pass
+      - POSTGRES_DB=marketcore_db
+      - POSTGRES_USER=marketcore_user
+      - POSTGRES_PASSWORD=marketcore_pass
     ports:
       - "5432:5432"
     restart: always
@@ -17,11 +17,10 @@ services:
   # Acceso: http://localhost:8000
   api_desktop:
     build: ./backend
-    container_name: vetcore_desktop
+    container_name: marketcore_desktop
     command: python manage.py runserver 0.0.0.0:8000
     volumes:
       - ./backend:/app
-      - ./Vetter:/vetter:ro
     environment:
       - DEPLOYMENT_MODE=DESKTOP
       - DEBUG=1
@@ -29,7 +28,7 @@ services:
       - ALLOWED_HOSTS=*
       - LICENSE_API_URL=http://cloud_api:8000/check-license
       - AM_I_IN_DOCKER=1
-      - VETCORE_MODE=DEV
+      - MARKETCORE_MODE=DEV
     ports:
       - "8000:8000"
     depends_on:
@@ -39,15 +38,15 @@ services:
   # Acceso: http://localhost:8001
   api_saas:
     build: ./backend
-    container_name: vetcore_saas
+    container_name: marketcore_saas
     command: python manage.py runserver 0.0.0.0:8000
     volumes:
       - ./backend:/app
     environment:
       - DEPLOYMENT_MODE=SAAS
-      - POSTGRES_DB=vetcore_db
-      - POSTGRES_USER=vetcore_user
-      - POSTGRES_PASSWORD=vetcore_pass
+      - POSTGRES_DB=marketcore_db
+      - POSTGRES_USER=marketcore_user
+      - POSTGRES_PASSWORD=marketcore_pass
       - POSTGRES_HOST=db
       - POSTGRES_PORT=5432
       - SECRET_KEY=${SECRET_KEY:-django-insecure-dev-only-key-change-in-production}
@@ -55,7 +54,7 @@ services:
       - DEBUG=1
       - LICENSE_API_URL=http://cloud_api:8000/check-license
       - AM_I_IN_DOCKER=1
-      - VETCORE_MODE=DEV
+      - MARKETCORE_MODE=DEV
     ports:
       - "8001:8000"
     depends_on:
@@ -84,8 +83,8 @@ services:
       - "5000:8000"
     environment:
       - DATABASE_URL=postgresql://cloud_admin:cloud_secret_pass@cloud_db/licenses_db
-      - API_SECRET=${API_SECRET:-vetcore-dev-secret-change-in-prod}
-      - JWT_SECRET=${JWT_SECRET:-vetcore-jwt-dev-secret-change-in-prod}
+      - API_SECRET=${API_SECRET:-marketcore-dev-secret-change-in-prod}
+      - JWT_SECRET=${JWT_SECRET:-marketcore-jwt-dev-secret-change-in-prod}
       - DEBUG=1
       - CORS_ORIGINS=*
       - RATE_LIMIT_DEFAULT=120/minute

@@ -1,6 +1,6 @@
 from django import forms
 from django.utils.translation import gettext_lazy as _
-from .models import Client, Patient, Company, UserProfile
+from .models import Client, Company, UserProfile
 from django.contrib.auth.models import User
 
 
@@ -77,28 +77,6 @@ class ClientForm(forms.ModelForm):
         }
 
 
-class PatientForm(forms.ModelForm):
-    class Meta:
-        model = Patient
-        fields = ['owner', 'name', 'species', 'breed', 'birth_date', 'current_weight']
-        labels = {
-            'owner': _('Owner'),
-            'name': _('Name'),
-            'species': _('Species'),
-            'breed': _('Breed'),
-            'birth_date': _('Birth Date'),
-            'current_weight': _('Weight (kg)'),
-        }
-        widgets = {
-            'owner': forms.Select(attrs={'class': 'form-select'}),
-            'name': forms.TextInput(attrs={'class': 'form-control'}),
-            'species': forms.Select(attrs={'class': 'form-select'}),
-            'breed': forms.TextInput(attrs={'class': 'form-control'}),
-            'birth_date': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
-            'current_weight': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01'}),
-        }
-
-
 class CompanyForm(forms.ModelForm):
     class Meta:
         model = Company
@@ -127,7 +105,7 @@ class SetupForm(forms.Form):
     password = forms.CharField(label=_("Password"), widget=forms.PasswordInput(attrs={'class': 'form-control'}))
     password_confirm = forms.CharField(label=_("Confirm Password"), widget=forms.PasswordInput(attrs={'class': 'form-control'}))
 
-    company_name = forms.CharField(label=_("Clinic Name"), max_length=100, widget=forms.TextInput(attrs={'class': 'form-control'}))
+    company_name = forms.CharField(label=_("Business Name"), max_length=100, widget=forms.TextInput(attrs={'class': 'form-control'}))
     tax_id = forms.CharField(label=_("Tax ID"), max_length=20, widget=forms.TextInput(attrs={'class': 'form-control'}))
     address = forms.CharField(label=_("Address"), required=False, widget=forms.TextInput(attrs={'class': 'form-control'}))
     phone = forms.CharField(label=_("Phone"), required=False, widget=forms.TextInput(attrs={'class': 'form-control'}))
@@ -142,7 +120,6 @@ class SetupForm(forms.Form):
 class EmployeeForm(forms.ModelForm):
     role = forms.ChoiceField(choices=UserProfile.ROLES, widget=forms.Select(attrs={'class': 'form-select'}))
     is_admin = forms.BooleanField(required=False, label=_("Is Administrator?"), widget=forms.CheckboxInput(attrs={'class': 'form-check-input'}))
-    license_number = forms.CharField(required=False, label=_("License Number"), widget=forms.TextInput(attrs={'class': 'form-control'}))
     password = forms.CharField(label=_("Password"), widget=forms.PasswordInput(attrs={'class': 'form-control'}))
     pin = forms.CharField(required=False, label=_("Quick PIN (4 digits)"), widget=forms.PasswordInput(attrs={'class': 'form-control', 'maxlength': '4'}))
     avatar = forms.ChoiceField(choices=UserProfile.AVATARS, label=_("Profile Icon"), widget=forms.Select(attrs={'class': 'form-select'}))
@@ -157,17 +134,10 @@ class EmployeeForm(forms.ModelForm):
             'email': forms.EmailInput(attrs={'class': 'form-control'}),
         }
 
-    def clean(self):
-        cleaned_data = super().clean()
-        if cleaned_data.get('role') == 'VET' and not cleaned_data.get('license_number'):
-            self.add_error('license_number', _('License number is required for veterinarians.'))
-        return cleaned_data
-
 
 class EditEmployeeForm(forms.ModelForm):
     role = forms.ChoiceField(choices=UserProfile.ROLES, widget=forms.Select(attrs={'class': 'form-select'}))
     is_admin = forms.BooleanField(required=False, label=_("Administrator permissions"), widget=forms.CheckboxInput(attrs={'class': 'form-check-input'}))
-    license_number = forms.CharField(required=False, label=_("License Number"), widget=forms.TextInput(attrs={'class': 'form-control'}))
     pin = forms.CharField(required=False, label=_("Quick Access PIN (4 digits)"), widget=forms.TextInput(attrs={'class': 'form-control', 'maxlength': '4', 'type': 'password'}))
     avatar = forms.ChoiceField(choices=UserProfile.AVATARS, label=_("Profile Icon"), widget=forms.Select(attrs={'class': 'form-select'}))
 
@@ -180,10 +150,3 @@ class EditEmployeeForm(forms.ModelForm):
             'last_name': forms.TextInput(attrs={'class': 'form-control'}),
             'email': forms.EmailInput(attrs={'class': 'form-control'}),
         }
-
-    def clean(self):
-        cleaned_data = super().clean()
-        license_number = cleaned_data.get('license_number', '').strip()
-        if cleaned_data.get('role') == 'VET' and not license_number:
-            self.add_error('license_number', _('License number is required.'))
-        return cleaned_data

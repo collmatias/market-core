@@ -33,7 +33,7 @@ class LicenseCheckMiddleware:
             if request.path.startswith(path):
                 return self.get_response(request)
 
-        if not os.environ.get('VETCORE_MODE'):
+        if not os.environ.get('MARKETCORE_MODE'):
             deployment = getattr(settings, 'DEPLOYMENT_MODE', 'DESKTOP')
             if deployment == 'DESKTOP':
                 is_valid, hw_id = check_license()

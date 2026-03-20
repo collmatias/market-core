@@ -47,9 +47,6 @@
                     <td class="align-middle">{{ client.email|default:"-" }}</td>
                     <td class="text-end">
                         <div class="btn-group" role="group">
-                            <a href="{% url 'schedule' %}?client={{ client.id }}" class="btn btn-sm btn-outline-success" title="{% trans 'Book Appointment' %}">
-                                <i class="bi bi-calendar-plus"></i>
-                            </a>
                             <a href="{% url 'edit_client' client.id %}" class="btn btn-sm btn-outline-primary" title="{% trans 'Edit Client' %}">
                                 <i class="bi bi-pencil"></i>
                             </a>

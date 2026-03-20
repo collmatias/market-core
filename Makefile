@@ -1,10 +1,10 @@
 # --- Variables ---
 COMPOSE = docker compose
-API_CONTAINER = api
+API_CONTAINER = api_desktop
 
 # --- Ayuda (Default) ---
 help:
-	@echo "🛠️  Comandos de VetCore:"
+	@echo "🛠️  Comandos de MarketCoreSoft:"
 	@echo "  make up          : Levanta el proyecto (y reconstruye si es necesario)"
 	@echo "  make down        : Baja los contenedores"
 	@echo "  make logs        : Ver logs en tiempo real"
